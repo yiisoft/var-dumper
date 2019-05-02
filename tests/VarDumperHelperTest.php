@@ -140,9 +140,9 @@ RESULT;
         $expectedResult = "unserialize('" . serialize($var) . "')";
         $data[] = [$var, $expectedResult];
 
-        $var = static function () {
-            return 2;
-        };
+        // @formatter:off
+        $var = static function () {return 2;};
+        // @formatter:on
         $expectedResult = 'function () {return 2;}';
         $data[] = [$var, $expectedResult];
 
