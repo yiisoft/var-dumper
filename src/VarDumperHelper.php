@@ -10,12 +10,16 @@ namespace Yiisoft\VarDumper;
 use Yiisoft\Arrays\Arrayable;
 
 /**
- * BaseVarDumper provides concrete implementation for [[VarDumper]].
+ * VarDumper is intended to replace the PHP functions var_dump and print_r.
+ * It can correctly identify the recursively referenced objects in a complex
+ * object structure. It also has a recursive depth control to avoid indefinite
+ * recursive display of some peculiar variables.
  *
- * Do not use BaseVarDumper. Use [[VarDumper]] instead.
+ * VarDumper can be used as follows,
  *
- * @author Qiang Xue <qiang.xue@gmail.com>
- * @since 2.0
+ * ```php
+ * VarDumper::dump($var);
+ *
  */
 class VarDumperHelper
 {
@@ -32,7 +36,7 @@ class VarDumperHelper
      * @param int $depth maximum depth that the dumper should go into the variable. Defaults to 10.
      * @param bool $highlight whether the result should be syntax-highlighted
      */
-    public static function dump($var, $depth = 10, $highlight = false)
+    public static function dump($var, int $depth = 10, bool $highlight = false): void
     {
         echo static::dumpAsString($var, $depth, $highlight);
     }
@@ -46,7 +50,7 @@ class VarDumperHelper
      * @param bool $highlight whether the result should be syntax-highlighted
      * @return string the string representation of the variable
      */
-    public static function dumpAsString($var, $depth = 10, $highlight = false)
+    public static function dumpAsString($var, int $depth = 10, bool $highlight = false): string
     {
         self::$_output = '';
         self::$_objects = [];
@@ -64,7 +68,7 @@ class VarDumperHelper
      * @param mixed $var variable to be dumped
      * @param int $level depth level
      */
-    private static function dumpInternal($var, $level)
+    private static function dumpInternal($var, int $level): void
     {
         switch (gettype($var)) {
             case 'boolean':
@@ -119,7 +123,7 @@ class VarDumperHelper
                     if ('__PHP_Incomplete_Class' !== get_class($var) && method_exists($var, '__debugInfo')) {
                         $dumpValues = $var->__debugInfo();
                         if (!is_array($dumpValues)) {
-                            throw new \Exception('__debuginfo() must return an array');
+                            throw new \Exception('__debugInfo() must return an array');
                         }
                     } else {
                         $dumpValues = (array) $var;
@@ -151,7 +155,7 @@ class VarDumperHelper
      * @param mixed $var the variable to be exported.
      * @return string a string representation of the variable
      */
-    public static function export($var)
+    public static function export($var): string
     {
         self::$_output = '';
         self::exportInternal($var, 0);
@@ -162,7 +166,7 @@ class VarDumperHelper
      * @param mixed $var variable to be exported
      * @param int $level depth level
      */
-    private static function exportInternal($var, $level)
+    private static function exportInternal($var, int $level): void
     {
         switch (gettype($var)) {
             case 'NULL':
@@ -200,14 +204,18 @@ class VarDumperHelper
                         if ($var instanceof Arrayable) {
                             self::exportInternal($var->toArray(), $level);
                             return;
-                        } elseif ($var instanceof \IteratorAggregate) {
+                        }
+
+                        if ($var instanceof \IteratorAggregate) {
                             $varAsArray = [];
                             foreach ($var as $key => $value) {
                                 $varAsArray[$key] = $value;
                             }
                             self::exportInternal($varAsArray, $level);
                             return;
-                        } elseif ('__PHP_Incomplete_Class' !== get_class($var) && method_exists($var, '__toString')) {
+                        }
+
+                        if ('__PHP_Incomplete_Class' !== get_class($var) && method_exists($var, '__toString')) {
                             $output = var_export($var->__toString(), true);
                         } else {
                             $outputBackup = self::$_output;
@@ -228,7 +236,7 @@ class VarDumperHelper
      * @param \Closure $closure closure instance.
      * @return string
      */
-    private static function exportClosure(\Closure $closure)
+    private static function exportClosure(\Closure $closure): string
     {
         $reflection = new \ReflectionFunction($closure);
 

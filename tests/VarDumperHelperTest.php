@@ -17,7 +17,7 @@ use Yiisoft\VarDumper\VarDumperHelper;
 class VarDumperHelperTest extends TestCase
 {
 
-    public function testDumpIncompleteObject()
+    public function testDumpIncompleteObject(): void
     {
         $serializedObj = 'O:16:"nonExistingClass":0:{}';
         $incompleteObj = unserialize($serializedObj);
@@ -26,7 +26,7 @@ class VarDumperHelperTest extends TestCase
         $this->assertContains('nonExistingClass', $dumpResult);
     }
 
-    public function testExportIncompleteObject()
+    public function testExportIncompleteObject(): void
     {
         $serializedObj = 'O:16:"nonExistingClass":0:{}';
         $incompleteObj = unserialize($serializedObj);
@@ -34,7 +34,7 @@ class VarDumperHelperTest extends TestCase
         $this->assertContains('nonExistingClass', $exportResult);
     }
 
-    public function testDumpObject()
+    public function testDumpObject(): void
     {
         $obj = new StdClass();
         $this->assertEquals("stdClass#1\n(\n)", VarDumperHelper::dumpAsString($obj));
@@ -155,7 +155,7 @@ RESULT;
      * @param mixed $var
      * @param string $expectedResult
      */
-    public function testExport($var, $expectedResult)
+    public function testExport($var, $expectedResult): void
     {
         $exportResult = VarDumperHelper::export($var);
         $this->assertEqualsWithoutLE($expectedResult, $exportResult);
@@ -165,7 +165,7 @@ RESULT;
     /**
      * @depends testExport
      */
-    public function testExportObjectFallback()
+    public function testExportObjectFallback(): void
     {
         $var = new StdClass();
         $var->testFunction = static function () {
@@ -189,7 +189,7 @@ RESULT;
     /**
      * @depends testDumpObject
      */
-    public function testDumpClassWithCustomDebugInfo()
+    public function testDumpClassWithCustomDebugInfo(): void
     {
         $object = new CustomDebugInfo();
         $object->volume = 10;
@@ -206,7 +206,7 @@ RESULT;
      * @param string $actual
      * @param string $message
      */
-    protected function assertEqualsWithoutLE(string $expected, string $actual, string $message = '')
+    protected function assertEqualsWithoutLE(string $expected, string $actual, string $message = ''): void
     {
         $expected = str_replace("\r\n", "\n", $expected);
         $actual = str_replace("\r\n", "\n", $actual);
