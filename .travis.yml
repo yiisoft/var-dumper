@@ -49,7 +49,7 @@ matrix:
     - php: nightly
 
   allow_failures:
-    - php: master
+    - php: nightly
 
 install:
   - |
