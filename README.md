@@ -10,5 +10,5 @@ This library provides the VarDumper helper.
 
 [![Latest Stable Version](https://poser.pugx.org/yiisoft/var-dumper/v/stable.png)](https://packagist.org/packages/yiisoft/var-dumper)
 [![Total Downloads](https://poser.pugx.org/yiisoft/var-dumper/downloads.png)](https://packagist.org/packages/yiisoft/var-dumper)
-[![Build Status](https://travis-ci.org/yiisoft/var-dumper.svg?branch=master)](https://travis-ci.org/yiisoft/var-dumper)
+[![Build Status](https://travis-ci.com/yiisoft/var-dumper.svg?branch=master)](https://travis-ci.com/yiisoft/var-dumper)
 
