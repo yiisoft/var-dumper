@@ -31,7 +31,6 @@ env:
     - DEFAULT_COMPOSER_FLAGS="--prefer-dist --no-interaction --no-progress --optimize-autoloader"
     - TASK_TESTS_PHP=1
     - TASK_TESTS_COVERAGE=0
-    - TRAVIS_SECOND_USER=travis_two
 
 # cache vendor dirs
 cache:
@@ -46,10 +45,11 @@ matrix:
     - php: 7.2
     - php: 7.3
       env: TASK_TESTS_COVERAGE=1
+    - php: 7.4snapshot
     - php: nightly
 
   allow_failures:
-    - php: nightly
+    - php: master
 
 install:
   - |
@@ -67,11 +67,6 @@ before_script:
   # show some versions and env information
   - php --version
   - composer --version
-  - |
-    if [ $TASK_TESTS_PHP == 1 ]; then
-      php -r "echo INTL_ICU_VERSION . \"\n\";"
-      php -r "echo INTL_ICU_DATA_VERSION . \"\n\";"
-    fi
 
   # enable code coverage
   - |
@@ -79,21 +74,11 @@ before_script:
       PHPUNIT_FLAGS="--coverage-clover=coverage.clover"
     fi
 
-  # Disable DEPRECATE messages during PHPUnit initialization on PHP 7.2. To fix them, PHPUnit should be updated to 6.*
-  # For Yii2 tests, messages will be enabled by tests/bootstrap.php
-  - |
-    if [[ $TRAVIS_PHP_VERSION == 7.2 || $TRAVIS_PHP_VERSION = nightly ]]; then
-      echo 'Disabled DEPRECATED notifications for PHP >= 7.2';
-      echo 'error_reporting = E_ALL & ~E_DEPRECATED' >> /tmp/php-config.ini;
-      phpenv config-add /tmp/php-config.ini;
-    fi
-
-
 script:
   # PHP tests
   - |
     if [ $TASK_TESTS_PHP == 1 ]; then
-      vendor/bin/phpunit --verbose $PHPUNIT_FLAGS --exclude-group wincache,xcache
+      vendor/bin/phpunit --verbose $PHPUNIT_FLAGS
     fi
 
 after_script:
