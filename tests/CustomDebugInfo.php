@@ -10,7 +10,7 @@ namespace Yiisoft\VarDumper\Tests;
 /**
  * CustomDebugInfo serves for the testing of `__debugInfo()` PHP magic method.
  *
- * @see VarDumperHelperTest
+ * @see VarDumperTest
  */
 class CustomDebugInfo
 {
