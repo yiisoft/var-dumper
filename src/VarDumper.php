@@ -23,9 +23,9 @@ use Yiisoft\Arrays\Arrayable;
  */
 class VarDumper
 {
-    private static $_objects;
-    private static $_output;
-    private static $_depth;
+    private static $objects;
+    private static $output;
+    private static $depth;
 
 
     /**
@@ -52,16 +52,16 @@ class VarDumper
      */
     public static function dumpAsString($var, int $depth = 10, bool $highlight = false): string
     {
-        self::$_output = '';
-        self::$_objects = [];
-        self::$_depth = $depth;
+        self::$output = '';
+        self::$objects = [];
+        self::$depth = $depth;
         self::dumpInternal($var, 0);
         if ($highlight) {
-            $result = highlight_string("<?php\n" . self::$_output, true);
-            self::$_output = preg_replace('/&lt;\\?php<br \\/>/', '', $result, 1);
+            $result = highlight_string("<?php\n" . self::$output, true);
+            self::$output = preg_replace('/&lt;\\?php<br \\/>/', '', $result, 1);
         }
 
-        return self::$_output;
+        return self::$output;
     }
 
     /**
@@ -72,54 +72,54 @@ class VarDumper
     {
         switch (gettype($var)) {
             case 'boolean':
-                self::$_output .= $var ? 'true' : 'false';
+                self::$output .= $var ? 'true' : 'false';
                 break;
             case 'integer':
-                self::$_output .= (string)$var;
+                self::$output .= (string)$var;
                 break;
             case 'double':
-                self::$_output .= (string)$var;
+                self::$output .= (string)$var;
                 break;
             case 'string':
-                self::$_output .= "'" . addslashes($var) . "'";
+                self::$output .= "'" . addslashes($var) . "'";
                 break;
             case 'resource':
-                self::$_output .= '{resource}';
+                self::$output .= '{resource}';
                 break;
             case 'NULL':
-                self::$_output .= 'null';
+                self::$output .= 'null';
                 break;
             case 'unknown type':
-                self::$_output .= '{unknown}';
+                self::$output .= '{unknown}';
                 break;
             case 'array':
-                if (self::$_depth <= $level) {
-                    self::$_output .= '[...]';
+                if (self::$depth <= $level) {
+                    self::$output .= '[...]';
                 } elseif (empty($var)) {
-                    self::$_output .= '[]';
+                    self::$output .= '[]';
                 } else {
                     $keys = array_keys($var);
                     $spaces = str_repeat(' ', $level * 4);
-                    self::$_output .= '[';
+                    self::$output .= '[';
                     foreach ($keys as $key) {
-                        self::$_output .= "\n" . $spaces . '    ';
+                        self::$output .= "\n" . $spaces . '    ';
                         self::dumpInternal($key, 0);
-                        self::$_output .= ' => ';
+                        self::$output .= ' => ';
                         self::dumpInternal($var[$key], $level + 1);
                     }
-                    self::$_output .= "\n" . $spaces . ']';
+                    self::$output .= "\n" . $spaces . ']';
                 }
                 break;
             case 'object':
-                if (($id = array_search($var, self::$_objects, true)) !== false) {
-                    self::$_output .= get_class($var) . '#' . ($id + 1) . '(...)';
-                } elseif (self::$_depth <= $level) {
-                    self::$_output .= get_class($var) . '(...)';
+                if (($id = array_search($var, self::$objects, true)) !== false) {
+                    self::$output .= get_class($var) . '#' . ($id + 1) . '(...)';
+                } elseif (self::$depth <= $level) {
+                    self::$output .= get_class($var) . '(...)';
                 } else {
-                    $id = array_push(self::$_objects, $var);
+                    $id = array_push(self::$objects, $var);
                     $className = get_class($var);
                     $spaces = str_repeat(' ', $level * 4);
-                    self::$_output .= "$className#$id\n" . $spaces . '(';
+                    self::$output .= "$className#$id\n" . $spaces . '(';
                     if ('__PHP_Incomplete_Class' !== get_class($var) && method_exists($var, '__debugInfo')) {
                         $dumpValues = $var->__debugInfo();
                         if (!is_array($dumpValues)) {
@@ -130,10 +130,10 @@ class VarDumper
                     }
                     foreach ($dumpValues as $key => $value) {
                         $keyDisplay = strtr(trim($key), "\0", ':');
-                        self::$_output .= "\n" . $spaces . "    [$keyDisplay] => ";
+                        self::$output .= "\n" . $spaces . "    [$keyDisplay] => ";
                         self::dumpInternal($value, $level + 1);
                     }
-                    self::$_output .= "\n" . $spaces . ')';
+                    self::$output .= "\n" . $spaces . ')';
                 }
                 break;
         }
@@ -157,9 +157,9 @@ class VarDumper
      */
     public static function export($var): string
     {
-        self::$_output = '';
+        self::$output = '';
         self::exportInternal($var, 0);
-        return self::$_output;
+        return self::$output;
     }
 
     /**
@@ -170,31 +170,31 @@ class VarDumper
     {
         switch (gettype($var)) {
             case 'NULL':
-                self::$_output .= 'null';
+                self::$output .= 'null';
                 break;
             case 'array':
                 if (empty($var)) {
-                    self::$_output .= '[]';
+                    self::$output .= '[]';
                 } else {
                     $keys = array_keys($var);
                     $outputKeys = ($keys !== range(0, count($var) - 1));
                     $spaces = str_repeat(' ', $level * 4);
-                    self::$_output .= '[';
+                    self::$output .= '[';
                     foreach ($keys as $key) {
-                        self::$_output .= "\n" . $spaces . '    ';
+                        self::$output .= "\n" . $spaces . '    ';
                         if ($outputKeys) {
                             self::exportInternal($key, 0);
-                            self::$_output .= ' => ';
+                            self::$output .= ' => ';
                         }
                         self::exportInternal($var[$key], $level + 1);
-                        self::$_output .= ',';
+                        self::$output .= ',';
                     }
-                    self::$_output .= "\n" . $spaces . ']';
+                    self::$output .= "\n" . $spaces . ']';
                 }
                 break;
             case 'object':
                 if ($var instanceof \Closure) {
-                    self::$_output .= self::exportClosure($var);
+                    self::$output .= self::exportClosure($var);
                 } else {
                     try {
                         $output = 'unserialize(' . var_export(serialize($var), true) . ')';
@@ -218,16 +218,16 @@ class VarDumper
                         if ('__PHP_Incomplete_Class' !== get_class($var) && method_exists($var, '__toString')) {
                             $output = var_export($var->__toString(), true);
                         } else {
-                            $outputBackup = self::$_output;
+                            $outputBackup = self::$output;
                             $output = var_export(self::dumpAsString($var), true);
-                            self::$_output = $outputBackup;
+                            self::$output = $outputBackup;
                         }
                     }
-                    self::$_output .= $output;
+                    self::$output .= $output;
                 }
                 break;
             default:
-                self::$_output .= var_export($var, true);
+                self::$output .= var_export($var, true);
         }
     }
 
