@@ -1,13 +1,7 @@
 <?php
-/**
- * @link http://www.yiiframework.com/
- * @copyright Copyright (c) 2008 Yii Software LLC
- * @license http://www.yiiframework.com/license/
- */
-
 namespace Yiisoft\VarDumper;
 
-use Yiisoft\Arrays\Arrayable;
+use Yiisoft\Arrays\ArrayableInterface;
 
 /**
  * VarDumper is intended to replace the PHP functions var_dump and print_r.
@@ -201,7 +195,7 @@ class VarDumper
                     } catch (\Exception $e) {
                         // serialize may fail, for example: if object contains a `\Closure` instance
                         // so we use a fallback
-                        if ($var instanceof Arrayable) {
+                        if ($var instanceof ArrayableInterface) {
                             self::exportInternal($var->toArray(), $level);
                             return;
                         }
