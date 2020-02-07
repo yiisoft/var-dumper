@@ -4,3 +4,5 @@ finder:
   exclude:
     - docs
     - vendor
+  not-name:
+    - VarDumperTest.php

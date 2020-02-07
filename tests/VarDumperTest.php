@@ -1,4 +1,5 @@
 <?php
+
 namespace Yiisoft\VarDumper\Tests;
 
 use PHPUnit\Framework\TestCase;
@@ -10,7 +11,6 @@ use Yiisoft\VarDumper\VarDumper;
  */
 class VarDumperTest extends TestCase
 {
-
     public function testDumpIncompleteObject(): void
     {
         $serializedObj = 'O:16:"nonExistingClass":0:{}';

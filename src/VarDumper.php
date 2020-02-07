@@ -1,4 +1,5 @@
 <?php
+
 namespace Yiisoft\VarDumper;
 
 use Yiisoft\Arrays\ArrayableInterface;
