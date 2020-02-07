@@ -135,9 +135,7 @@ RESULT;
         $data[] = [$var, $expectedResult];
 
         // @formatter:off
-        $var = static function () {
-            return 2;
-        };
+        $var = static function () {return 2;};
         // @formatter:on
         $expectedResult = 'function () {return 2;}';
         $data[] = [$var, $expectedResult];
