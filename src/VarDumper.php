@@ -19,7 +19,7 @@ use Yiisoft\Arrays\ArrayableInterface;
 final class VarDumper
 {
     private $variable;
-    private array $objects = [];
+    private static array $objects = [];
 
     private function __construct($variable)
     {
@@ -123,10 +123,10 @@ final class VarDumper
                 $this->buildVarObjectsCache($value, $depth, $level + 1);
             }
         } elseif (is_object($var)) {
-            if ($depth <= $level || in_array($var, $this->objects, true)) {
+            if ($depth <= $level || in_array($var, self::$objects, true)) {
                 return;
             }
-            $this->objects[] = $var;
+            self::$objects[] = $var;
             $dumpValues = $this->getVarDumpValuesArray($var);
             foreach ($dumpValues as $key => $value) {
                 $this->buildVarObjectsCache($value, $depth, $level + 1);
@@ -152,8 +152,8 @@ final class VarDumper
         if (is_object($var)) {
             $className = get_class($var);
             $output = [];
-            if (($objectCollapseLevel < $level) && (($id = array_search($var, $this->objects, true)) !== false)) {
-                $classRef = get_class($this->objects[$id]) . '#' . ($id + 1);
+            if (($objectCollapseLevel < $level) && (($id = array_search($var, self::$objects, true)) !== false)) {
+                $classRef = get_class(self::$objects[$id]) . '#' . ($id + 1);
                 $output[$className] = ['@object' => $classRef];
             } elseif ($depth <= $level) {
                 $output[$className] = ['@object' => '(...)'];
@@ -229,7 +229,7 @@ final class VarDumper
                 }
                 return $output . "\n" . $spaces . ']';
             case 'object':
-                if (($id = array_search($var, $this->objects, true)) !== false) {
+                if (($id = array_search($var, self::$objects, true)) !== false) {
                     return get_class($var) . '#' . ($id + 1) . '(...)';
                 }
 
@@ -237,7 +237,7 @@ final class VarDumper
                     return get_class($var) . '(...)';
                 }
 
-                $id = array_push($this->objects, $var);
+                $id = array_push(self::$objects, $var);
                 $className = get_class($var);
                 $spaces = str_repeat(' ', $level * 4);
                 $output = "$className#$id\n" . $spaces . '(';
