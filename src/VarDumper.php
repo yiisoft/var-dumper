@@ -111,14 +111,7 @@ class VarDumper
                 return;
             }
             array_push(self::$objects, $var);
-            if ('__PHP_Incomplete_Class' !== get_class($var) && method_exists($var, '__debugInfo')) {
-                $dumpValues = $var->__debugInfo();
-                if (!is_array($dumpValues)) {
-                    throw new \Exception('__debugInfo() must return an array');
-                }
-            } else {
-                $dumpValues = (array)$var;
-            }
+            $dumpValues = self::getVarDumpValuesArray($var);
             foreach ($dumpValues as $key => $value) {
                 self::buildVarObjectsCache($value, $level + 1);
             }
