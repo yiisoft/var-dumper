@@ -31,13 +31,14 @@ class VarDumperTest extends TestCase
     public function testDumpObject(): void
     {
         $obj = new StdClass();
-        $this->assertEquals("stdClass#1\n(\n)", VarDumper::dumpAsString($obj));
+        $this->assertEquals("stdClass#2\n(\n)", VarDumper::dumpAsString($obj));
 
         $obj = new StdClass();
         $obj->name = 'test-name';
         $obj->price = 19;
         $dumpResult = VarDumper::dumpAsString($obj);
-        $this->assertStringContainsString("stdClass#1\n(", $dumpResult);
+
+        $this->assertStringContainsString("stdClass#3\n(", $dumpResult);
         $this->assertStringContainsString("[name] => 'test-name'", $dumpResult);
         $this->assertStringContainsString('[price] => 19', $dumpResult);
     }
@@ -190,6 +191,7 @@ RESULT;
         $object->unitPrice = 15;
 
         $dumpResult = VarDumper::dumpAsString($object);
+
         $this->assertStringContainsString('totalPrice', $dumpResult);
         $this->assertStringNotContainsString('unitPrice', $dumpResult);
     }
