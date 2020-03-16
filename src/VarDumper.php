@@ -18,7 +18,7 @@ use Yiisoft\Arrays\ArrayableInterface;
  */
 class VarDumper
 {
-    private static $objects;
+    private static $objects = [];
     private static $output;
     private static $depth;
 
@@ -48,7 +48,6 @@ class VarDumper
     public static function dumpAsString($var, int $depth = 10, bool $highlight = false): string
     {
         self::$output = '';
-        self::$objects = [];
         self::$depth = $depth;
         self::dumpInternal($var, 0);
         if ($highlight) {
@@ -57,6 +56,125 @@ class VarDumper
         }
 
         return self::$output;
+    }
+
+    public static function dumpAsJson($var, int $depth = 50): string
+    {
+        self::$depth = $depth;
+        self::buildVarObjectsCache($var);
+
+        return json_encode(self::dumpNestedInternal($var, 0));
+    }
+
+    public static function dumpObjectsAsJson(): string
+    {
+        $objects = self::$objects;
+        $json = self::dumpNestedInternal($objects, 0, 1);
+
+        return json_encode(self::getObjectsMap($json));
+    }
+
+    /**
+     * Exports a variable as a string representation.
+     *
+     * The string is a valid PHP expression that can be evaluated by PHP parser
+     * and the evaluation result will give back the variable value.
+     *
+     * This method is similar to `var_export()`. The main difference is that
+     * it generates more compact string representation using short array syntax.
+     *
+     * It also handles objects by using the PHP functions serialize() and unserialize().
+     *
+     * PHP 5.4 or above is required to parse the exported value.
+     *
+     * @param mixed $var the variable to be exported.
+     * @return string a string representation of the variable
+     */
+    public static function export($var): string
+    {
+        self::$output = '';
+        self::exportInternal($var, 0);
+        return self::$output;
+    }
+
+    private static function buildVarObjectsCache($var, int $level = 0): void
+    {
+        if (is_array($var)) {
+            if (self::$depth <= $level) {
+                return;
+            } else {
+                foreach ($var as $key => $value) {
+                    self::buildVarObjectsCache($value, $level + 1);
+                }
+            }
+        } elseif (is_object($var)) {
+            if ((($id = array_search($var, self::$objects, true)) !== false) || (self::$depth <= $level)) {
+                return;
+            } else {
+                array_push(self::$objects, $var);
+                if ('__PHP_Incomplete_Class' !== get_class($var) && method_exists($var, '__debugInfo')) {
+                    $dumpValues = $var->__debugInfo();
+                    if (!is_array($dumpValues)) {
+                        throw new \Exception('__debugInfo() must return an array');
+                    }
+                } else {
+                    $dumpValues = (array)$var;
+                }
+                foreach ($dumpValues as $key => $value) {
+                    self::buildVarObjectsCache($value, $level + 1);
+                }
+            }
+        }
+
+        return;
+    }
+
+    private static function dumpNestedInternal($var, int $level, int $objectCollapseLevel = 0)
+    {
+        $output = [];
+        if (is_array($var)) {
+            if (self::$depth <= $level) {
+                $output = ['@array' => '[...]'];
+            } else {
+                foreach ($var as $key => $value) {
+                    $keyDisplay = str_replace("\0", '::', trim($key));
+                    $output[$keyDisplay] = self::dumpNestedInternal($value, $level + 1, $objectCollapseLevel);
+                }
+            }
+        } elseif (is_object($var)) {
+            $className = get_class($var);
+            if (($objectCollapseLevel < $level) && (($id = array_search($var, self::$objects, true)) !== false)) {
+                $classRef = get_class(self::$objects[$id]) . '#' . ($id + 1);
+                $output[$className] = ['@object' => $classRef];
+            } elseif (self::$depth <= $level) {
+                $output[$className] = ['@object' => '(...)'];
+            } else {
+                $dumpValues = self::getVarDumpValuesArray($var);
+                if (empty($dumpValues)) {
+                    $output[$className] = '{stateless object}';
+                }
+                foreach ($dumpValues as $key => $value) {
+                    $keyDisplay = str_replace("\0", '::', trim($key));
+                    $output[$className][$keyDisplay] = self::dumpNestedInternal($value, $level + 1, $objectCollapseLevel);
+                }
+            }
+        } elseif (is_resource($var)) {
+            $output = self::getResourceDescription($var);
+        } else {
+            $output = $var;
+        }
+
+        return $output;
+    }
+
+    private static function getObjectsMap(array $objectsArray): array
+    {
+        $objects = [];
+        foreach ($objectsArray as $index => $object) {
+            $className = array_key_first($object);
+            $objects[$className . '#' . ($index + 1)] = $object[$className];
+        }
+        return $objects;
     }
 
     /**
@@ -115,14 +233,7 @@ class VarDumper
                     $className = get_class($var);
                     $spaces = str_repeat(' ', $level * 4);
                     self::$output .= "$className#$id\n" . $spaces . '(';
-                    if ('__PHP_Incomplete_Class' !== get_class($var) && method_exists($var, '__debugInfo')) {
-                        $dumpValues = $var->__debugInfo();
-                        if (!is_array($dumpValues)) {
-                            throw new \Exception('__debugInfo() must return an array');
-                        }
-                    } else {
-                        $dumpValues = (array) $var;
-                    }
+                    $dumpValues = self::getVarDumpValuesArray($var);
                     foreach ($dumpValues as $key => $value) {
                         $keyDisplay = strtr(trim($key), "\0", ':');
                         self::$output .= "\n" . $spaces . "    [$keyDisplay] => ";
@@ -134,27 +245,29 @@ class VarDumper
         }
     }
 
-    /**
-     * Exports a variable as a string representation.
-     *
-     * The string is a valid PHP expression that can be evaluated by PHP parser
-     * and the evaluation result will give back the variable value.
-     *
-     * This method is similar to `var_export()`. The main difference is that
-     * it generates more compact string representation using short array syntax.
-     *
-     * It also handles objects by using the PHP functions serialize() and unserialize().
-     *
-     * PHP 5.4 or above is required to parse the exported value.
-     *
-     * @param mixed $var the variable to be exported.
-     * @return string a string representation of the variable
-     */
-    public static function export($var): string
+    private static function getVarDumpValuesArray($var): array
     {
-        self::$output = '';
-        self::exportInternal($var, 0);
-        return self::$output;
+        if ('__PHP_Incomplete_Class' !== get_class($var) && method_exists($var, '__debugInfo')) {
+            $dumpValues = $var->__debugInfo();
+            if (!is_array($dumpValues)) {
+                throw new \Exception('__debugInfo() must return an array');
+            }
+            return $dumpValues;
+        }
+
+        return (array)$var;
+    }
+
+    private static function getResourceDescription($resource)
+    {
+        $type = get_resource_type($resource);
+        if ($type === 'stream') {
+            $desc = stream_get_meta_data($resource);
+        } else {
+            $desc = '{resource}';
+        }
+
+        return $desc;
     }
 
     /**
