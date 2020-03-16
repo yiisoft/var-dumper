@@ -107,10 +107,10 @@ class VarDumper
                 self::buildVarObjectsCache($value, $level + 1);
             }
         } elseif (is_object($var)) {
-            if ((array_search($var, self::$objects, true) !== false) || (self::$depth <= $level)) {
+            if (self::$depth <= $level || in_array($var, self::$objects, true)) {
                 return;
             }
-            array_push(self::$objects, $var);
+            self::$objects[] = $var;
             $dumpValues = self::getVarDumpValuesArray($var);
             foreach ($dumpValues as $key => $value) {
                 self::buildVarObjectsCache($value, $level + 1);
@@ -177,8 +177,6 @@ class VarDumper
                 self::$output .= $var ? 'true' : 'false';
                 break;
             case 'integer':
-                self::$output .= (string)$var;
-                break;
             case 'double':
                 self::$output .= (string)$var;
                 break;
