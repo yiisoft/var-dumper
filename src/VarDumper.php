@@ -90,8 +90,12 @@ final class VarDumper
         }
 
         $this->buildVarObjectsCache($this->variable, $depth);
+
+        $backup = $this->variable;
         $this->variable = self::$objects;
-        return json_encode($this->getObjectsMap($this->asArray($depth, 1)), $options);
+        $output = json_encode($this->getObjectsMap($this->asArray($depth, 1)), $options);
+        $this->variable = $backup;
+        return $output;
     }
 
     /**
