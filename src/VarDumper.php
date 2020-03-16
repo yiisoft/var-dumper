@@ -102,31 +102,27 @@ class VarDumper
         if (is_array($var)) {
             if (self::$depth <= $level) {
                 return;
-            } else {
-                foreach ($var as $key => $value) {
-                    self::buildVarObjectsCache($value, $level + 1);
-                }
+            }
+            foreach ($var as $key => $value) {
+                self::buildVarObjectsCache($value, $level + 1);
             }
         } elseif (is_object($var)) {
-            if ((($id = array_search($var, self::$objects, true)) !== false) || (self::$depth <= $level)) {
+            if ((array_search($var, self::$objects, true) !== false) || (self::$depth <= $level)) {
                 return;
+            }
+            array_push(self::$objects, $var);
+            if ('__PHP_Incomplete_Class' !== get_class($var) && method_exists($var, '__debugInfo')) {
+                $dumpValues = $var->__debugInfo();
+                if (!is_array($dumpValues)) {
+                    throw new \Exception('__debugInfo() must return an array');
+                }
             } else {
-                array_push(self::$objects, $var);
-                if ('__PHP_Incomplete_Class' !== get_class($var) && method_exists($var, '__debugInfo')) {
-                    $dumpValues = $var->__debugInfo();
-                    if (!is_array($dumpValues)) {
-                        throw new \Exception('__debugInfo() must return an array');
-                    }
-                } else {
-                    $dumpValues = (array)$var;
-                }
-                foreach ($dumpValues as $key => $value) {
-                    self::buildVarObjectsCache($value, $level + 1);
-                }
+                $dumpValues = (array)$var;
+            }
+            foreach ($dumpValues as $key => $value) {
+                self::buildVarObjectsCache($value, $level + 1);
             }
         }
-
-        return;
     }
 
     private static function dumpNestedInternal($var, int $level, int $objectCollapseLevel = 0)
