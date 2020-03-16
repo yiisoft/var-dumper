@@ -11,6 +11,7 @@ use Yiisoft\VarDumper\VarDumper;
  */
 class VarDumperTest extends TestCase
 {
+    /**@runInSeparateProcess*/
     public function testDumpIncompleteObject(): void
     {
         $serializedObj = 'O:16:"nonExistingClass":0:{}';
@@ -28,6 +29,7 @@ class VarDumperTest extends TestCase
         $this->assertStringContainsString('nonExistingClass', $exportResult);
     }
 
+    /**@runInSeparateProcess*/
     public function testDumpObject(): void
     {
         $obj = new StdClass();

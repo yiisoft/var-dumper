@@ -66,12 +66,9 @@ class VarDumper
         return json_encode(self::dumpNestedInternal($var, 0));
     }
 
-    public static function dumpObjectsAsJson(): string
+    public static function dumpCurrentObjectsCacheAsJson(): string
     {
-        $objects = self::$objects;
-        $json = self::dumpNestedInternal($objects, 0, 1);
-
-        return json_encode(self::getObjectsMap($json));
+        return json_encode(self::getObjectsMap(self::dumpNestedInternal(self::$objects, 0, 1)));
     }
 
     /**
