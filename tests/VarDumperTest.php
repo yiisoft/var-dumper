@@ -15,7 +15,7 @@ class VarDumperTest extends TestCase
     {
         $serializedObj = 'O:16:"nonExistingClass":0:{}';
         $incompleteObj = unserialize($serializedObj);
-        $dumpResult = VarDumper::dumpAsString($incompleteObj);
+        $dumpResult = VarDumper::create($incompleteObj)->asString();
         $this->assertStringContainsString("__PHP_Incomplete_Class#1\n(", $dumpResult);
         $this->assertStringContainsString('nonExistingClass', $dumpResult);
     }
@@ -24,20 +24,21 @@ class VarDumperTest extends TestCase
     {
         $serializedObj = 'O:16:"nonExistingClass":0:{}';
         $incompleteObj = unserialize($serializedObj);
-        $exportResult = VarDumper::export($incompleteObj);
+        $exportResult = VarDumper::create($incompleteObj)->export();
         $this->assertStringContainsString('nonExistingClass', $exportResult);
     }
 
     public function testDumpObject(): void
     {
         $obj = new StdClass();
-        $this->assertEquals("stdClass#1\n(\n)", VarDumper::dumpAsString($obj));
+        $this->assertEquals("stdClass#2\n(\n)", VarDumper::create($obj)->asString());
 
         $obj = new StdClass();
         $obj->name = 'test-name';
         $obj->price = 19;
-        $dumpResult = VarDumper::dumpAsString($obj);
-        $this->assertStringContainsString("stdClass#1\n(", $dumpResult);
+        $dumpResult = VarDumper::create($obj)->asString();
+
+        $this->assertStringContainsString("stdClass#3\n(", $dumpResult);
         $this->assertStringContainsString("[name] => 'test-name'", $dumpResult);
         $this->assertStringContainsString('[price] => 19', $dumpResult);
     }
@@ -151,7 +152,7 @@ RESULT;
      */
     public function testExport($var, $expectedResult): void
     {
-        $exportResult = VarDumper::export($var);
+        $exportResult = VarDumper::create($var)->export();
         $this->assertEqualsWithoutLE($expectedResult, $exportResult);
         //$this->assertEquals($var, eval('return ' . $exportResult . ';'));
     }
@@ -165,7 +166,7 @@ RESULT;
         $var->testFunction = static function () {
             return 2;
         };
-        $exportResult = VarDumper::export($var);
+        $exportResult = VarDumper::create($var)->export();
         $this->assertNotEmpty($exportResult);
 
         $master = new StdClass();
@@ -176,7 +177,7 @@ RESULT;
             return true;
         };
 
-        $exportResult = VarDumper::export($master);
+        $exportResult = VarDumper::create($master)->export();
         $this->assertNotEmpty($exportResult);
     }
 
@@ -189,9 +190,19 @@ RESULT;
         $object->volume = 10;
         $object->unitPrice = 15;
 
-        $dumpResult = VarDumper::dumpAsString($object);
+        $dumpResult = VarDumper::create($object)->asString();
+
         $this->assertStringContainsString('totalPrice', $dumpResult);
         $this->assertStringNotContainsString('unitPrice', $dumpResult);
+    }
+
+    public function testAsJson(): void
+    {
+        $var = new StdClass();
+        $var->name = 'Dmitry';
+
+        $output = VarDumper::create($var)->asJson(50);
+        $this->assertEqualsWithoutLE('{"stdClass":{"name":"Dmitry"}}', $output);
     }
 
     /**

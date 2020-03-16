@@ -21,7 +21,8 @@
     "prefer-stable": true,
     "require": {
         "yiisoft/arrays": "^3.0@dev",
-        "php": "^7.4"
+        "php": "^7.4",
+        "ext-json": "*"
     },
     "require-dev": {
         "phpunit/phpunit": "^9.0",
