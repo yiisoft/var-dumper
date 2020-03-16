@@ -120,18 +120,22 @@ class VarDumper
 
     private static function dumpNestedInternal($var, int $level, int $objectCollapseLevel = 0)
     {
-        $output = [];
         if (is_array($var)) {
             if (self::$depth <= $level) {
-                $output = ['@array' => '[...]'];
-            } else {
-                foreach ($var as $key => $value) {
-                    $keyDisplay = str_replace("\0", '::', trim($key));
-                    $output[$keyDisplay] = self::dumpNestedInternal($value, $level + 1, $objectCollapseLevel);
-                }
+                return ['@array' => '[...]'];
             }
-        } elseif (is_object($var)) {
+
+            $output = [];
+            foreach ($var as $key => $value) {
+                $keyDisplay = str_replace("\0", '::', trim($key));
+                $output[$keyDisplay] = self::dumpNestedInternal($value, $level + 1, $objectCollapseLevel);
+            }
+            return $output;
+        }
+
+        if (is_object($var)) {
             $className = get_class($var);
+            $output = [];
             if (($objectCollapseLevel < $level) && (($id = array_search($var, self::$objects, true)) !== false)) {
                 $classRef = get_class(self::$objects[$id]) . '#' . ($id + 1);
                 $output[$className] = ['@object' => $classRef];
@@ -147,13 +151,14 @@ class VarDumper
                     $output[$className][$keyDisplay] = self::dumpNestedInternal($value, $level + 1, $objectCollapseLevel);
                 }
             }
-        } elseif (is_resource($var)) {
-            $output = self::getResourceDescription($var);
-        } else {
-            $output = $var;
+            return $output;
         }
 
-        return $output;
+        if (is_resource($var)) {
+            return self::getResourceDescription($var);
+        }
+
+        return $var;
     }
 
     private static function getObjectsMap(array $objectsArray): array
