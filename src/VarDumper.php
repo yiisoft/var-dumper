@@ -143,7 +143,7 @@ final class VarDumper
     {
         if (is_array($var)) {
             if ($depth <= $level) {
-                return ['@array' => '[...]'];
+                return 'array [...]';
             }
 
             $output = [];
@@ -158,17 +158,21 @@ final class VarDumper
             $className = get_class($var);
             $output = [];
             if (($objectCollapseLevel < $level) && (($id = array_search($var, self::$objects, true)) !== false)) {
-                $classRef = get_class(self::$objects[$id]) . '#' . ($id + 1);
-                $output[$className] = ['@object' => $classRef];
+                if ($var instanceof \Closure) {
+                    $output = $this->exportClosure($var);
+                } else {
+                    $classRef = 'object@' . get_class(self::$objects[$id]) . '#' . ($id + 1);
+                    $output = $classRef;
+                }
             } elseif ($depth <= $level) {
-                $output[$className] = ['@object' => '(...)'];
+                $output = $className . ' (...)';
             } else {
                 $dumpValues = $this->getVarDumpValuesArray($var);
                 if (empty($dumpValues)) {
                     $output[$className] = '{stateless object}';
                 }
                 foreach ($dumpValues as $key => $value) {
-                    $keyDisplay = str_replace("\0", '::', trim($key));
+                    $keyDisplay = $this->normalizeProperty($key);
                     $output[$className][$keyDisplay] = $this->dumpNestedInternal($value, $depth, $level + 1, $objectCollapseLevel);
                 }
             }
@@ -180,6 +184,21 @@ final class VarDumper
         }
 
         return $var;
+    }
+
+    private function normalizeProperty(string $property): string
+    {
+        $property = str_replace("\0", '::', trim($property));
+
+        if (($pos = strpos($property, '*::')) === 0) {
+            return 'protected::' . substr($property, 3);
+        }
+
+        if (($pos = strpos($property, '::')) !== false) {
+            return 'private::' . substr($property, $pos + 2);
+        }
+
+        return 'public::' . $property;
     }
 
     private function getObjectsMap(array $objectsArray): array
@@ -370,7 +389,7 @@ final class VarDumper
         $closureTokens = [];
         $pendingParenthesisCount = 0;
         foreach ($tokens as $token) {
-            if (isset($token[0]) && $token[0] === T_FUNCTION) {
+            if (isset($token[0]) && ($token[0] === T_FUNCTION || $token[0] === T_FN)) {
                 $closureTokens[] = $token[1];
                 continue;
             }

@@ -202,7 +202,7 @@ RESULT;
         $var->name = 'Dmitry';
 
         $output = VarDumper::create($var)->asJson(50);
-        $this->assertEqualsWithoutLE('{"stdClass":{"name":"Dmitry"}}', $output);
+        $this->assertEqualsWithoutLE('{"stdClass":{"public::name":"Dmitry"}}', $output);
     }
 
     /**
