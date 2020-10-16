@@ -2,7 +2,7 @@
 
 namespace Yiisoft\VarDumper;
 
-use Yiisoft\Arrays\ArrayableInterface;
+//use Yiisoft\{Arrays\ArrayHelper, Arrays\ArrayableTrait}, Yiisoft\Arrays\ArraySorter;
 
 /**
  * VarDumper is intended to replace the PHP functions var_dump and print_r.
@@ -383,6 +383,7 @@ final class VarDumper
         }
 
         --$start;
+        $uses = $this->parseUses(file($fileName));
 
         $source = implode("\n", array_slice(file($fileName), $start, $end - $start));
         $tokens = token_get_all('<?php ' . $source);
@@ -438,4 +439,5 @@ final class VarDumper
 
         return $tokens;
     }
+
 }
