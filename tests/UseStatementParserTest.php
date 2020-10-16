@@ -31,6 +31,17 @@ class UseStatementParserTest extends TestCase
          */
         return $this->saveExamplesToTemporaryFile([
             [
+                'use Yiisoft\Arrays\ArrayHelper as alias;',
+                ['alias' => '\Yiisoft\Arrays\ArrayHelper'],
+            ],
+            [
+                'use Yiisoft\Arrays\ArrayHelper as Helper, Yiisoft\Arrays\ArraySorter as Sorter;',
+                [
+                    'Helper' => '\Yiisoft\Arrays\ArrayHelper',
+                    'Sorter' => '\Yiisoft\Arrays\ArraySorter',
+                ],
+            ],
+            [
                 'use Yiisoft\Arrays\ArrayHelper;',
                 ['\Yiisoft\Arrays\ArrayHelper'],
             ],

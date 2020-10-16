@@ -18,7 +18,7 @@ class UseStatementParser
             }
 
             if ($token[0] === T_USE) {
-                array_push($uses, ...$this->normalizeUse(array_slice($tokens, $i + 1)));
+                $uses = array_merge($uses, $this->normalizeUse(array_slice($tokens, $i + 1)));
                 continue;
             }
         }
@@ -30,8 +30,8 @@ class UseStatementParser
     {
         $commonNamespace = '\\';
         $current = '';
+        $alias = null;
         $uses = [];
-        $pendingParenthesisCount = 0;
 
         foreach ($tokens as $token) {
             if (!isset($token[0])) {
@@ -43,7 +43,11 @@ class UseStatementParser
             }
             if ($token === ',' || $token === ';') {
                 if ($current !== '') {
-                    $uses[] = $commonNamespace . $current;
+                    if ($alias === null) {
+                        $uses[] = $commonNamespace . $current;
+                    } else {
+                        $uses[$alias] = $commonNamespace . $current;
+                    }
                     $current = '';
                 }
             }
@@ -51,23 +55,31 @@ class UseStatementParser
                 break;
             }
             if ($token === '{') {
-                $pendingParenthesisCount++;
                 $commonNamespace .= $current;
                 $current = '';
                 continue;
             }
-
-            if ($token === '}') {
-                $pendingParenthesisCount--;
-                if ($pendingParenthesisCount === 0) {
-                    $uses[] = $commonNamespace . $current;
-                    $commonNamespace = '\\';
-                    $current = '';
-                }
-                continue;
+            if ($token[0] === T_AS) {
+                $current .= '@';
             }
         }
 
-        return $uses;
+        return $this->replaceAliases($uses);
+    }
+
+    private function replaceAliases(array $uses): array
+    {
+        $result = [];
+        foreach ($uses as $use) {
+            $delimiterPosition = strpos($use, '@');
+            if ($delimiterPosition !== false) {
+                $alias = mb_substr($use, $delimiterPosition + 1);
+                $result[$alias] = mb_substr($use, 0, $delimiterPosition);
+            } else {
+                $result[] = $use;
+            }
+        }
+
+        return $result;
     }
 }
