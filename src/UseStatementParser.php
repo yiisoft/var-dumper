@@ -28,14 +28,8 @@ class UseStatementParser
 
     private function normalizeUse(array $tokens): array
     {
-        /**
-         * use Yiisoft\Arrays\ArrayHelper;
-         * use Yiisoft\Arrays\ArrayHelper, Yiisoft\Arrays\ArraySorter;
-         * use Yiisoft\{Arrays\ArrayHelper, Arrays\ArrayableTrait};
-         * use Yiisoft\{Arrays\ArrayHelper, Arrays\ArrayableTrait}, Yiisoft\Arrays\ArraySorter;
-         */
         $commonNamespace = '\\';
-        $tempNamespace = '';
+        $current = '';
         $uses = [];
         $pendingParenthesisCount = 0;
 
@@ -44,49 +38,36 @@ class UseStatementParser
                 continue;
             }
             if ($token[0] === T_STRING || $token[0] === T_NS_SEPARATOR) {
-                $commonNamespace .= $token[1];
+                $current .= $token[1];
                 continue;
             }
-            //            if ($pendingParenthesisCount === 0) {
-            //                $commonNamespace .= $token[1];
-            //            }
             if ($token === ',' || $token === ';') {
-                if ($pendingParenthesisCount === 0) {
-                    $uses[] = $commonNamespace;
-                    $commonNamespace = '\\';
+                if ($current !== '') {
+                    $uses[] = $commonNamespace . $current;
+                    $current = '';
                 }
             }
             if ($token === ';') {
                 break;
             }
-            //            if ($token[1] === '{') {
-            //                $pendingParenthesisCount++;
-            //                continue;
-            //            }
-            //
-            //            if ($token[1] === '}') {
-            //            $pendingParenthesisCount--;
-            //            if ($pendingParenthesisCount === 0) {
-            //                    $commonNamespace = '';
-            //                }
-            //                continue;
-            //            }
+            if ($token === '{') {
+                $pendingParenthesisCount++;
+                $commonNamespace .= $current;
+                $current = '';
+                continue;
+            }
 
-            //            if ($token[0] === T_STRING) {
-            //                $uses[] = $token[1];
-            //            }
-        }
-        //        var_dump($uses);
-        //        exit();
-
-        //        var_dump($commonNamespace . implode('', array_filter($uses)));
-        //        exit();
-        //        return [$commonNamespace];
-
-        if (!empty($uses)) {
-            return $uses;
+            if ($token === '}') {
+                $pendingParenthesisCount--;
+                if ($pendingParenthesisCount === 0) {
+                    $uses[] = $commonNamespace . $current;
+                    $commonNamespace = '\\';
+                    $current = '';
+                }
+                continue;
+            }
         }
 
-        return [$commonNamespace];
+        return $uses;
     }
 }
