@@ -34,13 +34,13 @@ class UseStatementParserTest extends TestCase
                 'use Yiisoft\Arrays\ArrayHelper;',
                 ['\Yiisoft\Arrays\ArrayHelper'],
             ],
-//            [
-//                'use Yiisoft\Arrays\ArrayHelper, Yiisoft\Arrays\ArraySorter;',
-//                [
-//                    '\Yiisoft\Arrays\ArrayHelper',
-//                    '\Yiisoft\Arrays\ArraySorter',
-//                ],
-//            ],
+            [
+                'use Yiisoft\Arrays\ArrayHelper, Yiisoft\Arrays\ArraySorter;',
+                [
+                    '\Yiisoft\Arrays\ArrayHelper',
+                    '\Yiisoft\Arrays\ArraySorter',
+                ],
+            ],
 //            [
 //                'use Yiisoft\{Arrays\ArrayHelper, Arrays\ArrayableTrait};',
 //                [

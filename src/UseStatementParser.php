@@ -21,7 +21,6 @@ class UseStatementParser
                 array_push($uses, ...$this->normalizeUse(array_slice($tokens, $i + 1)));
                 continue;
             }
-
         }
 
         return $uses;
@@ -35,42 +34,59 @@ class UseStatementParser
          * use Yiisoft\{Arrays\ArrayHelper, Arrays\ArrayableTrait};
          * use Yiisoft\{Arrays\ArrayHelper, Arrays\ArrayableTrait}, Yiisoft\Arrays\ArraySorter;
          */
-        $parentNamespace = '\\';
-        $useParts = [];
+        $commonNamespace = '\\';
+        $tempNamespace = '';
+        $uses = [];
         $pendingParenthesisCount = 0;
 
         foreach ($tokens as $token) {
-            if ($token === ';') {
-                break;
-            }
             if (!isset($token[0])) {
                 continue;
             }
             if ($token[0] === T_STRING || $token[0] === T_NS_SEPARATOR) {
-                $parentNamespace .= $token[1];
+                $commonNamespace .= $token[1];
                 continue;
             }
-//            if ($token[1] === '{') {
-//                $pendingParenthesisCount++;
-//                continue;
-//            }
-//
-//            if ($token[1] === '}') {
-//                $pendingParenthesisCount--;
-//                if ($pendingParenthesisCount === 0) {
-//                    $parentNamespace = '';
-//                }
-//                continue;
-//            }
+            //            if ($pendingParenthesisCount === 0) {
+            //                $commonNamespace .= $token[1];
+            //            }
+            if ($token === ',' || $token === ';') {
+                if ($pendingParenthesisCount === 0) {
+                    $uses[] = $commonNamespace;
+                    $commonNamespace = '\\';
+                }
+            }
+            if ($token === ';') {
+                break;
+            }
+            //            if ($token[1] === '{') {
+            //                $pendingParenthesisCount++;
+            //                continue;
+            //            }
+            //
+            //            if ($token[1] === '}') {
+            //            $pendingParenthesisCount--;
+            //            if ($pendingParenthesisCount === 0) {
+            //                    $commonNamespace = '';
+            //                }
+            //                continue;
+            //            }
 
-//            $useParts[] = $token[1];
+            //            if ($token[0] === T_STRING) {
+            //                $uses[] = $token[1];
+            //            }
         }
-//        var_dump($useParts);
-//        exit();
+        //        var_dump($uses);
+        //        exit();
 
-//        var_dump($parentNamespace . implode('', array_filter($useParts)));
-//        exit();
-        return [$parentNamespace];
-//        return [$parentNamespace . implode('', array_filter($useParts))];
+        //        var_dump($commonNamespace . implode('', array_filter($uses)));
+        //        exit();
+        //        return [$commonNamespace];
+
+        if (!empty($uses)) {
+            return $uses;
+        }
+
+        return [$commonNamespace];
     }
 }
