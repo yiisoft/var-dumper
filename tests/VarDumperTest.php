@@ -6,6 +6,7 @@ use PHPUnit\Framework\TestCase;
 use StdClass;
 use Yiisoft\VarDumper as VD;
 use Yiisoft\VarDumper\VarDumper;
+use Yiisoft\VarDumper\VarDumper as Dumper;
 
 /**
  * @group helpers
@@ -194,13 +195,19 @@ RESULT;
                 // @formatter:on
                 'fn () => 2',
             ],
-            'original'=>[
+            'original class name' => [
                 // @formatter:off
                 static fn (VarDumper $date) => new \DateTimeZone(''),
                 // @formatter:on
                 "static fn (\Yiisoft\VarDumper\VarDumper \$date) => new \DateTimeZone('')",
             ],
-            'namespace alias'=>[
+            'class alias' => [
+                // @formatter:off
+                static fn (Dumper $date) => new \DateTimeZone(''),
+                // @formatter:on
+                "static fn (\Yiisoft\VarDumper\VarDumper \$date) => new \DateTimeZone('')",
+            ],
+            'namespace alias' => [
                 // @formatter:off
                 static fn (VD\VarDumper $date) => new \DateTimeZone(''),
                 // @formatter:on
