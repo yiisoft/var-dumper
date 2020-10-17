@@ -2,8 +2,6 @@
 
 namespace Yiisoft\VarDumper;
 
-//use Yiisoft\{Arrays\ArrayHelper, Arrays\ArrayableTrait}, Yiisoft\Arrays\ArraySorter;
-
 /**
  * VarDumper is intended to replace the PHP functions var_dump and print_r.
  * It can correctly identify the recursively referenced objects in a complex
@@ -22,6 +20,8 @@ final class VarDumper
     private static array $objects = [];
 
     private array $exportClosureTokens = [T_FUNCTION, T_FN];
+
+    private ?UseStatementParser $useStatementParser = null;
 
     private function __construct($variable)
     {
@@ -383,7 +383,7 @@ final class VarDumper
         }
 
         --$start;
-        $uses = $this->parseUses(file($fileName));
+        $uses = $this->getUsesParser()->fromFile($fileName);
 
         $source = implode("\n", array_slice(file($fileName), $start, $end - $start));
         $tokens = token_get_all('<?php ' . $source);
@@ -404,7 +404,20 @@ final class VarDumper
                 continue;
             }
             if ($closureTokens !== []) {
-                $closureTokens[] = $token[1] ?? $token;
+                $readableToken = $token[1] ?? $token;
+                if ($token[0] === T_STRING) {
+                    $string = $token[1];
+                    var_dump($string, $uses);
+                    if (is_string($string)) {
+                        if (in_array($string, $uses, true)) {
+                            $key = array_search($string, $uses, true);
+                            $readableToken = $uses[$key];
+                        } elseif (array_key_exists($string, $uses)) {
+                            $readableToken = $uses[$string];
+                        }
+                    }
+                }
+                $closureTokens[] = $readableToken;
                 if ($token === '}') {
                     $pendingParenthesisCount--;
                     if ($pendingParenthesisCount === 0) {
@@ -440,4 +453,12 @@ final class VarDumper
         return $tokens;
     }
 
+    public function getUsesParser(): UseStatementParser
+    {
+        if ($this->useStatementParser === null) {
+            $this->useStatementParser = new UseStatementParser();
+        }
+
+        return $this->useStatementParser;
+    }
 }

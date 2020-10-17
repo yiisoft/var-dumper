@@ -194,13 +194,13 @@ RESULT;
                 // @formatter:on
                 'fn () => 2',
             ],
-            [
+            'original'=>[
                 // @formatter:off
                 static fn (VarDumper $date) => new \DateTimeZone(''),
                 // @formatter:on
                 "static fn (\Yiisoft\VarDumper\VarDumper \$date) => new \DateTimeZone('')",
             ],
-            [
+            'namespace alias'=>[
                 // @formatter:off
                 static fn (VD\VarDumper $date) => new \DateTimeZone(''),
                 // @formatter:on
