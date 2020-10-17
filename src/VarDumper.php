@@ -392,6 +392,7 @@ final class VarDumper
         $closureTokens = [];
         $pendingParenthesisCount = 0;
         $isShortClosure = false;
+        $buffer = '';
         foreach ($tokens as $token) {
             if (!isset($token[0])) {
                 continue;
@@ -405,16 +406,11 @@ final class VarDumper
             }
             if ($closureTokens !== []) {
                 $readableToken = $token[1] ?? $token;
-                if ($token[0] === T_STRING) {
-                    $string = $token[1];
-                    var_dump($string, $uses);
-                    if (is_string($string)) {
-                        if (in_array($string, $uses, true)) {
-                            $key = array_search($string, $uses, true);
-                            $readableToken = $uses[$key];
-                        } elseif (array_key_exists($string, $uses)) {
-                            $readableToken = $uses[$string];
-                        }
+                if ($this->isNextTokenIsPartOfNamespace($token)) {
+                    $buffer .= $token[1];
+                    if (!$this->isNextTokenIsPartOfNamespace(next($tokens)) && array_key_exists($buffer, $uses)) {
+                        $readableToken = $uses[$buffer];
+                        $buffer = '';
                     }
                 }
                 $closureTokens[] = $readableToken;
@@ -460,5 +456,14 @@ final class VarDumper
         }
 
         return $this->useStatementParser;
+    }
+
+    private function isNextTokenIsPartOfNamespace($token): bool
+    {
+        if (!is_array($token)) {
+            return false;
+        }
+
+        return $token[0] === T_STRING || $token[0] === T_NS_SEPARATOR;
     }
 }
