@@ -23,6 +23,8 @@ final class VarDumper
 
     private ?UseStatementParser $useStatementParser = null;
 
+    private bool $beautify = true;
+
     private function __construct($variable)
     {
         $this->variable = $variable;
@@ -248,12 +250,15 @@ final class VarDumper
                 $spaces = str_repeat(' ', $level * 4);
                 $output .= '[';
                 foreach ($keys as $key) {
-                    $output .= "\n" . $spaces . '    ';
+                    $this->beautify && $output .= "\n" . $spaces . '    ';
                     $output .= $this->dumpInternal($key, $depth, 0);
                     $output .= ' => ';
                     $output .= $this->dumpInternal($var[$key], $depth, $level + 1);
                 }
-                return $output . "\n" . $spaces . ']';
+
+                return $this->beautify
+                    ? $output . "\n" . $spaces . ']'
+                    : $output . ']';
             case 'object':
                 if (($id = array_search($var, self::$objects, true)) !== false) {
                     return get_class($var) . '#' . ($id + 1) . '(...)';
@@ -323,15 +328,22 @@ final class VarDumper
                 $spaces = str_repeat(' ', $level * 4);
                 $output = '[';
                 foreach ($keys as $key) {
-                    $output .= "\n" . $spaces . '    ';
+                    if ($this->beautify) {
+                        $output .= "\n" . $spaces . '    ';
+                    }
                     if ($outputKeys) {
                         $output .= $this->exportInternal($key, 0);
                         $output .= ' => ';
                     }
                     $output .= $this->exportInternal($var[$key], $level + 1);
-                    $output .= ',';
+                    var_dump($output);
+                    if ($this->beautify || next($keys) !== false) {
+                        $output .= ',';
+                    }
                 }
-                return $output . "\n" . $spaces . ']';
+                return $this->beautify
+                    ? $output . "\n" . $spaces . ']'
+                    : $output . ']';
             case 'object':
                 if ($var instanceof \Closure) {
                     return $this->exportClosure($var);
@@ -385,7 +397,7 @@ final class VarDumper
         --$start;
         $uses = $this->getUsesParser()->fromFile($fileName);
 
-        $source = implode("\n", array_slice(file($fileName), $start, $end - $start));
+        $source = implode('', array_slice(file($fileName), $start, $end - $start));
         $tokens = token_get_all('<?php ' . $source);
         array_shift($tokens);
 
@@ -413,27 +425,31 @@ final class VarDumper
                         $buffer = '';
                     }
                 }
-                $closureTokens[] = $readableToken;
-                if ($token === '}') {
+                if ($token === '}' || $token === ']') {
                     $pendingParenthesisCount--;
                     if ($pendingParenthesisCount === 0) {
+                        $closureTokens[] = $readableToken;
                         break;
                     }
-                } elseif ($token === '{') {
+                    if ($pendingParenthesisCount < 0) {
+                        break;
+                    }
+                } elseif ($token === '{' || $token === '[') {
                     $pendingParenthesisCount++;
                 }
+                $closureTokens[] = $readableToken;
             }
         }
         if ($isShortClosure) {
             $closureTokens= $this->cleanShortClosureTokens($closureTokens);
         }
-
         return implode('', $closureTokens);
     }
 
     public function asPhpString(): string
     {
         $this->exportClosureTokens = [T_FUNCTION, T_FN, T_STATIC];
+        $this->beautify = false;
         return $this->export();
     }
 

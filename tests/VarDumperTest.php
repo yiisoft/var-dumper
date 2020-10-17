@@ -195,6 +195,12 @@ RESULT;
                 // @formatter:on
                 'fn () => 2',
             ],
+            'closure in array' => [
+                // @formatter:off
+                [fn () => new \DateTimeZone('')],
+                // @formatter:on
+                "[fn () => new \DateTimeZone('')]",
+            ],
             'original class name' => [
                 // @formatter:off
                 static fn (VarDumper $date) => new \DateTimeZone(''),
