@@ -11,7 +11,7 @@ use Yiisoft\VarDumper\VarDumper as Dumper;
 /**
  * @group helpers
  */
-class VarDumperTest extends TestCase
+final class VarDumperTest extends TestCase
 {
     public function testDumpIncompleteObject(): void
     {
