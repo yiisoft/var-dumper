@@ -45,6 +45,7 @@ class VarDumperTest extends TestCase
 
     /**
      * Data provider for [[testExport()]].
+     *
      * @return array test data
      */
     public function dataProviderExport(): array
@@ -155,6 +156,42 @@ RESULT;
         $exportResult = VarDumper::create($var)->export();
         $this->assertEqualsWithoutLE($expectedResult, $exportResult);
         //$this->assertEquals($var, eval('return ' . $exportResult . ';'));
+    }
+
+    /**
+     * @dataProvider asPhpStringDataProvider
+     *
+     * @param mixed $var
+     * @param string $expectedResult
+     */
+    public function testAsPhpString($var, $expectedResult): void
+    {
+        $exportResult = VarDumper::create($var)->asPhpString();
+        $this->assertEqualsWithoutLE($expectedResult, $exportResult);
+    }
+
+    public function asPhpStringDataProvider(): array
+    {
+        return [
+            [
+                // @formatter:off
+                static fn (VarDumper $date) => new \DateTimeZone(''),
+                // @formatter:on
+                "static fn (VarDumper \$date) => new \DateTimeZone('')",
+            ],
+            [
+                // @formatter:off
+                 static function () {return 2;},
+                // @formatter:on
+                'static function () {return 2;}',
+            ],
+            [
+                // @formatter:off
+                static fn () => 2,
+                // @formatter:on
+                'static fn () => 2',
+            ],
+        ];
     }
 
     /**

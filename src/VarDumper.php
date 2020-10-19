@@ -21,6 +21,8 @@ final class VarDumper
     private $variable;
     private static array $objects = [];
 
+    private array $exportClosureTokens = [T_FUNCTION, T_FN];
+
     private function __construct($variable)
     {
         $this->variable = $variable;
@@ -388,9 +390,16 @@ final class VarDumper
 
         $closureTokens = [];
         $pendingParenthesisCount = 0;
+        $isShortClosure = false;
         foreach ($tokens as $token) {
-            if (isset($token[0]) && ($token[0] === T_FUNCTION || $token[0] === T_FN)) {
+            if (!isset($token[0])) {
+                continue;
+            }
+            if (in_array($token[0], $this->exportClosureTokens, true)) {
                 $closureTokens[] = $token[1];
+                if (!$isShortClosure && $token[0] === T_FN) {
+                    $isShortClosure = true;
+                }
                 continue;
             }
             if ($closureTokens !== []) {
@@ -405,7 +414,28 @@ final class VarDumper
                 }
             }
         }
+        if ($isShortClosure) {
+            $closureTokens= $this->cleanShortClosureTokens($closureTokens);
+        }
 
         return implode('', $closureTokens);
+    }
+
+    public function asPhpString(): string
+    {
+        $this->exportClosureTokens = [T_FUNCTION, T_FN, T_STATIC];
+        return $this->export();
+    }
+
+    private function cleanShortClosureTokens(array $tokens): array
+    {
+        $count = count($tokens);
+        for ($i = $count; $i > 0; $i--) {
+            if ($tokens[$i - 1] === ',') {
+                return array_slice($tokens, 0, $i - 1);
+            }
+        }
+
+        return $tokens;
     }
 }
