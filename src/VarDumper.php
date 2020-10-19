@@ -250,7 +250,9 @@ final class VarDumper
                 $spaces = str_repeat(' ', $level * 4);
                 $output .= '[';
                 foreach ($keys as $key) {
-                    $this->beautify && $output .= "\n" . $spaces . '    ';
+                    if ($this->beautify) {
+                        $output .= "\n" . $spaces . '    ';
+                    }
                     $output .= $this->dumpInternal($key, $depth, 0);
                     $output .= ' => ';
                     $output .= $this->dumpInternal($var[$key], $depth, $level + 1);
@@ -336,7 +338,6 @@ final class VarDumper
                         $output .= ' => ';
                     }
                     $output .= $this->exportInternal($var[$key], $level + 1);
-                    var_dump($output);
                     if ($this->beautify || next($keys) !== false) {
                         $output .= ',';
                     }
