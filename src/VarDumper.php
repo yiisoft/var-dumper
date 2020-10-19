@@ -443,6 +443,7 @@ final class VarDumper
         if ($isShortClosure) {
             $closureTokens= $this->cleanShortClosureTokens($closureTokens);
         }
+
         return implode('', $closureTokens);
     }
 
