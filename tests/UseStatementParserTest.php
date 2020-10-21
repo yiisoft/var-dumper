@@ -7,12 +7,12 @@ namespace Yiisoft\VarDumper\Tests;
 use PHPUnit\Framework\TestCase;
 use Yiisoft\VarDumper\UseStatementParser;
 
-class UseStatementParserTest extends TestCase
+final class UseStatementParserTest extends TestCase
 {
     /**
      * @dataProvider usesProvider
      */
-    public function testFromFile(string $file, array $expectedUses)
+    public function testFromFile(string $file, array $expectedUses): void
     {
         $parser = new UseStatementParser();
 
