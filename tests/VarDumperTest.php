@@ -191,6 +191,18 @@ RESULT;
                 // @formatter:on
                 'static fn () => 2',
             ],
+            [
+                // @formatter:off
+                [fn () => $params['test']],
+                // @formatter:on
+                "[fn () => \$params['test']]",
+            ],
+            [
+                // @formatter:off
+                [fn () => $params['test'],],
+                // @formatter:on
+                "[fn () => \$params['test'],]",
+            ],
         ];
     }
 
