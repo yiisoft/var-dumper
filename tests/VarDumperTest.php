@@ -219,6 +219,12 @@ RESULT;
                 // @formatter:on
                 "static fn (\Yiisoft\VarDumper\VarDumper \$date) => new \DateTimeZone('')",
             ],
+            'closure with null-collision operator' => [
+                // @formatter:off
+                fn () => $_ENV['var'] ?? null,
+                // @formatter:on
+                "fn () => \$_ENV['var'] ?? null",
+            ],
         ];
     }
 

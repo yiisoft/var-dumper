@@ -426,23 +426,23 @@ final class VarDumper
                         $buffer = '';
                     }
                 }
-                if ($token === '}' || $token === ']') {
-                    $pendingParenthesisCount--;
-                    if ($pendingParenthesisCount === 0) {
-                        $closureTokens[] = $readableToken;
-                        break;
-                    }
-                    if ($pendingParenthesisCount < 0) {
-                        break;
-                    }
-                } elseif ($token === '{' || $token === '[') {
+                if ($token === '{' || $token === '[') {
                     $pendingParenthesisCount++;
+                } elseif ($token === '}' || $token === ']') {
+                    if ($pendingParenthesisCount === 0) {
+                        break;
+                    }
+                    $pendingParenthesisCount--;
+                } elseif ($token === ',' || $token === ';') {
+                    if ($pendingParenthesisCount === 0) {
+                        break;
+                    }
                 }
                 $closureTokens[] = $readableToken;
             }
         }
         if ($isShortClosure) {
-            $closureTokens= $this->cleanShortClosureTokens($closureTokens);
+            $closureTokens = $this->cleanShortClosureTokens($closureTokens);
         }
 
         return implode('', $closureTokens);
