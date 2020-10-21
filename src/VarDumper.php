@@ -441,9 +441,6 @@ final class VarDumper
                 $closureTokens[] = $readableToken;
             }
         }
-        if ($isShortClosure) {
-            $closureTokens = $this->cleanShortClosureTokens($closureTokens);
-        }
 
         return implode('', $closureTokens);
     }
@@ -453,18 +450,6 @@ final class VarDumper
         $this->exportClosureTokens = [T_FUNCTION, T_FN, T_STATIC];
         $this->beautify = false;
         return $this->export();
-    }
-
-    private function cleanShortClosureTokens(array $tokens): array
-    {
-        $count = count($tokens);
-        for ($i = $count; $i > 0; $i--) {
-            if ($tokens[$i - 1] === ',') {
-                return array_slice($tokens, 0, $i - 1);
-            }
-        }
-
-        return $tokens;
     }
 
     public function getUsesParser(): UseStatementParser
