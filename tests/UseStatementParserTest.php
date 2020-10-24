@@ -62,7 +62,7 @@ final class UseStatementParserTest extends TestCase
         ]);
     }
 
-    public function saveExamplesToTemporaryFile(array $examples): array
+    private function saveExamplesToTemporaryFile(array $examples): array
     {
         static $handles = [];
         foreach ($examples as &$example) {

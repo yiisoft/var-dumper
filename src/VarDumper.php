@@ -452,7 +452,7 @@ final class VarDumper
         return $this->export();
     }
 
-    public function getUsesParser(): UseStatementParser
+    private function getUsesParser(): UseStatementParser
     {
         if ($this->useStatementParser === null) {
             $this->useStatementParser = new UseStatementParser();
