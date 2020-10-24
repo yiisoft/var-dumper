@@ -158,6 +158,9 @@ final class VarDumper
 
         if (is_object($var)) {
             $className = get_class($var);
+            /**
+             * @psalm-var array<string, array<string, array|string>> $output
+             */
             $output = [];
             if (($objectCollapseLevel < $level) && (($id = array_search($var, self::$objects, true)) !== false)) {
                 if ($var instanceof \Closure) {
@@ -175,6 +178,9 @@ final class VarDumper
                 }
                 foreach ($dumpValues as $key => $value) {
                     $keyDisplay = $this->normalizeProperty($key);
+                    /**
+                     * @psalm-suppress InvalidArrayOffset
+                     */
                     $output[$className][$keyDisplay] = $this->dumpNestedInternal($value, $depth, $level + 1, $objectCollapseLevel);
                 }
             }
@@ -216,6 +222,7 @@ final class VarDumper
     /**
      * @param mixed $var variable to be dumped
      * @param int $level depth level
+     * @return string
      */
     private function dumpInternal($var, int $depth, int $level): string
     {
@@ -307,6 +314,8 @@ final class VarDumper
     /**
      * @param mixed $var variable to be exported
      * @param int $level depth level
+     * @return string
+     * @throws \ReflectionException
      */
     private function exportInternal($var, int $level): string
     {
@@ -369,6 +378,7 @@ final class VarDumper
      * Exports a [[Closure]] instance.
      * @param \Closure $closure closure instance.
      * @return string
+     * @throws \ReflectionException
      */
     private function exportClosure(\Closure $closure): string
     {

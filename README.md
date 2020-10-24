@@ -12,3 +12,18 @@ This library provides the VarDumper helper.
 [![Total Downloads](https://poser.pugx.org/yiisoft/var-dumper/downloads.png)](https://packagist.org/packages/yiisoft/var-dumper)
 [![Build Status](https://travis-ci.com/yiisoft/var-dumper.svg?branch=master)](https://travis-ci.com/yiisoft/var-dumper)
 
+## Unit testing
+
+The package is tested with [PHPUnit](https://phpunit.de/). To run tests:
+
+```bash
+./vendor/bin/phpunit
+```
+
+## Static analysis
+
+The code is statically analyzed with [Psalm](https://psalm.dev/). To run static analysis:
+
+```php
+./vendor/bin/psalm
+```
