@@ -23,12 +23,6 @@ final class UseStatementParserTest extends TestCase
 
     public function usesProvider(): array
     {
-        /**
-         * use Yiisoft\Arrays\ArrayHelper;
-         * use Yiisoft\Arrays\ArrayHelper, Yiisoft\Arrays\ArraySorter;
-         * use Yiisoft\{Arrays\ArrayHelper, Arrays\ArrayableTrait};
-         * use Yiisoft\{Arrays\ArrayHelper, Arrays\ArrayableTrait}, Yiisoft\Arrays\ArraySorter;
-         */
         return $this->saveExamplesToTemporaryFile([
             [
                 'use Yiisoft\Arrays\ArrayHelper as alias;',
