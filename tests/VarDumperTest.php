@@ -4,12 +4,14 @@ namespace Yiisoft\VarDumper\Tests;
 
 use PHPUnit\Framework\TestCase;
 use StdClass;
+use Yiisoft\VarDumper as VD;
 use Yiisoft\VarDumper\VarDumper;
+use Yiisoft\VarDumper\VarDumper as Dumper;
 
 /**
  * @group helpers
  */
-class VarDumperTest extends TestCase
+final class VarDumperTest extends TestCase
 {
     public function testDumpIncompleteObject(): void
     {
@@ -174,10 +176,12 @@ RESULT;
     {
         return [
             [
-                // @formatter:off
-                static fn (VarDumper $date) => new \DateTimeZone(''),
-                // @formatter:on
-                "static fn (VarDumper \$date) => new \DateTimeZone('')",
+                "123",
+                "'123'",
+            ],
+            [
+                123,
+                "123",
             ],
             [
                 // @formatter:off
@@ -187,9 +191,39 @@ RESULT;
             ],
             [
                 // @formatter:off
-                static fn () => 2,
+                 fn () => 2,
                 // @formatter:on
-                'static fn () => 2',
+                'fn () => 2',
+            ],
+            'closure in array' => [
+                // @formatter:off
+                [fn () => new \DateTimeZone('')],
+                // @formatter:on
+                "[fn () => new \DateTimeZone('')]",
+            ],
+            'original class name' => [
+                // @formatter:off
+                static fn (VarDumper $date) => new \DateTimeZone(''),
+                // @formatter:on
+                "static fn (\Yiisoft\VarDumper\VarDumper \$date) => new \DateTimeZone('')",
+            ],
+            'class alias' => [
+                // @formatter:off
+                static fn (Dumper $date) => new \DateTimeZone(''),
+                // @formatter:on
+                "static fn (\Yiisoft\VarDumper\VarDumper \$date) => new \DateTimeZone('')",
+            ],
+            'namespace alias' => [
+                // @formatter:off
+                static fn (VD\VarDumper $date) => new \DateTimeZone(''),
+                // @formatter:on
+                "static fn (\Yiisoft\VarDumper\VarDumper \$date) => new \DateTimeZone('')",
+            ],
+            'closure with null-collision operator' => [
+                // @formatter:off
+                fn () => $_ENV['var'] ?? null,
+                // @formatter:on
+                "fn () => \$_ENV['var'] ?? null",
             ],
         ];
     }
