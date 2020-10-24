@@ -58,6 +58,7 @@ final class UseStatementParserTest extends TestCase
 
     private function saveExamplesToTemporaryFile(array $examples): array
     {
+        // Needed for tests. usesProvider provides temporary file that contains code from provider.
         static $handles = [];
         foreach ($examples as &$example) {
             $tmpFile = tmpfile();
