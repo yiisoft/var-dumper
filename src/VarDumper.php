@@ -87,7 +87,7 @@ final class VarDumper
 
     public function asJsonObjectsMap(int $depth = 50, bool $prettyPrint = false): string
     {
-        $options = JSON_THROW_ON_ERROR;
+        $options = JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_IGNORE;
 
         if ($prettyPrint) {
             $options |= JSON_PRETTY_PRINT;
