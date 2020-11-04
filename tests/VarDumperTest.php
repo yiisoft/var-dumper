@@ -59,6 +59,14 @@ final class VarDumperTest extends TestCase
                 'test string',
                 var_export('test string', true),
             ],
+            'emoji supported' => [
+                '🤣',
+                var_export('🤣', true),
+            ],
+            'hex supported' => [
+                pack('H*', md5('binary string')),
+                var_export(pack('H*', md5('binary string')), true),
+            ],
             [
                 75,
                 var_export(75, true),
@@ -267,17 +275,18 @@ RESULT;
         $this->assertStringNotContainsString('unitPrice', $dumpResult);
     }
 
-    public function testAsJson(): void
+    /**
+     * @dataProvider jsonDataProvider()
+     */
+    public function testAsJson($variable, string $result): void
     {
-        $var = new StdClass();
-        $var->name = 'Dmitry';
-
-        $output = VarDumper::create($var)->asJson(50);
-        $this->assertEqualsWithoutLE('{"stdClass":{"public::name":"Dmitry"}}', $output);
+        $output = VarDumper::create($variable)->asJson();
+        $this->assertEqualsWithoutLE($result, $output);
     }
 
     /**
      * Asserting two strings equality ignoring line endings.
+     *
      * @param string $expected
      * @param string $actual
      * @param string $message
@@ -287,5 +296,27 @@ RESULT;
         $expected = str_replace("\r\n", "\n", $expected);
         $actual = str_replace("\r\n", "\n", $actual);
         $this->assertEquals($expected, $actual, $message);
+    }
+
+    public function jsonDataProvider(): array
+    {
+        $var = new StdClass();
+        $var->name = 'Dmitry';
+        $binaryString = pack('H*', md5('binary string'));
+
+        return [
+            [
+                $var,
+                '{"stdClass":{"public::name":"Dmitry"}}',
+            ],
+            'emoji supported' => [
+                ['emoji' => '🤣'],
+                '{"emoji":"🤣"}',
+            ],
+            'hex supported' => [
+                ['string' => $binaryString],
+                '{"string":"ɍ^\u00191\u0017]-f"}',
+            ],
+        ];
     }
 }
