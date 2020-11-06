@@ -315,7 +315,7 @@ RESULT;
             ],
             'hex supported' => [
                 ['string' => $binaryString],
-                '{"string":"ɍ^\u00191\u0017]-f"}',
+                '{"string":"ɍ��^��\u00191\u0017�]�-f�"}',
             ],
         ];
     }
