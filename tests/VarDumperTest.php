@@ -3,7 +3,7 @@
 namespace Yiisoft\VarDumper\Tests;
 
 use PHPUnit\Framework\TestCase;
-use StdClass;
+use stdClass;
 use Yiisoft\VarDumper as VD;
 use Yiisoft\VarDumper\VarDumper;
 use Yiisoft\VarDumper\VarDumper as Dumper;
@@ -18,7 +18,9 @@ final class VarDumperTest extends TestCase
         $serializedObj = 'O:16:"nonExistingClass":0:{}';
         $incompleteObj = unserialize($serializedObj);
         $dumpResult = VarDumper::create($incompleteObj)->asString();
-        $this->assertStringContainsString("__PHP_Incomplete_Class#1\n(", $dumpResult);
+        $objectId = spl_object_id($incompleteObj);
+
+        $this->assertStringContainsString("__PHP_Incomplete_Class#{$objectId}\n(", $dumpResult);
         $this->assertStringContainsString('nonExistingClass', $dumpResult);
     }
 
@@ -32,15 +34,17 @@ final class VarDumperTest extends TestCase
 
     public function testDumpObject(): void
     {
-        $obj = new StdClass();
-        $this->assertEquals("stdClass#2\n(\n)", VarDumper::create($obj)->asString());
+        $obj = new stdClass();
+        $objectId = spl_object_id($obj);
+        $this->assertEquals("stdClass#{$objectId}\n(\n)", VarDumper::create($obj)->asString());
 
-        $obj = new StdClass();
+        $obj = new stdClass();
         $obj->name = 'test-name';
         $obj->price = 19;
         $dumpResult = VarDumper::create($obj)->asString();
+        $objectId = spl_object_id($obj);
 
-        $this->assertStringContainsString("stdClass#3\n(", $dumpResult);
+        $this->assertStringContainsString("stdClass#{$objectId}\n(", $dumpResult);
         $this->assertStringContainsString("[name] => 'test-name'", $dumpResult);
         $this->assertStringContainsString('[price] => 19', $dumpResult);
     }
@@ -141,7 +145,7 @@ RESULT;
 
         // Objects :
 
-        $var = new StdClass();
+        $var = new stdClass();
         $var->testField = 'Test Value';
         $expectedResult = "unserialize('" . serialize($var) . "')";
         $data[] = [$var, $expectedResult];
@@ -150,6 +154,20 @@ RESULT;
         $var = static function () {return 2;};
         // @formatter:on
         $expectedResult = 'function () {return 2;}';
+        $data[] = [$var, $expectedResult];
+
+        // @formatter:off
+        $var = new stdClass();
+        $var->a = static fn () => '123';
+        // @formatter:on
+        $objectId = spl_object_id($var);
+
+        $expectedResult = <<<DUMP
+        'stdClass#{$objectId}
+        (
+            [a] => fn () => \'123\'
+        )'
+        DUMP;
         $data[] = [$var, $expectedResult];
 
         return $data;
@@ -165,7 +183,6 @@ RESULT;
     {
         $exportResult = VarDumper::create($var)->export();
         $this->assertEqualsWithoutLE($expectedResult, $exportResult);
-        //$this->assertEquals($var, eval('return ' . $exportResult . ';'));
     }
 
     /**
@@ -241,15 +258,15 @@ RESULT;
      */
     public function testExportObjectFallback(): void
     {
-        $var = new StdClass();
+        $var = new stdClass();
         $var->testFunction = static function () {
             return 2;
         };
         $exportResult = VarDumper::create($var)->export();
         $this->assertNotEmpty($exportResult);
 
-        $master = new StdClass();
-        $slave = new StdClass();
+        $master = new stdClass();
+        $slave = new stdClass();
         $master->slave = $slave;
         $slave->master = $master;
         $master->function = static function () {
@@ -300,9 +317,12 @@ RESULT;
 
     public function jsonDataProvider(): array
     {
-        $var = new StdClass();
+        $var = new stdClass();
         $var->name = 'Dmitry';
         $binaryString = pack('H*', md5('binary string'));
+
+        $var2 = new stdClass();
+        $var2->a = fn () => 1;
 
         return [
             [
@@ -312,6 +332,10 @@ RESULT;
             'emoji supported' => [
                 ['emoji' => '🤣'],
                 '{"emoji":"🤣"}',
+            ],
+            'closure supported' => [
+                $var2,
+                '{"stdClass":{"public::a":"fn () => 1"}}',
             ],
             'hex supported' => [
                 ['string' => $binaryString],
