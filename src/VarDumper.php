@@ -170,7 +170,7 @@ final class VarDumper
                 if ($var instanceof \Closure) {
                     $output = $this->exportClosure($var);
                 } else {
-                    $classRef = 'object@' . get_class(self::$objects[$id]) . '#' . ($id + 1);
+                    $classRef = 'object@' . get_class(self::$objects[$id]) . '#' . spl_object_id(self::$objects[$id]);
                     $output = $classRef;
                 }
             } elseif ($depth <= $level) {
@@ -218,7 +218,7 @@ final class VarDumper
         $objects = [];
         foreach ($objectsArray as $index => $object) {
             $className = array_key_first($object);
-            $objects[$className . '#' . ($index + 1)] = $object[$className];
+            $objects[$className . '#' . (spl_object_id($object))] = $object[$className];
         }
         return $objects;
     }
@@ -275,14 +275,16 @@ final class VarDumper
                     return $this->exportClosure($var);
                 }
                 if (($id = array_search($var, self::$objects, true)) !== false) {
-                    return get_class($var) . '#' . ($id + 1) . '(...)';
+                    $objectId = spl_object_id(self::$objects[$id]);
+                    return get_class($var) . '#' . ($objectId) . '(...)';
                 }
 
                 if ($depth <= $level) {
                     return get_class($var) . '(...)';
                 }
 
-                $id = array_push(self::$objects, $var);
+                self::$objects[] = $var;
+                $id = spl_object_id($var);
                 $className = get_class($var);
                 $spaces = str_repeat(' ', $level * 4);
                 $output = "$className#$id\n" . $spaces . '(';

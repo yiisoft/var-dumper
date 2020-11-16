@@ -18,7 +18,9 @@ final class VarDumperTest extends TestCase
         $serializedObj = 'O:16:"nonExistingClass":0:{}';
         $incompleteObj = unserialize($serializedObj);
         $dumpResult = VarDumper::create($incompleteObj)->asString();
-        $this->assertStringContainsString("__PHP_Incomplete_Class#1\n(", $dumpResult);
+        $objectId = spl_object_id($incompleteObj);
+
+        $this->assertStringContainsString("__PHP_Incomplete_Class#{$objectId}\n(", $dumpResult);
         $this->assertStringContainsString('nonExistingClass', $dumpResult);
     }
 
@@ -33,14 +35,16 @@ final class VarDumperTest extends TestCase
     public function testDumpObject(): void
     {
         $obj = new stdClass();
-        $this->assertEquals("stdClass#2\n(\n)", VarDumper::create($obj)->asString());
+        $objectId = spl_object_id($obj);
+        $this->assertEquals("stdClass#{$objectId}\n(\n)", VarDumper::create($obj)->asString());
 
         $obj = new stdClass();
         $obj->name = 'test-name';
         $obj->price = 19;
         $dumpResult = VarDumper::create($obj)->asString();
+        $objectId = spl_object_id($obj);
 
-        $this->assertStringContainsString("stdClass#3\n(", $dumpResult);
+        $this->assertStringContainsString("stdClass#{$objectId}\n(", $dumpResult);
         $this->assertStringContainsString("[name] => 'test-name'", $dumpResult);
         $this->assertStringContainsString('[price] => 19', $dumpResult);
     }
@@ -156,9 +160,10 @@ RESULT;
         $var = new stdClass();
         $var->a = static fn () => '123';
         // @formatter:on
+        $objectId = spl_object_id($var);
 
         $expectedResult = <<<DUMP
-        'stdClass#4
+        'stdClass#{$objectId}
         (
             [a] => fn () => \'123\'
         )'
@@ -178,7 +183,6 @@ RESULT;
     {
         $exportResult = VarDumper::create($var)->export();
         $this->assertEqualsWithoutLE($expectedResult, $exportResult);
-        //$this->assertEquals($var, eval('return ' . $exportResult . ';'));
     }
 
     /**
