@@ -3,7 +3,7 @@
 namespace Yiisoft\VarDumper\Tests;
 
 use PHPUnit\Framework\TestCase;
-use StdClass;
+use stdClass;
 use Yiisoft\VarDumper as VD;
 use Yiisoft\VarDumper\VarDumper;
 use Yiisoft\VarDumper\VarDumper as Dumper;
@@ -32,10 +32,10 @@ final class VarDumperTest extends TestCase
 
     public function testDumpObject(): void
     {
-        $obj = new StdClass();
+        $obj = new stdClass();
         $this->assertEquals("stdClass#2\n(\n)", VarDumper::create($obj)->asString());
 
-        $obj = new StdClass();
+        $obj = new stdClass();
         $obj->name = 'test-name';
         $obj->price = 19;
         $dumpResult = VarDumper::create($obj)->asString();
@@ -141,7 +141,7 @@ RESULT;
 
         // Objects :
 
-        $var = new StdClass();
+        $var = new stdClass();
         $var->testField = 'Test Value';
         $expectedResult = "unserialize('" . serialize($var) . "')";
         $data[] = [$var, $expectedResult];
@@ -254,15 +254,15 @@ RESULT;
      */
     public function testExportObjectFallback(): void
     {
-        $var = new StdClass();
+        $var = new stdClass();
         $var->testFunction = static function () {
             return 2;
         };
         $exportResult = VarDumper::create($var)->export();
         $this->assertNotEmpty($exportResult);
 
-        $master = new StdClass();
-        $slave = new StdClass();
+        $master = new stdClass();
+        $slave = new stdClass();
         $master->slave = $slave;
         $slave->master = $master;
         $master->function = static function () {
