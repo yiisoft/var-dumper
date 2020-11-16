@@ -2,6 +2,8 @@
 
 namespace Yiisoft\VarDumper;
 
+use Yiisoft\Arrays\ArrayableInterface;
+
 /**
  * VarDumper is intended to replace the PHP functions var_dump and print_r.
  * It can correctly identify the recursively referenced objects in a complex
@@ -269,6 +271,9 @@ final class VarDumper
                     ? $output . "\n" . $spaces . ']'
                     : $output . ']';
             case 'object':
+                if ($var instanceof \Closure) {
+                    return $this->exportClosure($var);
+                }
                 if (($id = array_search($var, self::$objects, true)) !== false) {
                     return get_class($var) . '#' . ($id + 1) . '(...)';
                 }
