@@ -152,6 +152,19 @@ RESULT;
         $expectedResult = 'function () {return 2;}';
         $data[] = [$var, $expectedResult];
 
+        // @formatter:off
+        $var = new stdClass();
+        $var->a = static fn () => '123';
+        // @formatter:on
+
+        $expectedResult = <<<DUMP
+        'stdClass#4
+        (
+            [a] => fn () => \'123\'
+        )'
+        DUMP;
+        $data[] = [$var, $expectedResult];
+
         return $data;
     }
 
@@ -300,9 +313,12 @@ RESULT;
 
     public function jsonDataProvider(): array
     {
-        $var = new StdClass();
+        $var = new stdClass();
         $var->name = 'Dmitry';
         $binaryString = pack('H*', md5('binary string'));
+
+        $var2 = new stdClass();
+        $var2->a = fn () => 1;
 
         return [
             [
@@ -312,6 +328,10 @@ RESULT;
             'emoji supported' => [
                 ['emoji' => '🤣'],
                 '{"emoji":"🤣"}',
+            ],
+            'closure supported' => [
+                $var2,
+                '{"stdClass":{"public::a":"fn () => 1"}}',
             ],
             'hex supported' => [
                 ['string' => $binaryString],
