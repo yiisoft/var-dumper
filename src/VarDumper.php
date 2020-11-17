@@ -288,7 +288,7 @@ final class VarDumper
                     return $this->exportClosure($var);
                 }
                 if (in_array($var, self::$objects, true)) {
-                    return $this->getObjectDescription($var). '(...)';
+                    return $this->getObjectDescription($var) . '(...)';
                 }
 
                 if ($depth <= $level) {
@@ -497,7 +497,7 @@ final class VarDumper
         return $token[0] === T_STRING || $token[0] === T_NS_SEPARATOR;
     }
 
-    private function getObjectDescription(object $object):string
+    private function getObjectDescription(object $object): string
     {
         return get_class($object) . '#' . spl_object_id($object);
     }
