@@ -137,7 +137,8 @@ final class VarDumper
             if ($depth <= $level || in_array($var, self::$objects, true)) {
                 return;
             }
-            self::$objects[] = $var;
+            $id = spl_object_id($var);
+            self::$objects[$id] = $var;
             $dumpValues = $this->getVarDumpValuesArray($var);
             foreach ($dumpValues as $key => $value) {
                 $this->buildVarObjectsCache($value, $depth, $level + 1);
@@ -170,7 +171,7 @@ final class VarDumper
                 if ($var instanceof \Closure) {
                     $output = $this->exportClosure($var);
                 } else {
-                    $classRef = 'object@' . get_class(self::$objects[$id]) . '#' . spl_object_id(self::$objects[$id]);
+                    $classRef = 'object@' . get_class(self::$objects[$id]) . '#' . $id;
                     $output = $classRef;
                 }
             } elseif ($depth <= $level) {
@@ -216,10 +217,12 @@ final class VarDumper
     private function getObjectsMap(array $objectsArray): array
     {
         $objects = [];
+
         foreach ($objectsArray as $index => $object) {
             $className = array_key_first($object);
-            $objects[$className . '#' . (spl_object_id($object))] = $object[$className];
+            $objects[$className . '#' . $index] = $object[$className];
         }
+
         return $objects;
     }
 
@@ -275,16 +278,15 @@ final class VarDumper
                     return $this->exportClosure($var);
                 }
                 if (($id = array_search($var, self::$objects, true)) !== false) {
-                    $objectId = spl_object_id(self::$objects[$id]);
-                    return get_class($var) . '#' . ($objectId) . '(...)';
+                    return get_class($var) . '#' . $id . '(...)';
                 }
 
                 if ($depth <= $level) {
                     return get_class($var) . '(...)';
                 }
-
-                self::$objects[] = $var;
                 $id = spl_object_id($var);
+                self::$objects[$id] = $var;
+
                 $className = get_class($var);
                 $spaces = str_repeat(' ', $level * 4);
                 $output = "$className#$id\n" . $spaces . '(';
