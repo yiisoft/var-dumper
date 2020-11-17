@@ -197,6 +197,19 @@ RESULT;
         $this->assertEqualsWithoutLE($expectedResult, $exportResult);
     }
 
+    /**
+     * @dataProvider asJsonObjectMap
+     *
+     * @param mixed $var
+     * @param string $expectedResult
+     * @group JOM
+     */
+    public function testAsJsonObjectsMap($var, $expectedResult): void
+    {
+        $exportResult = VarDumper::create($var)->asJsonObjectsMap();
+        $this->assertStringContainsString($expectedResult, $exportResult);
+    }
+
     public function asPhpStringDataProvider(): array
     {
         return [
@@ -249,6 +262,20 @@ RESULT;
                 fn () => $_ENV['var'] ?? null,
                 // @formatter:on
                 "fn () => \$_ENV['var'] ?? null",
+            ],
+        ];
+    }
+
+    public function asJsonObjectMap(): array
+    {
+        $user = new stdClass();
+        $user->id = 1;
+        $objectId = spl_object_id($user);
+
+        return [
+            [
+                $user,
+                "\"stdClass#{$objectId}\":{\"public::id\":1}",
             ],
         ];
     }
