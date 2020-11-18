@@ -172,25 +172,81 @@ RESULT;
     public function asPhpStringDataProvider(): array
     {
         return [
-            [
-                "123",
-                "'123'",
-            ],
-            'integer'=>[
-                123,
-                "123",
-            ],
-            [
+            'short function' => [
                 // @formatter:off
-                 static function () {return 2;},
+                fn () => 1,
                 // @formatter:on
-                'static function () {return 2;}',
+                'fn () => 1',
             ],
-            [
+            'short static function' => [
                 // @formatter:off
-                 fn () => 2,
+                static fn () => 1,
                 // @formatter:on
-                'fn () => 2',
+                'static fn () => 1',
+            ],
+            'function' => [
+                function () {
+                    return 1;
+                },
+                'function () {
+                    return 1;
+                }',
+            ],
+            'static function' => [
+                static function () {
+                    return 1;
+                },
+                'static function () {
+                    return 1;
+                }',
+            ],
+            'string' => [
+                'Hello, Yii!',
+                "'Hello, Yii!'",
+            ],
+            'empty string' => [
+                '',
+                "''",
+            ],
+            'null' => [
+                null,
+                'null',
+            ],
+            'integer' => [
+                1,
+                '1',
+            ],
+            'integer with separator' => [
+                1_23_456,
+                '123456',
+            ],
+            'boolean' => [
+                true,
+                'true',
+            ],
+            'resource' => [
+                fopen('php://input', 'rb'),
+                'NULL',
+            ],
+            'empty array' => [
+                [],
+                '[]',
+            ],
+            'array of 3 elements' => [
+                [
+                    'one',
+                    'two',
+                    'three',
+                ],
+                "['one','two','three']"
+            ],
+            'array of 3 elements, custom keys' => [
+                [
+                    2 => 'one',
+                    'two' => 'two',
+                    0 => 'three',
+                ],
+                "[2 => 'one','two' => 'two',0 => 'three']"
             ],
             'closure in array' => [
                 // @formatter:off
@@ -200,21 +256,21 @@ RESULT;
             ],
             'original class name' => [
                 // @formatter:off
-                static fn (VarDumper $date) => new \DateTimeZone(''),
+                fn (VarDumper $date) => new \DateTimeZone(''),
                 // @formatter:on
-                "static fn (\Yiisoft\VarDumper\VarDumper \$date) => new \DateTimeZone('')",
+                "fn (\Yiisoft\VarDumper\VarDumper \$date) => new \DateTimeZone('')",
             ],
             'class alias' => [
                 // @formatter:off
-                static fn (Dumper $date) => new \DateTimeZone(''),
+                fn (Dumper $date) => new \DateTimeZone(''),
                 // @formatter:on
-                "static fn (\Yiisoft\VarDumper\VarDumper \$date) => new \DateTimeZone('')",
+                "fn (\Yiisoft\VarDumper\VarDumper \$date) => new \DateTimeZone('')",
             ],
             'namespace alias' => [
                 // @formatter:off
-                static fn (VD\VarDumper $date) => new \DateTimeZone(''),
+                fn (VD\VarDumper $date) => new \DateTimeZone(''),
                 // @formatter:on
-                "static fn (\Yiisoft\VarDumper\VarDumper \$date) => new \DateTimeZone('')",
+                "fn (\Yiisoft\VarDumper\VarDumper \$date) => new \DateTimeZone('')",
             ],
             'closure with null-collision operator' => [
                 // @formatter:off
@@ -435,6 +491,72 @@ RESULT;
             'resource' => [
                 fopen('php://input', 'rb'),
                 '{resource}',
+            ],
+            'empty array' => [
+                [],
+                '[]',
+            ],
+            'array of 3 elements, automatic keys' => [
+                [
+                    'one',
+                    'two',
+                    'three',
+                ],
+                <<<S
+                [
+                    0 => 'one'
+                    1 => 'two'
+                    2 => 'three'
+                ]
+                S,
+            ],
+            'array of 3 elements, custom keys' => [
+                [
+                    2 => 'one',
+                    'two' => 'two',
+                    0 => 'three',
+                ],
+                <<<S
+                [
+                    2 => 'one'
+                    'two' => 'two'
+                    0 => 'three'
+                ]
+                S,
+            ],
+            'closure in array' => [
+                // @formatter:off
+                [fn () => new \DateTimeZone('')],
+                // @formatter:on
+                <<<S
+                [
+                    0 => fn () => new \DateTimeZone('')
+                ]
+                S,
+            ],
+            'original class name' => [
+                // @formatter:off
+                static fn (VarDumper $date) => new \DateTimeZone(''),
+                // @formatter:on
+                "fn (\Yiisoft\VarDumper\VarDumper \$date) => new \DateTimeZone('')",
+            ],
+            'class alias' => [
+                // @formatter:off
+                fn (Dumper $date) => new \DateTimeZone(''),
+                // @formatter:on
+                "fn (\Yiisoft\VarDumper\VarDumper \$date) => new \DateTimeZone('')",
+            ],
+            'namespace alias' => [
+                // @formatter:off
+                fn (VD\VarDumper $date) => new \DateTimeZone(''),
+                // @formatter:on
+                "fn (\Yiisoft\VarDumper\VarDumper \$date) => new \DateTimeZone('')",
+            ],
+            'closure with null-collision operator' => [
+                // @formatter:off
+                fn () => $_ENV['var'] ?? null,
+                // @formatter:on
+                "fn () => \$_ENV['var'] ?? null",
             ],
         ];
     }
