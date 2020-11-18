@@ -34,6 +34,11 @@ final class VarDumperTest extends TestCase
 
         $emptyObject = new stdClass();
 
+        $objectWithReferences1 = new stdClass();
+        $objectWithReferences2 = new stdClass();
+        $objectWithReferences1->object = $objectWithReferences2;
+        $objectWithReferences2->object = $objectWithReferences1;
+
         return [
             'custom debug info' => [
                 $customDebugInfo,
@@ -175,6 +180,12 @@ final class VarDumperTest extends TestCase
                 // @formatter:on
                 "fn () => \$_ENV['var'] ?? null",
             ],
+            'object with references'=> [
+                $objectWithReferences1,
+                <<<S
+                unserialize('O:8:"stdClass":1:{s:6:"object";O:8:"stdClass":1:{s:6:"object";r:1;}}')
+                S,
+            ]
         ];
     }
 
@@ -340,27 +351,6 @@ final class VarDumperTest extends TestCase
                 S,
             ],
         ];
-    }
-
-    public function testExportObjectFallback(): void
-    {
-        $var = new stdClass();
-        $var->testFunction = static function () {
-            return 2;
-        };
-        $exportResult = VarDumper::create($var)->export();
-        $this->assertNotEmpty($exportResult);
-
-        $master = new stdClass();
-        $slave = new stdClass();
-        $master->slave = $slave;
-        $slave->master = $master;
-        $master->function = static function () {
-            return true;
-        };
-
-        $exportResult = VarDumper::create($master)->export();
-        $this->assertNotEmpty($exportResult);
     }
 
     /**
