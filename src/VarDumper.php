@@ -147,55 +147,65 @@ final class VarDumper
 
     private function dumpNestedInternal($var, int $depth, int $level, int $objectCollapseLevel = 0)
     {
-        if (is_array($var)) {
-            if ($depth <= $level) {
-                return 'array [...]';
-            }
+        $output = $var;
 
-            $output = [];
-            foreach ($var as $key => $value) {
-                $keyDisplay = str_replace("\0", '::', trim($key));
-                $output[$keyDisplay] = $this->dumpNestedInternal($value, $depth, $level + 1, $objectCollapseLevel);
-            }
-            return $output;
-        }
+        switch (gettype($var)) {
+            case 'array':
+                if ($depth <= $level) {
+                    return 'array [...]';
+                }
 
-        if (is_object($var)) {
-            $className = get_class($var);
-            /**
-             * @psalm-var array<string, array<string, array|string>> $output
-             */
-            $output = [];
-            if (($objectCollapseLevel < $level) && (($id = array_search($var, self::$objects, true)) !== false)) {
-                if ($var instanceof \Closure) {
-                    $output = $this->exportClosure($var);
+                $output = [];
+                foreach ($var as $key => $value) {
+                    if (is_object($value)) {
+                        $keyDisplay = spl_object_id($value);
+                    } else {
+                        $keyDisplay = str_replace("\0", '::', trim($key));
+                    }
+                    $output[$keyDisplay] = $this->dumpNestedInternal($value, $depth, $level + 1, $objectCollapseLevel);
+                }
+
+                break;
+            case 'object':
+                $className = get_class($var);
+                /**
+                 * @psalm-var array<string, array<string, array|string>> $output
+                 */
+                if (($objectCollapseLevel < $level) && (in_array($var, self::$objects, true))) {
+                    if ($var instanceof \Closure) {
+                        $output = $this->exportClosure($var);
+                    } else {
+                        $output = 'object@' . $this->getObjectDescription($var);
+                    }
+                } elseif ($depth <= $level) {
+                    $output = $className . ' (...)';
                 } else {
-                    $classRef = 'object@' . get_class(self::$objects[$id]) . '#' . spl_object_id(self::$objects[$id]);
-                    $output = $classRef;
+                    $output = [];
+                    $dumpValues = $this->getVarDumpValuesArray($var);
+                    if (empty($dumpValues)) {
+                        $output[$className] = '{stateless object}';
+                    }
+                    foreach ($dumpValues as $key => $value) {
+                        $keyDisplay = $this->normalizeProperty($key);
+                        /**
+                         * @psalm-suppress InvalidArrayOffset
+                         */
+                        $output[$className][$keyDisplay] = $this->dumpNestedInternal(
+                            $value,
+                            $depth,
+                            $level + 1,
+                            $objectCollapseLevel
+                        );
+                    }
                 }
-            } elseif ($depth <= $level) {
-                $output = $className . ' (...)';
-            } else {
-                $dumpValues = $this->getVarDumpValuesArray($var);
-                if (empty($dumpValues)) {
-                    $output[$className] = '{stateless object}';
-                }
-                foreach ($dumpValues as $key => $value) {
-                    $keyDisplay = $this->normalizeProperty($key);
-                    /**
-                     * @psalm-suppress InvalidArrayOffset
-                     */
-                    $output[$className][$keyDisplay] = $this->dumpNestedInternal($value, $depth, $level + 1, $objectCollapseLevel);
-                }
-            }
-            return $output;
+
+                break;
+            case 'resource':
+                $output = $this->getResourceDescription($var);
+                break;
         }
 
-        if (is_resource($var)) {
-            return $this->getResourceDescription($var);
-        }
-
-        return $var;
+        return $output;
     }
 
     private function normalizeProperty(string $property): string
@@ -217,8 +227,11 @@ final class VarDumper
     {
         $objects = [];
         foreach ($objectsArray as $index => $object) {
+            if (!is_array($object)) {
+                continue;
+            }
             $className = array_key_first($object);
-            $objects[$className . '#' . (spl_object_id($object))] = $object[$className];
+            $objects[$className . '#' . $index] = $object[$className];
         }
         return $objects;
     }
@@ -274,9 +287,8 @@ final class VarDumper
                 if ($var instanceof \Closure) {
                     return $this->exportClosure($var);
                 }
-                if (($id = array_search($var, self::$objects, true)) !== false) {
-                    $objectId = spl_object_id(self::$objects[$id]);
-                    return get_class($var) . '#' . ($objectId) . '(...)';
+                if (in_array($var, self::$objects, true)) {
+                    return $this->getObjectDescription($var) . '(...)';
                 }
 
                 if ($depth <= $level) {
@@ -284,10 +296,8 @@ final class VarDumper
                 }
 
                 self::$objects[] = $var;
-                $id = spl_object_id($var);
-                $className = get_class($var);
                 $spaces = str_repeat(' ', $level * 4);
-                $output = "$className#$id\n" . $spaces . '(';
+                $output = $this->getObjectDescription($var) . "\n" . $spaces . '(';
                 $dumpValues = $this->getVarDumpValuesArray($var);
                 foreach ($dumpValues as $key => $value) {
                     $keyDisplay = strtr(trim($key), "\0", ':');
@@ -485,5 +495,10 @@ final class VarDumper
         }
 
         return $token[0] === T_STRING || $token[0] === T_NS_SEPARATOR;
+    }
+
+    private function getObjectDescription(object $object): string
+    {
+        return get_class($object) . '#' . spl_object_id($object);
     }
 }
