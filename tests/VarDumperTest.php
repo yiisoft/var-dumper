@@ -13,141 +13,8 @@ use Yiisoft\VarDumper\VarDumper as Dumper;
  */
 final class VarDumperTest extends TestCase
 {
-    public function testExportIncompleteObject(): void
-    {
-        $serializedObj = 'O:16:"nonExistingClass":0:{}';
-        $incompleteObj = unserialize($serializedObj);
-        $exportResult = VarDumper::create($incompleteObj)->export();
-        $this->assertStringContainsString('nonExistingClass', $exportResult);
-    }
-
     /**
-     * Data provider for [[testExport()]].
-     *
-     * @return array test data
-     */
-    public function dataProviderExport(): array
-    {
-        // Regular :
-
-        $data = [
-            [
-                'test string',
-                "'test string'",
-            ],
-            'emoji supported' => [
-                '🤣',
-                "'🤣'",
-            ],
-            'hex supported' => [
-                pack('H*', md5('binary string')),
-                var_export(pack('H*', md5('binary string')), true),
-            ],
-            [
-                75,
-                75,
-            ],
-            [
-                7.5,
-                7.5,
-            ],
-            [
-                null,
-                'null',
-            ],
-            [
-                true,
-                'true',
-            ],
-            [
-                false,
-                'false',
-            ],
-            [
-                [],
-                '[]',
-            ],
-        ];
-
-        // Arrays :
-
-        $var = [
-            'key1' => 'value1',
-            'key2' => 'value2',
-        ];
-        $expectedResult = <<<'RESULT'
-[
-    'key1' => 'value1',
-    'key2' => 'value2',
-]
-RESULT;
-        $data[] = [$var, $expectedResult];
-
-        $var = [
-            'value1',
-            'value2',
-        ];
-        $expectedResult = <<<'RESULT'
-[
-    'value1',
-    'value2',
-]
-RESULT;
-        $data[] = [$var, $expectedResult];
-
-        $var = [
-            'key1' => [
-                'subkey1' => 'value2',
-            ],
-            'key2' => [
-                'subkey2' => 'value3',
-            ],
-        ];
-        $expectedResult = <<<'RESULT'
-[
-    'key1' => [
-        'subkey1' => 'value2',
-    ],
-    'key2' => [
-        'subkey2' => 'value3',
-    ],
-]
-RESULT;
-        $data[] = [$var, $expectedResult];
-
-        // Objects :
-
-        $var = new stdClass();
-        $var->testField = 'Test Value';
-        $expectedResult = "unserialize('" . serialize($var) . "')";
-        $data[] = [$var, $expectedResult];
-
-        // @formatter:off
-        $var = static function () {return 2;};
-        // @formatter:on
-        $expectedResult = 'function () {return 2;}';
-        $data[] = [$var, $expectedResult];
-
-        // @formatter:off
-        $var = new stdClass();
-        $var->a = static fn () => '123';
-        // @formatter:on
-        $objectId = spl_object_id($var);
-
-        $expectedResult = <<<DUMP
-        'stdClass#{$objectId}
-        (
-            [a] => fn () => \'123\'
-        )'
-        DUMP;
-        $data[] = [$var, $expectedResult];
-
-        return $data;
-    }
-
-    /**
-     * @dataProvider dataProviderExport
-     *
+     * @dataProvider exportDataProvider
      * @param mixed $var
      * @param string $expectedResult
      */
@@ -155,6 +22,160 @@ RESULT;
     {
         $exportResult = VarDumper::create($var)->export();
         $this->assertEquals($expectedResult, $exportResult);
+    }
+
+    public function exportDataProvider(): array
+    {
+        $customDebugInfo = new CustomDebugInfo();
+        $customDebugInfo->volume = 10;
+        $customDebugInfo->unitPrice = 15;
+
+        $incompleteObject = unserialize('O:16:"nonExistingClass":0:{}');
+
+        $emptyObject = new stdClass();
+
+        return [
+            'custom debug info' => [
+                $customDebugInfo,
+                <<<S
+                unserialize('O:39:"Yiisoft\\\VarDumper\\\Tests\\\CustomDebugInfo":2:{s:6:"volume";i:10;s:9:"unitPrice";i:15;}')
+                S,
+            ],
+            'incomplete object' => [
+                $incompleteObject,
+                <<<S
+                unserialize('O:16:"nonExistingClass":0:{}')
+                S,
+            ],
+            'empty object' => [
+                $emptyObject,
+                <<<S
+                unserialize('O:8:"stdClass":0:{}')
+                S,
+            ],
+            'short function' => [
+                // @formatter:off
+                fn () => 1,
+                // @formatter:on
+                'fn () => 1',
+            ],
+            'short static function' => [
+                // @formatter:off
+                static fn () => 1,
+                // @formatter:on
+                'fn () => 1',
+            ],
+            'function' => [
+                function () {
+                    return 1;
+                },
+                'function () {
+                    return 1;
+                }',
+            ],
+            'static function' => [
+                static function () {
+                    return 1;
+                },
+                'function () {
+                    return 1;
+                }',
+            ],
+            'string' => [
+                'Hello, Yii!',
+                "'Hello, Yii!'",
+            ],
+            'empty string' => [
+                '',
+                "''",
+            ],
+            'null' => [
+                null,
+                'null',
+            ],
+            'integer' => [
+                1,
+                '1',
+            ],
+            'integer with separator' => [
+                1_23_456,
+                '123456',
+            ],
+            'boolean' => [
+                true,
+                'true',
+            ],
+            'resource' => [
+                fopen('php://input', 'rb'),
+                'NULL',
+            ],
+            'empty array' => [
+                [],
+                '[]',
+            ],
+            'array of 3 elements, automatic keys' => [
+                [
+                    'one',
+                    'two',
+                    'three',
+                ],
+                <<<S
+                [
+                    'one',
+                    'two',
+                    'three',
+                ]
+                S,
+            ],
+            'array of 3 elements, custom keys' => [
+                [
+                    2 => 'one',
+                    'two' => 'two',
+                    0 => 'three',
+                ],
+                <<<S
+                [
+                    2 => 'one',
+                    'two' => 'two',
+                    0 => 'three',
+                ]
+                S,
+            ],
+            'closure in array' => [
+                // @formatter:off
+                [fn () => new \DateTimeZone('')],
+                // @formatter:on
+                <<<S
+                [
+                    fn () => new \DateTimeZone(''),
+                ]
+                S,
+            ],
+            'original class name' => [
+                // @formatter:off
+                static fn (VarDumper $date) => new \DateTimeZone(''),
+                // @formatter:on
+                "fn (\Yiisoft\VarDumper\VarDumper \$date) => new \DateTimeZone('')",
+            ],
+            'class alias' => [
+                // @formatter:off
+                fn (Dumper $date) => new \DateTimeZone(''),
+                // @formatter:on
+                "fn (\Yiisoft\VarDumper\VarDumper \$date) => new \DateTimeZone('')",
+            ],
+            'namespace alias' => [
+                // @formatter:off
+                fn (VD\VarDumper $date) => new \DateTimeZone(''),
+                // @formatter:on
+                "fn (\Yiisoft\VarDumper\VarDumper \$date) => new \DateTimeZone('')",
+            ],
+            'closure with null-collision operator' => [
+                // @formatter:off
+                fn () => $_ENV['var'] ?? null,
+                // @formatter:on
+                "fn () => \$_ENV['var'] ?? null",
+            ],
+        ];
     }
 
     /**
