@@ -198,7 +198,7 @@ final class VarDumperTest extends TestCase
     public function testAsPhpString($var, $expectedResult): void
     {
         $exportResult = VarDumper::create($var)->asPhpString();
-        $this->assertEquals($expectedResult, $exportResult);
+        $this->assertEqualsWithoutLE($expectedResult, $exportResult);
     }
 
     public function asPhpStringDataProvider(): array
@@ -359,7 +359,21 @@ final class VarDumperTest extends TestCase
     public function testAsJson($variable, string $result): void
     {
         $output = VarDumper::create($variable)->asJson();
-        $this->assertEquals($result, $output);
+        $this->assertEqualsWithoutLE($result, $output);
+    }
+
+    /**
+     * Asserting two strings equality ignoring line endings.
+     *
+     * @param string $expected
+     * @param string $actual
+     * @param string $message
+     */
+    protected function assertEqualsWithoutLE(string $expected, string $actual, string $message = ''): void
+    {
+        $expected = str_replace("\r\n", "\n", $expected);
+        $actual = str_replace("\r\n", "\n", $actual);
+        $this->assertEquals($expected, $actual, $message);
     }
 
     public function jsonDataProvider(): array
