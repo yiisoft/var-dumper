@@ -197,19 +197,6 @@ RESULT;
         $this->assertEqualsWithoutLE($expectedResult, $exportResult);
     }
 
-    /**
-     * @dataProvider asJsonObjectMap
-     *
-     * @param mixed $var
-     * @param string $expectedResult
-     * @group JOM
-     */
-    public function testAsJsonObjectsMap($var, $expectedResult): void
-    {
-        $exportResult = VarDumper::create($var)->asJsonObjectsMap();
-        $this->assertStringContainsString($expectedResult, $exportResult);
-    }
-
     public function asPhpStringDataProvider(): array
     {
         return [
@@ -266,16 +253,42 @@ RESULT;
         ];
     }
 
+    /**
+     * @dataProvider asJsonObjectMap
+     *
+     * @param mixed $var
+     * @param string $expectedResult
+     * @group JOM
+     */
+    public function testAsJsonObjectsMap($var, $expectedResult): void
+    {
+        $exportResult = VarDumper::create($var)->asJsonObjectsMap();
+        $this->assertStringContainsString($expectedResult, $exportResult);
+    }
+
     public function asJsonObjectMap(): array
     {
         $user = new stdClass();
         $user->id = 1;
         $objectId = spl_object_id($user);
 
+        $decoratedUser = clone $user;
+        $decoratedUser->name = 'Name';
+        $decoratedUser->originalUser = $user;
+        $decoratedObjectId = spl_object_id($decoratedUser);
+
         return [
             [
                 $user,
-                "\"stdClass#{$objectId}\":{\"public::id\":1}",
+                <<<S
+                "stdClass#{$objectId}":{"public::id":1}
+                S,
+            ],
+            [
+                $decoratedUser,
+                <<<S
+                "stdClass#{$decoratedObjectId}":{"public::id":1,"public::name":"Name","public::originalUser":"object@stdClass#{$objectId}"}
+                S,
             ],
         ];
     }
