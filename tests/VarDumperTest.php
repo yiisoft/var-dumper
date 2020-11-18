@@ -21,7 +21,7 @@ final class VarDumperTest extends TestCase
     public function testExport($var, $expectedResult): void
     {
         $exportResult = VarDumper::create($var)->export();
-        $this->assertEquals($expectedResult, $exportResult);
+        $this->assertEqualsWithoutLE($expectedResult, $exportResult);
     }
 
     public function exportDataProvider(): array
@@ -417,7 +417,7 @@ final class VarDumperTest extends TestCase
     public function testAsString($variable, string $result): void
     {
         $output = VarDumper::create($variable)->asString();
-        $this->assertEquals($result, $output);
+        $this->assertEqualsWithoutLE($result, $output);
     }
 
     public function asStringDataProvider(): array
