@@ -378,33 +378,180 @@ final class VarDumperTest extends TestCase
 
     public function jsonDataProvider(): array
     {
-        $var = new stdClass();
-        $var->name = 'Dmitry';
-        $binaryString = pack('H*', md5('binary string'));
+        $objectWithClosureInProperty = new stdClass();
+        $objectWithClosureInProperty->a = fn () => 1;
+        $objectWithClosureInPropertyId = spl_object_id($objectWithClosureInProperty);
 
-        $var2 = new stdClass();
-        $var2->a = fn () => 1;
+        $emptyObject = new stdClass();
+        $emptyObjectId = spl_object_id($emptyObject);
+
+        // @formatter:off
+        $shortFunctionObject = fn () => 1;
+        // @formatter:on
+        $shortFunctionObjectId = spl_object_id($shortFunctionObject);
+
+        // @formatter:off
+        $staticShortFunctionObject = static fn () => 1;
+        // @formatter:on
+        $staticShortFunctionObjectId = spl_object_id($staticShortFunctionObject);
+
+        // @formatter:off
+        $functionObject = function () {
+            return 1;
+        };
+        // @formatter:on
+        $functionObjectId = spl_object_id($functionObject);
+
+        // @formatter:off
+        $staticFunctionObject = static function () {
+            return 1;
+        };
+        // @formatter:on
+        $staticFunctionObjectId = spl_object_id($staticFunctionObject);
+
+        // @formatter:off
+        $closureWithNullCollisionOperatorObject = fn () => $_ENV['var'] ?? null;
+        // @formatter:on
+        $closureWithNullCollisionOperatorObjectId = spl_object_id($closureWithNullCollisionOperatorObject);
+
+        // @formatter:off
+        $closureWithUsualClassNameObject = static fn (VarDumper $date) => new \DateTimeZone('');
+        // @formatter:on
+        $closureWithUsualClassNameObjectId = spl_object_id($closureWithUsualClassNameObject);
+
+        // @formatter:off
+        $closureWithAliasedClassNameObject = fn (Dumper $date) => new \DateTimeZone('');
+        // @formatter:on
+        $closureWithAliasedClassNameObjectId = spl_object_id($closureWithAliasedClassNameObject);
+
+        // @formatter:off
+        $closureWithAliasedNamespaceObject = fn (VD\VarDumper $date) => new \DateTimeZone('');
+        // @formatter:on
+        $closureWithAliasedNamespaceObjectId = spl_object_id($closureWithAliasedNamespaceObject);
 
         return [
-            'object1'=>[
-                $var,
-                '{"stdClass":{"public::name":"Dmitry"}}',
+            'empty object' => [
+                $emptyObject,
+                <<<S
+                {"stdClass#{$emptyObjectId}":"{stateless object}"}
+                S,
+            ],
+            'short function' => [
+                $shortFunctionObject,
+                <<<S
+                {"Closure#{$shortFunctionObjectId}":{"public::0":"fn () => 1"}}
+                S,
+            ],
+            'short static function' => [
+                $staticShortFunctionObject,
+                 <<<S
+                {"Closure#{$staticShortFunctionObjectId}":{"public::0":"fn () => 1"}}
+                S,
+            ],
+            'function' => [
+                $functionObject,
+                <<<S
+                {"Closure#{$functionObjectId}":{"public::0":"function () {\\n            return 1;\\n        }"}}
+                S,
+            ],
+            'static function' => [
+                $staticFunctionObject,
+                 <<<S
+                {"Closure#{$staticFunctionObjectId}":{"public::0":"function () {\\n            return 1;\\n        }"}}
+                S,
+            ],
+            'string' => [
+                'Hello, Yii!',
+                '"Hello, Yii!"',
+            ],
+            'empty string' => [
+                '',
+                '""',
+            ],
+            'null' => [
+                null,
+                'null',
+            ],
+            'integer' => [
+                1,
+                '1',
+            ],
+            'integer with separator' => [
+                1_23_456,
+                '123456',
+            ],
+            'boolean' => [
+                true,
+                'true',
+            ],
+            'resource' => [
+                fopen('php://input', 'rb'),
+                '{"timed_out":false,"blocked":true,"eof":false,"wrapper_type":"PHP","stream_type":"Input","mode":"rb","unread_bytes":0,"seekable":true,"uri":"php:\/\/input"}',
+            ],
+            'empty array' => [
+                [],
+                '[]',
+            ],
+            'array of 3 elements, automatic keys' => [
+                [
+                    'one',
+                    'two',
+                    'three',
+                ],
+                '["one","two","three"]'
+            ],
+            'array of 3 elements, custom keys' => [
+                [
+                    2 => 'one',
+                    'two' => 'two',
+                    0 => 'three',
+                ],
+                '{"2":"one","two":"two","0":"three"}'
+            ],
+            'closure in array' => [
+                // @formatter:off
+                [fn () => new \DateTimeZone('')],
+                // @formatter:on
+                '["fn () => new \\\DateTimeZone(\'\')"]',
+            ],
+            'original class name' => [
+                $closureWithUsualClassNameObject,
+                <<<S
+                {"Closure#{$closureWithUsualClassNameObjectId}":{"public::0":"fn (\\\Yiisoft\\\VarDumper\\\VarDumper \$date) => new \\\DateTimeZone('')"}}
+                S,
+            ],
+            'class alias' => [
+                $closureWithAliasedClassNameObject,
+                <<<S
+                {"Closure#{$closureWithAliasedClassNameObjectId}":{"public::0":"fn (\\\Yiisoft\\\VarDumper\\\VarDumper \$date) => new \\\DateTimeZone('')"}}
+                S,
+            ],
+            'namespace alias' => [
+                $closureWithAliasedNamespaceObject,
+                <<<S
+                {"Closure#{$closureWithAliasedNamespaceObjectId}":{"public::0":"fn (\\\Yiisoft\\\VarDumper\\\VarDumper \$date) => new \\\DateTimeZone('')"}}
+                S,
+
+            ],
+            'closure with null-collision operator' => [
+                $closureWithNullCollisionOperatorObject,
+                <<<S
+                {"Closure#{$closureWithNullCollisionOperatorObjectId}":{"public::0":"fn () => \$_ENV['var'] ?? null"}}
+                S,
             ],
             'emoji supported' => [
                 ['emoji' => '🤣'],
                 '{"emoji":"🤣"}',
             ],
             'closure supported' => [
-                $var2,
-                '{"stdClass":{"public::a":"fn () => 1"}}',
+                $objectWithClosureInProperty,
+                <<<S
+                {"stdClass#{$objectWithClosureInPropertyId}":{"public::a":"fn () => 1"}}
+                S,
             ],
-            'hex supported' => [
-                ['string' => $binaryString],
+            'binary string' => [
+                ['string' => pack('H*', md5('binary string'))],
                 '{"string":"ɍ��^��\u00191\u0017�]�-f�"}',
-            ],
-            [
-                fopen('php://input', 'rb'),
-                '{"timed_out":false,"blocked":true,"eof":false,"wrapper_type":"PHP","stream_type":"Input","mode":"rb","unread_bytes":0,"seekable":true,"uri":"php:\/\/input"}',
             ],
         ];
     }
