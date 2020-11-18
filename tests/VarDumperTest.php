@@ -13,40 +13,12 @@ use Yiisoft\VarDumper\VarDumper as Dumper;
  */
 final class VarDumperTest extends TestCase
 {
-    public function testDumpIncompleteObject(): void
-    {
-        $serializedObj = 'O:16:"nonExistingClass":0:{}';
-        $incompleteObj = unserialize($serializedObj);
-        $dumpResult = VarDumper::create($incompleteObj)->asString();
-        $objectId = spl_object_id($incompleteObj);
-
-        $this->assertStringContainsString("__PHP_Incomplete_Class#{$objectId}\n(", $dumpResult);
-        $this->assertStringContainsString('nonExistingClass', $dumpResult);
-    }
-
     public function testExportIncompleteObject(): void
     {
         $serializedObj = 'O:16:"nonExistingClass":0:{}';
         $incompleteObj = unserialize($serializedObj);
         $exportResult = VarDumper::create($incompleteObj)->export();
         $this->assertStringContainsString('nonExistingClass', $exportResult);
-    }
-
-    public function testDumpObject(): void
-    {
-        $obj = new stdClass();
-        $objectId = spl_object_id($obj);
-        $this->assertEquals("stdClass#{$objectId}\n(\n)", VarDumper::create($obj)->asString());
-
-        $obj = new stdClass();
-        $obj->name = 'test-name';
-        $obj->price = 19;
-        $dumpResult = VarDumper::create($obj)->asString();
-        $objectId = spl_object_id($obj);
-
-        $this->assertStringContainsString("stdClass#{$objectId}\n(", $dumpResult);
-        $this->assertStringContainsString("[name] => 'test-name'", $dumpResult);
-        $this->assertStringContainsString('[price] => 19', $dumpResult);
     }
 
     /**
@@ -61,11 +33,11 @@ final class VarDumperTest extends TestCase
         $data = [
             [
                 'test string',
-                var_export('test string', true),
+                "'test string'",
             ],
             'emoji supported' => [
                 '🤣',
-                var_export('🤣', true),
+                "'🤣'",
             ],
             'hex supported' => [
                 pack('H*', md5('binary string')),
@@ -73,11 +45,11 @@ final class VarDumperTest extends TestCase
             ],
             [
                 75,
-                var_export(75, true),
+                75,
             ],
             [
                 7.5,
-                var_export(7.5, true),
+                7.5,
             ],
             [
                 null,
@@ -204,7 +176,7 @@ RESULT;
                 "123",
                 "'123'",
             ],
-            [
+            'integer'=>[
                 123,
                 "123",
             ],
@@ -293,9 +265,6 @@ RESULT;
         ];
     }
 
-    /**
-     * @depends testExport
-     */
     public function testExportObjectFallback(): void
     {
         $var = new stdClass();
@@ -315,21 +284,6 @@ RESULT;
 
         $exportResult = VarDumper::create($master)->export();
         $this->assertNotEmpty($exportResult);
-    }
-
-    /**
-     * @depends testDumpObject
-     */
-    public function testDumpClassWithCustomDebugInfo(): void
-    {
-        $object = new CustomDebugInfo();
-        $object->volume = 10;
-        $object->unitPrice = 15;
-
-        $dumpResult = VarDumper::create($object)->asString();
-
-        $this->assertStringContainsString('totalPrice', $dumpResult);
-        $this->assertStringNotContainsString('unitPrice', $dumpResult);
     }
 
     /**
@@ -365,7 +319,7 @@ RESULT;
         $var2->a = fn () => 1;
 
         return [
-            [
+            'object1'=>[
                 $var,
                 '{"stdClass":{"public::name":"Dmitry"}}',
             ],
@@ -380,6 +334,121 @@ RESULT;
             'hex supported' => [
                 ['string' => $binaryString],
                 '{"string":"ɍ��^��\u00191\u0017�]�-f�"}',
+            ],
+            [
+                fopen('php://input', 'rb'),
+                '{"timed_out":false,"blocked":true,"eof":false,"wrapper_type":"PHP","stream_type":"Input","mode":"rb","unread_bytes":0,"seekable":true,"uri":"php:\/\/input"}',
+            ],
+        ];
+    }
+
+    /**
+     * @dataProvider asStringDataProvider
+     * @param mixed $variable
+     * @param string $result
+     */
+    public function testAsString($variable, string $result): void
+    {
+        $output = VarDumper::create($variable)->asString();
+        $this->assertEquals($result, $output);
+    }
+
+    public function asStringDataProvider(): array
+    {
+        $customDebugInfo = new CustomDebugInfo();
+        $customDebugInfo->volume = 10;
+        $customDebugInfo->unitPrice = 15;
+        $customDebugInfoObjectId = spl_object_id($customDebugInfo);
+
+        $incompleteObject = unserialize('O:16:"nonExistingClass":0:{}');
+        $incompleteObjectId = spl_object_id($incompleteObject);
+
+        $emptyObject = new stdClass();
+        $emptyObjectId = spl_object_id($emptyObject);
+
+        return [
+            'custom debug info' => [
+                $customDebugInfo,
+                <<<S
+                Yiisoft\VarDumper\Tests\CustomDebugInfo#{$customDebugInfoObjectId}
+                (
+                    [volume] => 10
+                    [totalPrice] => 150
+                )
+                S,
+            ],
+            'incomplete object' => [
+                $incompleteObject,
+                <<<S
+                __PHP_Incomplete_Class#{$incompleteObjectId}
+                (
+                    [__PHP_Incomplete_Class_Name] => 'nonExistingClass'
+                )
+                S,
+            ],
+            'empty object' => [
+                $emptyObject,
+                <<<S
+                stdClass#{$emptyObjectId}
+                (
+                )
+                S,
+            ],
+            'short function' => [
+                // @formatter:off
+                fn () => 1,
+                // @formatter:on
+                'fn () => 1',
+            ],
+            'short static function' => [
+                // @formatter:off
+                static fn () => 1,
+                // @formatter:on
+                'fn () => 1',
+            ],
+            'function' => [
+                function () {
+                    return 1;
+                },
+                'function () {
+                    return 1;
+                }',
+            ],
+            'static function' => [
+                static function () {
+                    return 1;
+                },
+                'function () {
+                    return 1;
+                }',
+            ],
+            'string' => [
+                'Hello, Yii!',
+                "'Hello, Yii!'",
+            ],
+            'empty string' => [
+                '',
+                "''",
+            ],
+            'null' => [
+                null,
+                'null',
+            ],
+            'integer' => [
+                1,
+                '1',
+            ],
+            'integer with separator' => [
+                1_23_456,
+                '123456',
+            ],
+            'boolean' => [
+                true,
+                'true',
+            ],
+            'resource' => [
+                fopen('php://input', 'rb'),
+                '{resource}',
             ],
         ];
     }
