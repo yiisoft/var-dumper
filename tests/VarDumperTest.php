@@ -154,7 +154,7 @@ RESULT;
     public function testExport($var, $expectedResult): void
     {
         $exportResult = VarDumper::create($var)->export();
-        $this->assertEqualsWithoutLE($expectedResult, $exportResult);
+        $this->assertEquals($expectedResult, $exportResult);
     }
 
     /**
@@ -166,7 +166,7 @@ RESULT;
     public function testAsPhpString($var, $expectedResult): void
     {
         $exportResult = VarDumper::create($var)->asPhpString();
-        $this->assertEqualsWithoutLE($expectedResult, $exportResult);
+        $this->assertEquals($expectedResult, $exportResult);
     }
 
     public function asPhpStringDataProvider(): array
@@ -292,21 +292,7 @@ RESULT;
     public function testAsJson($variable, string $result): void
     {
         $output = VarDumper::create($variable)->asJson();
-        $this->assertEqualsWithoutLE($result, $output);
-    }
-
-    /**
-     * Asserting two strings equality ignoring line endings.
-     *
-     * @param string $expected
-     * @param string $actual
-     * @param string $message
-     */
-    protected function assertEqualsWithoutLE(string $expected, string $actual, string $message = ''): void
-    {
-        $expected = str_replace("\r\n", "\n", $expected);
-        $actual = str_replace("\r\n", "\n", $actual);
-        $this->assertEquals($expected, $actual, $message);
+        $this->assertEquals($result, $output);
     }
 
     public function jsonDataProvider(): array
