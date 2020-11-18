@@ -371,8 +371,8 @@ final class VarDumperTest extends TestCase
      */
     protected function assertEqualsWithoutLE(string $expected, string $actual, string $message = ''): void
     {
-        $expected = str_replace("\r\n", "\n", $expected);
-        $actual = str_replace("\r\n", "\n", $actual);
+        $expected = str_replace(["\r\n", '\r\n'], ["\n", '\n'], $expected);
+        $actual = str_replace(["\r\n", '\r\n'], ["\n", '\n'], $actual);
         $this->assertEquals($expected, $actual, $message);
     }
 
