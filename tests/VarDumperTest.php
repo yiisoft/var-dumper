@@ -74,7 +74,7 @@ final class VarDumperTest extends TestCase
                 // @formatter:off
                 static fn () => 1,
                 // @formatter:on
-                'fn () => 1',
+                'static fn () => 1',
             ],
             'function' => [
                 function () {
@@ -88,7 +88,7 @@ final class VarDumperTest extends TestCase
                 static function () {
                     return 1;
                 },
-                'function () {
+                'static function () {
                     return 1;
                 }',
             ],
@@ -166,7 +166,7 @@ final class VarDumperTest extends TestCase
                 // @formatter:off
                 static fn (VarDumper $date) => new \DateTimeZone(''),
                 // @formatter:on
-                "fn (\Yiisoft\VarDumper\VarDumper \$date) => new \DateTimeZone('')",
+                "static fn (\Yiisoft\VarDumper\VarDumper \$date) => new \DateTimeZone('')",
             ],
             'class alias' => [
                 // @formatter:off
@@ -435,7 +435,7 @@ final class VarDumperTest extends TestCase
         $closureWithNullCollisionOperatorObjectId = spl_object_id($closureWithNullCollisionOperatorObject);
 
         // @formatter:off
-        $closureWithUsualClassNameObject = static fn (VarDumper $date) => new \DateTimeZone('');
+        $closureWithUsualClassNameObject = fn (VarDumper $date) => new \DateTimeZone('');
         // @formatter:on
         $closureWithUsualClassNameObjectId = spl_object_id($closureWithUsualClassNameObject);
 
@@ -465,7 +465,7 @@ final class VarDumperTest extends TestCase
             'short static function' => [
                 $staticShortFunctionObject,
                 <<<S
-                {"Closure#{$staticShortFunctionObjectId}":{"public::0":"fn () => 1"}}
+                {"Closure#{$staticShortFunctionObjectId}":{"public::0":"static fn () => 1"}}
                 S,
             ],
             'function' => [
@@ -477,7 +477,7 @@ final class VarDumperTest extends TestCase
             'static function' => [
                 $staticFunctionObject,
                 <<<S
-                {"Closure#{$staticFunctionObjectId}":{"public::0":"function () {\\n            return 1;\\n        }"}}
+                {"Closure#{$staticFunctionObjectId}":{"public::0":"static function () {\\n            return 1;\\n        }"}}
                 S,
             ],
             'string' => [
@@ -644,7 +644,7 @@ final class VarDumperTest extends TestCase
                 // @formatter:off
                 static fn () => 1,
                 // @formatter:on
-                'fn () => 1',
+                'static fn () => 1',
             ],
             'function' => [
                 function () {
@@ -658,7 +658,7 @@ final class VarDumperTest extends TestCase
                 static function () {
                     return 1;
                 },
-                'function () {
+                'static function () {
                     return 1;
                 }',
             ],
@@ -736,7 +736,7 @@ final class VarDumperTest extends TestCase
                 // @formatter:off
                 static fn (VarDumper $date) => new \DateTimeZone(''),
                 // @formatter:on
-                "fn (\Yiisoft\VarDumper\VarDumper \$date) => new \DateTimeZone('')",
+                "static fn (\Yiisoft\VarDumper\VarDumper \$date) => new \DateTimeZone('')",
             ],
             'class alias' => [
                 // @formatter:off

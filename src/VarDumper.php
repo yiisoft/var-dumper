@@ -21,8 +21,6 @@ final class VarDumper
     private $variable;
     private static array $objects = [];
 
-    private array $exportClosureTokens = [T_FUNCTION, T_FN];
-
     private ?UseStatementParser $useStatementParser = null;
 
     private bool $beautify = true;
@@ -401,7 +399,7 @@ final class VarDumper
             if (!isset($token[0])) {
                 continue;
             }
-            if (in_array($token[0], $this->exportClosureTokens, true)) {
+            if (in_array($token[0], [T_FUNCTION, T_FN, T_STATIC], true)) {
                 $closureTokens[] = $token[1];
                 if (!$isShortClosure && $token[0] === T_FN) {
                     $isShortClosure = true;
@@ -438,7 +436,6 @@ final class VarDumper
 
     public function asPhpString(): string
     {
-        $this->exportClosureTokens = [T_FUNCTION, T_FN, T_STATIC];
         $this->beautify = false;
         return $this->export();
     }
