@@ -70,7 +70,7 @@ final class VarDumper
         return $output;
     }
 
-    private function asArray(int $depth, int $objectCollapseLevel = 0): array
+    private function dumpNested(int $depth, int $objectCollapseLevel = 0)
     {
         $this->buildVarObjectsCache($this->variable, $depth);
         return $this->dumpNestedInternal($this->variable, $depth, 0, $objectCollapseLevel);
@@ -84,7 +84,7 @@ final class VarDumper
             $options |= JSON_PRETTY_PRINT;
         }
 
-        return json_encode($this->asArray($depth), $options);
+        return json_encode($this->dumpNested($depth), $options);
     }
 
     public function asJsonObjectsMap(int $depth = 50, bool $prettyPrint = false): string
@@ -99,7 +99,7 @@ final class VarDumper
 
         $backup = $this->variable;
         $this->variable = self::$objects;
-        $output = json_encode($this->getObjectsMap($this->asArray($depth, 1)), $options);
+        $output = json_encode($this->dumpNested($depth, 1), $options);
         $this->variable = $backup;
         return $output;
     }
@@ -157,11 +157,7 @@ final class VarDumper
 
                 $output = [];
                 foreach ($var as $key => $value) {
-                    if (is_object($value)) {
-                        $keyDisplay = spl_object_id($value);
-                    } else {
-                        $keyDisplay = str_replace("\0", '::', trim($key));
-                    }
+                    $keyDisplay = str_replace("\0", '::', trim($key));
                     $output[$keyDisplay] = $this->dumpNestedInternal($value, $depth, $level + 1, $objectCollapseLevel);
                 }
 
@@ -181,16 +177,17 @@ final class VarDumper
                     $output = $className . ' (...)';
                 } else {
                     $output = [];
+                    $mainKey = $this->getObjectDescription($var);
                     $dumpValues = $this->getVarDumpValuesArray($var);
                     if (empty($dumpValues)) {
-                        $output[$className] = '{stateless object}';
+                        $output[$mainKey] = '{stateless object}';
                     }
                     foreach ($dumpValues as $key => $value) {
                         $keyDisplay = $this->normalizeProperty($key);
                         /**
                          * @psalm-suppress InvalidArrayOffset
                          */
-                        $output[$className][$keyDisplay] = $this->dumpNestedInternal(
+                        $output[$mainKey][$keyDisplay] = $this->dumpNestedInternal(
                             $value,
                             $depth,
                             $level + 1,
@@ -223,22 +220,11 @@ final class VarDumper
         return 'public::' . $property;
     }
 
-    private function getObjectsMap(array $objectsArray): array
-    {
-        $objects = [];
-        foreach ($objectsArray as $index => $object) {
-            if (!is_array($object)) {
-                continue;
-            }
-            $className = array_key_first($object);
-            $objects[$className . '#' . $index] = $object[$className];
-        }
-        return $objects;
-    }
-
     /**
      * @param mixed $var variable to be dumped
+     * @param int $depth
      * @param int $level depth level
+     * @throws \ReflectionException
      * @return string
      */
     private function dumpInternal($var, int $depth, int $level): string
