@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Yiisoft\VarDumper\Tests;
 
 use PHPUnit\Framework\TestCase;
@@ -15,6 +17,7 @@ final class VarDumperTest extends TestCase
 {
     /**
      * @dataProvider exportDataProvider
+     *
      * @param mixed $var
      * @param string $expectedResult
      */
@@ -334,6 +337,7 @@ final class VarDumperTest extends TestCase
 
     /**
      * @dataProvider asJsonObjectMapDataProvider
+     *
      * @param mixed $var
      * @param string $expectedResult
      * @group JOM
@@ -551,7 +555,6 @@ final class VarDumperTest extends TestCase
                 <<<S
                 {"Closure#{$closureWithAliasedNamespaceObjectId}":{"public::0":"fn (\\\Yiisoft\\\VarDumper\\\VarDumper \$date) => new \\\DateTimeZone('')"}}
                 S,
-
             ],
             'closure with null-collision operator' => [
                 $closureWithNullCollisionOperatorObject,
@@ -578,6 +581,7 @@ final class VarDumperTest extends TestCase
 
     /**
      * @dataProvider asStringDataProvider
+     *
      * @param mixed $variable
      * @param string $result
      */
