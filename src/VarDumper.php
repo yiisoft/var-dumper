@@ -167,7 +167,7 @@ final class VarDumper
                         $output[$mainKey] = '{stateless object}';
                     }
                     foreach ($dumpValues as $key => $value) {
-                        $keyDisplay = $this->normalizeProperty($key);
+                        $keyDisplay = $this->normalizeProperty((string)$key);
                         /**
                          * @psalm-suppress InvalidArrayOffset
                          */
