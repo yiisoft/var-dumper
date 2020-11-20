@@ -141,7 +141,7 @@ final class VarDumper
 
                 $output = [];
                 foreach ($var as $key => $value) {
-                    $keyDisplay = str_replace("\0", '::', trim($key));
+                    $keyDisplay = str_replace("\0", '::', trim((string)$key));
                     $output[$keyDisplay] = $this->dumpNestedInternal($value, $depth, $level + 1, $objectCollapseLevel);
                 }
 
