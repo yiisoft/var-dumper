@@ -21,8 +21,6 @@ final class VarDumper
     private $variable;
     private static array $objects = [];
 
-    private array $exportClosureTokens = [T_FUNCTION, T_FN];
-
     private ?UseStatementParser $useStatementParser = null;
 
     private bool $beautify = true;
@@ -70,38 +68,22 @@ final class VarDumper
         return $output;
     }
 
-    private function dumpNested(int $depth, int $objectCollapseLevel = 0)
+    private function dumpNested($variable, int $depth, int $objectCollapseLevel)
     {
-        $this->buildVarObjectsCache($this->variable, $depth);
-        return $this->dumpNestedInternal($this->variable, $depth, 0, $objectCollapseLevel);
+        $this->buildObjectsCache($variable, $depth);
+        return $this->dumpNestedInternal($variable, $depth, 0, $objectCollapseLevel);
     }
 
     public function asJson(int $depth = 50, bool $prettyPrint = false): string
     {
-        $options = JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE;
-
-        if ($prettyPrint) {
-            $options |= JSON_PRETTY_PRINT;
-        }
-
-        return json_encode($this->dumpNested($depth), $options);
+        return $this->asJsonInternal($this->variable, $prettyPrint, $depth, 0);
     }
 
     public function asJsonObjectsMap(int $depth = 50, bool $prettyPrint = false): string
     {
-        $options = JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE;
+        $this->buildObjectsCache($this->variable, $depth);
 
-        if ($prettyPrint) {
-            $options |= JSON_PRETTY_PRINT;
-        }
-
-        $this->buildVarObjectsCache($this->variable, $depth);
-
-        $backup = $this->variable;
-        $this->variable = self::$objects;
-        $output = json_encode($this->dumpNested($depth, 1), $options);
-        $this->variable = $backup;
-        return $output;
+        return $this->asJsonInternal(self::$objects, $prettyPrint, $depth, 1);
     }
 
     /**
@@ -124,23 +106,21 @@ final class VarDumper
         return $this->exportInternal($this->variable, 0);
     }
 
-    private function buildVarObjectsCache($var, int $depth, int $level = 0): void
+    private function buildObjectsCache($variable, int $depth, int $level = 0): void
     {
-        if (is_array($var)) {
-            if ($depth <= $level) {
+        if ($depth <= $level) {
+            return;
+        }
+        if (is_object($variable)) {
+            if (in_array($variable, self::$objects, true)) {
                 return;
             }
-            foreach ($var as $key => $value) {
-                $this->buildVarObjectsCache($value, $depth, $level + 1);
-            }
-        } elseif (is_object($var)) {
-            if ($depth <= $level || in_array($var, self::$objects, true)) {
-                return;
-            }
-            self::$objects[] = $var;
-            $dumpValues = $this->getVarDumpValuesArray($var);
-            foreach ($dumpValues as $key => $value) {
-                $this->buildVarObjectsCache($value, $depth, $level + 1);
+            self::$objects[] = $variable;
+            $variable = $this->getObjectProperties($variable);
+        }
+        if (is_array($variable)) {
+            foreach ($variable as $value) {
+                $this->buildObjectsCache($value, $depth, $level + 1);
             }
         }
     }
@@ -178,7 +158,7 @@ final class VarDumper
                 } else {
                     $output = [];
                     $mainKey = $this->getObjectDescription($var);
-                    $dumpValues = $this->getVarDumpValuesArray($var);
+                    $dumpValues = $this->getObjectProperties($var);
                     if (empty($dumpValues)) {
                         $output[$mainKey] = '{stateless object}';
                     }
@@ -209,7 +189,7 @@ final class VarDumper
     {
         $property = str_replace("\0", '::', trim($property));
 
-        if (($pos = strpos($property, '*::')) === 0) {
+        if (strpos($property, '*::') === 0) {
             return 'protected::' . substr($property, 3);
         }
 
@@ -257,13 +237,13 @@ final class VarDumper
                 $keys = array_keys($var);
                 $spaces = str_repeat(' ', $level * 4);
                 $output .= '[';
-                foreach ($keys as $key) {
+                foreach ($keys as $name) {
                     if ($this->beautify) {
                         $output .= "\n" . $spaces . '    ';
                     }
-                    $output .= $this->dumpInternal($key, $depth, 0);
+                    $output .= $this->dumpInternal($name, $depth, 0);
                     $output .= ' => ';
-                    $output .= $this->dumpInternal($var[$key], $depth, $level + 1);
+                    $output .= $this->dumpInternal($var[$name], $depth, $level + 1);
                 }
 
                 return $this->beautify
@@ -284,10 +264,10 @@ final class VarDumper
                 self::$objects[] = $var;
                 $spaces = str_repeat(' ', $level * 4);
                 $output = $this->getObjectDescription($var) . "\n" . $spaces . '(';
-                $dumpValues = $this->getVarDumpValuesArray($var);
-                foreach ($dumpValues as $key => $value) {
-                    $keyDisplay = strtr(trim($key), "\0", ':');
-                    $output .= "\n" . $spaces . "    [$keyDisplay] => ";
+                $objectProperties = $this->getObjectProperties($var);
+                foreach ($objectProperties as $name => $value) {
+                    $propertyName = strtr(trim($name), "\0", ':');
+                    $output .= "\n" . $spaces . "    [$propertyName] => ";
                     $output .= $this->dumpInternal($value, $depth, $level + 1);
                 }
                 return $output . "\n" . $spaces . ')';
@@ -296,14 +276,10 @@ final class VarDumper
         }
     }
 
-    private function getVarDumpValuesArray($var): array
+    private function getObjectProperties($var): array
     {
         if ('__PHP_Incomplete_Class' !== get_class($var) && method_exists($var, '__debugInfo')) {
-            $dumpValues = $var->__debugInfo();
-            if (!is_array($dumpValues)) {
-                throw new \Exception('__debugInfo() must return an array');
-            }
-            return $dumpValues;
+            $var = $var->__debugInfo();
         }
 
         return (array)$var;
@@ -322,23 +298,23 @@ final class VarDumper
     }
 
     /**
-     * @param mixed $var variable to be exported
+     * @param mixed $variable variable to be exported
      * @param int $level depth level
-     * @return string
      * @throws \ReflectionException
+     *@return string
      */
-    private function exportInternal($var, int $level): string
+    private function exportInternal($variable, int $level): string
     {
-        switch (gettype($var)) {
+        switch (gettype($variable)) {
             case 'NULL':
                 return 'null';
             case 'array':
-                if (empty($var)) {
+                if (empty($variable)) {
                     return '[]';
                 }
 
-                $keys = array_keys($var);
-                $outputKeys = ($keys !== range(0, count($var) - 1));
+                $keys = array_keys($variable);
+                $outputKeys = ($keys !== range(0, count($variable) - 1));
                 $spaces = str_repeat(' ', $level * 4);
                 $output = '[';
                 foreach ($keys as $key) {
@@ -349,7 +325,7 @@ final class VarDumper
                         $output .= $this->exportInternal($key, 0);
                         $output .= ' => ';
                     }
-                    $output .= $this->exportInternal($var[$key], $level + 1);
+                    $output .= $this->exportInternal($variable[$key], $level + 1);
                     if ($this->beautify || next($keys) !== false) {
                         $output .= ',';
                     }
@@ -358,35 +334,35 @@ final class VarDumper
                     ? $output . "\n" . $spaces . ']'
                     : $output . ']';
             case 'object':
-                if ($var instanceof \Closure) {
-                    return $this->exportClosure($var);
+                if ($variable instanceof \Closure) {
+                    return $this->exportClosure($variable);
                 }
 
                 try {
-                    return 'unserialize(' . var_export(serialize($var), true) . ')';
+                    return 'unserialize(' . $this->exportVariable(serialize($variable)) . ')';
                 } catch (\Exception $e) {
                     // serialize may fail, for example: if object contains a `\Closure` instance
                     // so we use a fallback
-                    if ($var instanceof ArrayableInterface) {
-                        return $this->exportInternal($var->toArray(), $level);
+                    if ($variable instanceof ArrayableInterface) {
+                        return $this->exportInternal($variable->toArray(), $level);
                     }
 
-                    if ($var instanceof \IteratorAggregate) {
+                    if ($variable instanceof \IteratorAggregate) {
                         $varAsArray = [];
-                        foreach ($var as $key => $value) {
+                        foreach ($variable as $key => $value) {
                             $varAsArray[$key] = $value;
                         }
                         return $this->exportInternal($varAsArray, $level);
                     }
 
-                    if ('__PHP_Incomplete_Class' !== get_class($var) && method_exists($var, '__toString')) {
-                        return var_export($var->__toString(), true);
+                    if ('__PHP_Incomplete_Class' !== get_class($variable) && method_exists($variable, '__toString')) {
+                        return $this->exportVariable($variable->__toString());
                     }
 
-                    return var_export(self::create($var)->asString(), true);
+                    return $this->exportVariable(self::create($variable)->asString());
                 }
             default:
-                return var_export($var, true);
+                return $this->exportVariable($variable);
         }
     }
 
@@ -423,7 +399,7 @@ final class VarDumper
             if (!isset($token[0])) {
                 continue;
             }
-            if (in_array($token[0], $this->exportClosureTokens, true)) {
+            if (in_array($token[0], [T_FUNCTION, T_FN, T_STATIC], true)) {
                 $closureTokens[] = $token[1];
                 if (!$isShortClosure && $token[0] === T_FN) {
                     $isShortClosure = true;
@@ -460,7 +436,6 @@ final class VarDumper
 
     public function asPhpString(): string
     {
-        $this->exportClosureTokens = [T_FUNCTION, T_FN, T_STATIC];
         $this->beautify = false;
         return $this->export();
     }
@@ -486,5 +461,21 @@ final class VarDumper
     private function getObjectDescription(object $object): string
     {
         return get_class($object) . '#' . spl_object_id($object);
+    }
+
+    private function exportVariable($variable): string
+    {
+        return var_export($variable, true);
+    }
+
+    private function asJsonInternal($variable, bool $prettyPrint, int $depth, int $objectCollapseLevel)
+    {
+        $options = JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE;
+
+        if ($prettyPrint) {
+            $options |= JSON_PRETTY_PRINT;
+        }
+
+        return json_encode($this->dumpNested($variable, $depth, $objectCollapseLevel), $options);
     }
 }

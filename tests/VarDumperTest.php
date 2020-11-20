@@ -39,6 +39,12 @@ final class VarDumperTest extends TestCase
         $objectWithReferences1->object = $objectWithReferences2;
         $objectWithReferences2->object = $objectWithReferences1;
 
+        $objectWithClosureInProperty = new stdClass();
+        // @formatter:off
+        $objectWithClosureInProperty->a = fn () => 1;
+        // @formatter:on
+        $objectWithClosureInPropertyId = spl_object_id($objectWithClosureInProperty);
+
         return [
             'custom debug info' => [
                 $customDebugInfo,
@@ -68,7 +74,7 @@ final class VarDumperTest extends TestCase
                 // @formatter:off
                 static fn () => 1,
                 // @formatter:on
-                'fn () => 1',
+                'static fn () => 1',
             ],
             'function' => [
                 function () {
@@ -82,7 +88,7 @@ final class VarDumperTest extends TestCase
                 static function () {
                     return 1;
                 },
-                'function () {
+                'static function () {
                     return 1;
                 }',
             ],
@@ -160,7 +166,7 @@ final class VarDumperTest extends TestCase
                 // @formatter:off
                 static fn (VarDumper $date) => new \DateTimeZone(''),
                 // @formatter:on
-                "fn (\Yiisoft\VarDumper\VarDumper \$date) => new \DateTimeZone('')",
+                "static fn (\Yiisoft\VarDumper\VarDumper \$date) => new \DateTimeZone('')",
             ],
             'class alias' => [
                 // @formatter:off
@@ -180,12 +186,25 @@ final class VarDumperTest extends TestCase
                 // @formatter:on
                 "fn () => \$_ENV['var'] ?? null",
             ],
-            'object with references'=> [
+            'object with references' => [
                 $objectWithReferences1,
                 <<<S
                 unserialize('O:8:"stdClass":1:{s:6:"object";O:8:"stdClass":1:{s:6:"object";r:1;}}')
                 S,
-            ]
+            ],
+            'utf8 supported' => [
+                '🤣',
+                "'🤣'",
+            ],
+            'closure in property supported' => [
+                $objectWithClosureInProperty,
+                <<<S
+                'stdClass#{$objectWithClosureInPropertyId}
+                (
+                    [a] => fn () => 1
+                )'
+                S,
+            ],
         ];
     }
 
@@ -270,7 +289,7 @@ final class VarDumperTest extends TestCase
                     'two',
                     'three',
                 ],
-                "['one','two','three']"
+                "['one','two','three']",
             ],
             'array of 3 elements, custom keys' => [
                 [
@@ -278,7 +297,7 @@ final class VarDumperTest extends TestCase
                     'two' => 'two',
                     0 => 'three',
                 ],
-                "[2 => 'one','two' => 'two',0 => 'three']"
+                "[2 => 'one','two' => 'two',0 => 'three']",
             ],
             'closure in array' => [
                 // @formatter:off
@@ -314,8 +333,7 @@ final class VarDumperTest extends TestCase
     }
 
     /**
-     * @dataProvider asJsonObjectMap
-     *
+     * @dataProvider asJsonObjectMapDataProvider
      * @param mixed $var
      * @param string $expectedResult
      * @group JOM
@@ -326,7 +344,7 @@ final class VarDumperTest extends TestCase
         $this->assertStringContainsString($expectedResult, $exportResult);
     }
 
-    public function asJsonObjectMap(): array
+    public function asJsonObjectMapDataProvider(): array
     {
         $user = new stdClass();
         $user->id = 1;
@@ -379,7 +397,9 @@ final class VarDumperTest extends TestCase
     public function jsonDataProvider(): array
     {
         $objectWithClosureInProperty = new stdClass();
+        // @formatter:off
         $objectWithClosureInProperty->a = fn () => 1;
+        // @formatter:on
         $objectWithClosureInPropertyId = spl_object_id($objectWithClosureInProperty);
 
         $emptyObject = new stdClass();
@@ -415,7 +435,7 @@ final class VarDumperTest extends TestCase
         $closureWithNullCollisionOperatorObjectId = spl_object_id($closureWithNullCollisionOperatorObject);
 
         // @formatter:off
-        $closureWithUsualClassNameObject = static fn (VarDumper $date) => new \DateTimeZone('');
+        $closureWithUsualClassNameObject = fn (VarDumper $date) => new \DateTimeZone('');
         // @formatter:on
         $closureWithUsualClassNameObjectId = spl_object_id($closureWithUsualClassNameObject);
 
@@ -444,8 +464,8 @@ final class VarDumperTest extends TestCase
             ],
             'short static function' => [
                 $staticShortFunctionObject,
-                 <<<S
-                {"Closure#{$staticShortFunctionObjectId}":{"public::0":"fn () => 1"}}
+                <<<S
+                {"Closure#{$staticShortFunctionObjectId}":{"public::0":"static fn () => 1"}}
                 S,
             ],
             'function' => [
@@ -456,8 +476,8 @@ final class VarDumperTest extends TestCase
             ],
             'static function' => [
                 $staticFunctionObject,
-                 <<<S
-                {"Closure#{$staticFunctionObjectId}":{"public::0":"function () {\\n            return 1;\\n        }"}}
+                <<<S
+                {"Closure#{$staticFunctionObjectId}":{"public::0":"static function () {\\n            return 1;\\n        }"}}
                 S,
             ],
             'string' => [
@@ -498,7 +518,7 @@ final class VarDumperTest extends TestCase
                     'two',
                     'three',
                 ],
-                '["one","two","three"]'
+                '["one","two","three"]',
             ],
             'array of 3 elements, custom keys' => [
                 [
@@ -506,7 +526,7 @@ final class VarDumperTest extends TestCase
                     'two' => 'two',
                     0 => 'three',
                 ],
-                '{"2":"one","two":"two","0":"three"}'
+                '{"2":"one","two":"two","0":"three"}',
             ],
             'closure in array' => [
                 // @formatter:off
@@ -539,19 +559,19 @@ final class VarDumperTest extends TestCase
                 {"Closure#{$closureWithNullCollisionOperatorObjectId}":{"public::0":"fn () => \$_ENV['var'] ?? null"}}
                 S,
             ],
-            'emoji supported' => [
-                ['emoji' => '🤣'],
-                '{"emoji":"🤣"}',
+            'utf8 supported' => [
+                '🤣',
+                '"🤣"',
             ],
-            'closure supported' => [
+            'closure in property supported' => [
                 $objectWithClosureInProperty,
                 <<<S
                 {"stdClass#{$objectWithClosureInPropertyId}":{"public::a":"fn () => 1"}}
                 S,
             ],
             'binary string' => [
-                ['string' => pack('H*', md5('binary string'))],
-                '{"string":"ɍ��^��\u00191\u0017�]�-f�"}',
+                pack('H*', md5('binary string')),
+                '"ɍ��^��\u00191\u0017�]�-f�"',
             ],
         ];
     }
@@ -579,6 +599,12 @@ final class VarDumperTest extends TestCase
 
         $emptyObject = new stdClass();
         $emptyObjectId = spl_object_id($emptyObject);
+
+        $objectWithClosureInProperty = new stdClass();
+        // @formatter:off
+        $objectWithClosureInProperty->a = fn () => 1;
+        // @formatter:on
+        $objectWithClosureInPropertyId = spl_object_id($objectWithClosureInProperty);
 
         return [
             'custom debug info' => [
@@ -618,7 +644,7 @@ final class VarDumperTest extends TestCase
                 // @formatter:off
                 static fn () => 1,
                 // @formatter:on
-                'fn () => 1',
+                'static fn () => 1',
             ],
             'function' => [
                 function () {
@@ -632,7 +658,7 @@ final class VarDumperTest extends TestCase
                 static function () {
                     return 1;
                 },
-                'function () {
+                'static function () {
                     return 1;
                 }',
             ],
@@ -710,7 +736,7 @@ final class VarDumperTest extends TestCase
                 // @formatter:off
                 static fn (VarDumper $date) => new \DateTimeZone(''),
                 // @formatter:on
-                "fn (\Yiisoft\VarDumper\VarDumper \$date) => new \DateTimeZone('')",
+                "static fn (\Yiisoft\VarDumper\VarDumper \$date) => new \DateTimeZone('')",
             ],
             'class alias' => [
                 // @formatter:off
@@ -729,6 +755,19 @@ final class VarDumperTest extends TestCase
                 fn () => $_ENV['var'] ?? null,
                 // @formatter:on
                 "fn () => \$_ENV['var'] ?? null",
+            ],
+            'utf8 supported' => [
+                '🤣',
+                "'🤣'",
+            ],
+            'closure in property supported' => [
+                $objectWithClosureInProperty,
+                <<<S
+                stdClass#{$objectWithClosureInPropertyId}
+                (
+                    [a] => fn () => 1
+                )
+                S,
             ],
         ];
     }
