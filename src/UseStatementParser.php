@@ -76,7 +76,7 @@ class UseStatementParser
                 $alias = mb_substr($use, $delimiterPosition + 1);
                 $result[$alias] = mb_substr($use, 0, $delimiterPosition);
             } else {
-                $result[substr(strrchr($use, '\'), 1)] = $use;
+                $result[substr(strrchr($use, '\\'), 1)] = $use;
             }
         }
 
