@@ -22,7 +22,7 @@ final class VarDumper
     private $variable;
     private static array $objects = [];
 
-    private ?UseStatementParser $useStatementParser = null;
+    private ?ClosureExporter $closureExporter = null;
 
     private bool $beautify = true;
 
@@ -387,88 +387,17 @@ final class VarDumper
      */
     private function exportClosure(\Closure $closure): string
     {
-        $reflection = new \ReflectionFunction($closure);
-
-        $fileName = $reflection->getFileName();
-        $start = $reflection->getStartLine();
-        $end = $reflection->getEndLine();
-
-        if ($fileName === false || $start === false || $end === false) {
-            return 'function() {/* Error: unable to determine Closure source */}';
+        if ($this->closureExporter === null) {
+            $this->closureExporter = new ClosureExporter();
         }
 
-        --$start;
-        $uses = $this->getUsesParser()->fromFile($fileName);
-
-        $source = implode('', array_slice(file($fileName), $start, $end - $start));
-        $tokens = token_get_all('<?php ' . $source);
-        array_shift($tokens);
-
-        $closureTokens = [];
-        $pendingParenthesisCount = 0;
-        $isShortClosure = false;
-        $buffer = '';
-        foreach ($tokens as $token) {
-            if (!isset($token[0])) {
-                continue;
-            }
-            if (in_array($token[0], [T_FUNCTION, T_FN, T_STATIC], true)) {
-                $closureTokens[] = $token[1];
-                if (!$isShortClosure && $token[0] === T_FN) {
-                    $isShortClosure = true;
-                }
-                continue;
-            }
-            if ($closureTokens !== []) {
-                $readableToken = $token[1] ?? $token;
-                if ($this->isNextTokenIsPartOfNamespace($token)) {
-                    $buffer .= $token[1];
-                    if (!$this->isNextTokenIsPartOfNamespace(next($tokens)) && array_key_exists($buffer, $uses)) {
-                        $readableToken = $uses[$buffer];
-                        $buffer = '';
-                    }
-                }
-                if ($token === '{' || $token === '[') {
-                    $pendingParenthesisCount++;
-                } elseif ($token === '}' || $token === ']') {
-                    if ($pendingParenthesisCount === 0) {
-                        break;
-                    }
-                    $pendingParenthesisCount--;
-                } elseif ($token === ',' || $token === ';') {
-                    if ($pendingParenthesisCount === 0) {
-                        break;
-                    }
-                }
-                $closureTokens[] = $readableToken;
-            }
-        }
-
-        return implode('', $closureTokens);
+        return $this->closureExporter->export($closure);
     }
 
     public function asPhpString(): string
     {
         $this->beautify = false;
         return $this->export();
-    }
-
-    private function getUsesParser(): UseStatementParser
-    {
-        if ($this->useStatementParser === null) {
-            $this->useStatementParser = new UseStatementParser();
-        }
-
-        return $this->useStatementParser;
-    }
-
-    private function isNextTokenIsPartOfNamespace($token): bool
-    {
-        if (!is_array($token)) {
-            return false;
-        }
-
-        return $token[0] === T_STRING || $token[0] === T_NS_SEPARATOR;
     }
 
     private function getObjectDescription(object $object): string
