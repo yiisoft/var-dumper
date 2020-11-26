@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Yiisoft\VarDumper;
 
-class ClosureExporter
+final class ClosureExporter
 {
     private UseStatementParser $useStatementParser;
 
