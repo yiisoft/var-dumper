@@ -363,13 +363,13 @@ final class VarDumperTest extends TestCase
             [
                 $user,
                 <<<S
-                "stdClass#{$objectId}":{"public::id":1}
+                "stdClass#{$objectId}":{"public \$id":1}
                 S,
             ],
             [
                 $decoratedUser,
                 <<<S
-                "stdClass#{$decoratedObjectId}":{"public::id":1,"public::name":"Name","public::originalUser":"object@stdClass#{$objectId}"}
+                "stdClass#{$decoratedObjectId}":{"public \$id":1,"public \$name":"Name","public \$originalUser":"object@stdClass#{$objectId}"}
                 S,
             ],
         ];
@@ -463,25 +463,25 @@ final class VarDumperTest extends TestCase
             'short function' => [
                 $shortFunctionObject,
                 <<<S
-                {"Closure#{$shortFunctionObjectId}":{"public::0":"fn () => 1"}}
+                {"Closure#{$shortFunctionObjectId}":{"public $0":"fn () => 1"}}
                 S,
             ],
             'short static function' => [
                 $staticShortFunctionObject,
                 <<<S
-                {"Closure#{$staticShortFunctionObjectId}":{"public::0":"static fn () => 1"}}
+                {"Closure#{$staticShortFunctionObjectId}":{"public $0":"static fn () => 1"}}
                 S,
             ],
             'function' => [
                 $functionObject,
                 <<<S
-                {"Closure#{$functionObjectId}":{"public::0":"function () {\\n            return 1;\\n        }"}}
+                {"Closure#{$functionObjectId}":{"public $0":"function () {\\n            return 1;\\n        }"}}
                 S,
             ],
             'static function' => [
                 $staticFunctionObject,
                 <<<S
-                {"Closure#{$staticFunctionObjectId}":{"public::0":"static function () {\\n            return 1;\\n        }"}}
+                {"Closure#{$staticFunctionObjectId}":{"public $0":"static function () {\\n            return 1;\\n        }"}}
                 S,
             ],
             'string' => [
@@ -541,25 +541,25 @@ final class VarDumperTest extends TestCase
             'original class name' => [
                 $closureWithUsualClassNameObject,
                 <<<S
-                {"Closure#{$closureWithUsualClassNameObjectId}":{"public::0":"fn (\\\Yiisoft\\\VarDumper\\\VarDumper \$date) => new \\\DateTimeZone('')"}}
+                {"Closure#{$closureWithUsualClassNameObjectId}":{"public $0":"fn (\\\Yiisoft\\\VarDumper\\\VarDumper \$date) => new \\\DateTimeZone('')"}}
                 S,
             ],
             'class alias' => [
                 $closureWithAliasedClassNameObject,
                 <<<S
-                {"Closure#{$closureWithAliasedClassNameObjectId}":{"public::0":"fn (\\\Yiisoft\\\VarDumper\\\VarDumper \$date) => new \\\DateTimeZone('')"}}
+                {"Closure#{$closureWithAliasedClassNameObjectId}":{"public $0":"fn (\\\Yiisoft\\\VarDumper\\\VarDumper \$date) => new \\\DateTimeZone('')"}}
                 S,
             ],
             'namespace alias' => [
                 $closureWithAliasedNamespaceObject,
                 <<<S
-                {"Closure#{$closureWithAliasedNamespaceObjectId}":{"public::0":"fn (\\\Yiisoft\\\VarDumper\\\VarDumper \$date) => new \\\DateTimeZone('')"}}
+                {"Closure#{$closureWithAliasedNamespaceObjectId}":{"public $0":"fn (\\\Yiisoft\\\VarDumper\\\VarDumper \$date) => new \\\DateTimeZone('')"}}
                 S,
             ],
             'closure with null-collision operator' => [
                 $closureWithNullCollisionOperatorObject,
                 <<<S
-                {"Closure#{$closureWithNullCollisionOperatorObjectId}":{"public::0":"fn () => \$_ENV['var'] ?? null"}}
+                {"Closure#{$closureWithNullCollisionOperatorObjectId}":{"public $0":"fn () => \$_ENV['var'] ?? null"}}
                 S,
             ],
             'utf8 supported' => [
@@ -569,7 +569,7 @@ final class VarDumperTest extends TestCase
             'closure in property supported' => [
                 $objectWithClosureInProperty,
                 <<<S
-                {"stdClass#{$objectWithClosureInPropertyId}":{"public::a":"fn () => 1"}}
+                {"stdClass#{$objectWithClosureInPropertyId}":{"public \$a":"fn () => 1"}}
                 S,
             ],
             'binary string' => [

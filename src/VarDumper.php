@@ -194,14 +194,14 @@ final class VarDumper
         $property = str_replace("\0", '::', trim($property));
 
         if (strpos($property, '*::') === 0) {
-            return 'protected::' . substr($property, 3);
+            return 'protected $' . substr($property, 3);
         }
 
         if (($pos = strpos($property, '::')) !== false) {
-            return 'private::' . substr($property, $pos + 2);
+            return 'private $' . substr($property, $pos + 2);
         }
 
-        return 'public::' . $property;
+        return 'public $' . $property;
     }
 
     /**
