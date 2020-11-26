@@ -153,12 +153,13 @@ final class VarDumper
                     break;
                 }
 
-                if (($objectCollapseLevel < $level) && (in_array($var, self::$objects, true))) {
-                    if ($var instanceof \Closure) {
-                        $output = $this->exportClosure($var);
-                    } else {
-                        $output = 'object@' . $objectDescription;
-                    }
+                if ($var instanceof \Closure) {
+                    $output = [$objectDescription => $this->exportClosure($var)];
+                    break;
+                }
+
+                if ($objectCollapseLevel < $level && in_array($var, self::$objects, true)) {
+                    $output = 'object@' . $objectDescription;
                     break;
                 }
 
@@ -166,9 +167,10 @@ final class VarDumper
                 $properties = $this->getObjectProperties($var);
                 if (empty($properties)) {
                     $output[$objectDescription] = '{stateless object}';
+                    break;
                 }
                 foreach ($properties as $name => $value) {
-                    $keyDisplay = $this->normalizeProperty((string)$name);
+                    $keyDisplay = $this->normalizeProperty((string) $name);
                     /**
                      * @psalm-suppress InvalidArrayOffset
                      */
