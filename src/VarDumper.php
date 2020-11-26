@@ -140,44 +140,44 @@ final class VarDumper
                 }
 
                 $output = [];
-                foreach ($var as $key => $value) {
-                    $keyDisplay = str_replace("\0", '::', trim((string)$key));
+                foreach ($var as $name => $value) {
+                    $keyDisplay = str_replace("\0", '::', trim((string)$name));
                     $output[$keyDisplay] = $this->dumpNestedInternal($value, $depth, $level + 1, $objectCollapseLevel);
                 }
 
                 break;
             case 'object':
-                $className = get_class($var);
-                /**
-                 * @psalm-var array<string, array<string, array|string>> $output
-                 */
+                $objectDescription = $this->getObjectDescription($var);
+                if ($depth <= $level) {
+                    $output = $objectDescription . ' (...)';
+                    break;
+                }
+
                 if (($objectCollapseLevel < $level) && (in_array($var, self::$objects, true))) {
                     if ($var instanceof \Closure) {
                         $output = $this->exportClosure($var);
                     } else {
-                        $output = 'object@' . $this->getObjectDescription($var);
+                        $output = 'object@' . $objectDescription;
                     }
-                } elseif ($depth <= $level) {
-                    $output = $className . ' (...)';
-                } else {
-                    $output = [];
-                    $mainKey = $this->getObjectDescription($var);
-                    $dumpValues = $this->getObjectProperties($var);
-                    if (empty($dumpValues)) {
-                        $output[$mainKey] = '{stateless object}';
-                    }
-                    foreach ($dumpValues as $key => $value) {
-                        $keyDisplay = $this->normalizeProperty((string)$key);
-                        /**
-                         * @psalm-suppress InvalidArrayOffset
-                         */
-                        $output[$mainKey][$keyDisplay] = $this->dumpNestedInternal(
-                            $value,
-                            $depth,
-                            $level + 1,
-                            $objectCollapseLevel
-                        );
-                    }
+                    break;
+                }
+
+                $output = [];
+                $properties = $this->getObjectProperties($var);
+                if (empty($properties)) {
+                    $output[$objectDescription] = '{stateless object}';
+                }
+                foreach ($properties as $name => $value) {
+                    $keyDisplay = $this->normalizeProperty((string)$name);
+                    /**
+                     * @psalm-suppress InvalidArrayOffset
+                     */
+                    $output[$objectDescription][$keyDisplay] = $this->dumpNestedInternal(
+                        $value,
+                        $depth,
+                        $level + 1,
+                        $objectCollapseLevel
+                    );
                 }
 
                 break;
