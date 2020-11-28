@@ -345,7 +345,7 @@ final class VarDumperTest extends TestCase
     public function testAsJsonObjectsMap($var, $expectedResult): void
     {
         $exportResult = VarDumper::create($var)->asJsonObjectsMap();
-        $this->assertStringContainsString($expectedResult, $exportResult);
+        $this->assertEquals($expectedResult, $exportResult);
     }
 
     public function asJsonObjectMapDataProvider(): array
@@ -363,13 +363,13 @@ final class VarDumperTest extends TestCase
             [
                 $user,
                 <<<S
-                "stdClass#{$objectId}":{"public \$id":1}
+                [{"stdClass#{$objectId}":{"public \$id":1}}]
                 S,
             ],
             [
                 $decoratedUser,
                 <<<S
-                "stdClass#{$decoratedObjectId}":{"public \$id":1,"public \$name":"Name","public \$originalUser":"object@stdClass#{$objectId}"}
+                [{"stdClass#{$decoratedObjectId}":{"public \$id":1,"public \$name":"Name","public \$originalUser":"object@stdClass#{$objectId}"}},{"stdClass#{$objectId}":{"public \$id":1}}]
                 S,
             ],
         ];

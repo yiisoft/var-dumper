@@ -20,7 +20,7 @@ use Yiisoft\Arrays\ArrayableInterface;
 final class VarDumper
 {
     private $variable;
-    private static array $objects = [];
+    private array $objects = [];
 
     private ?ClosureExporter $closureExporter = null;
 
@@ -87,7 +87,7 @@ final class VarDumper
     {
         $this->buildObjectsCache($this->variable, $depth);
 
-        return $this->asJsonInternal(self::$objects, $prettyPrint, $depth, 1);
+        return $this->asJsonInternal($this->objects, $prettyPrint, $depth, 1);
     }
 
     /**
@@ -116,10 +116,10 @@ final class VarDumper
             return;
         }
         if (is_object($variable)) {
-            if (in_array($variable, self::$objects, true)) {
+            if (in_array($variable, $this->objects, true)) {
                 return;
             }
-            self::$objects[] = $variable;
+            $this->objects[] = $variable;
             $variable = $this->getObjectProperties($variable);
         }
         if (is_array($variable)) {
@@ -158,7 +158,7 @@ final class VarDumper
                     break;
                 }
 
-                if ($objectCollapseLevel < $level && in_array($var, self::$objects, true)) {
+                if ($objectCollapseLevel < $level && in_array($var, $this->objects, true)) {
                     $output = 'object@' . $objectDescription;
                     break;
                 }
@@ -261,7 +261,7 @@ final class VarDumper
                 if ($var instanceof \Closure) {
                     return $this->exportClosure($var);
                 }
-                if (in_array($var, self::$objects, true)) {
+                if (in_array($var, $this->objects, true)) {
                     return $this->getObjectDescription($var) . '(...)';
                 }
 
@@ -269,7 +269,7 @@ final class VarDumper
                     return get_class($var) . '(...)';
                 }
 
-                self::$objects[] = $var;
+                $this->objects[] = $var;
                 $spaces = str_repeat(' ', $level * 4);
                 $output = $this->getObjectDescription($var) . "\n" . $spaces . '(';
                 $objectProperties = $this->getObjectProperties($var);
