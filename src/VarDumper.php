@@ -20,7 +20,7 @@ use Yiisoft\Arrays\ArrayableInterface;
 final class VarDumper
 {
     private $variable;
-    private static array $objects = [];
+    private array $objects = [];
 
     private ?ClosureExporter $closureExporter = null;
 
@@ -87,7 +87,7 @@ final class VarDumper
     {
         $this->buildObjectsCache($this->variable, $depth);
 
-        return $this->asJsonInternal(self::$objects, $prettyPrint, $depth, 1);
+        return $this->asJsonInternal($this->objects, $prettyPrint, $depth, 1);
     }
 
     /**
@@ -116,10 +116,10 @@ final class VarDumper
             return;
         }
         if (is_object($variable)) {
-            if (in_array($variable, self::$objects, true)) {
+            if (in_array($variable, $this->objects, true)) {
                 return;
             }
-            self::$objects[] = $variable;
+            $this->objects[] = $variable;
             $variable = $this->getObjectProperties($variable);
         }
         if (is_array($variable)) {
@@ -140,44 +140,46 @@ final class VarDumper
                 }
 
                 $output = [];
-                foreach ($var as $key => $value) {
-                    $keyDisplay = str_replace("\0", '::', trim((string)$key));
+                foreach ($var as $name => $value) {
+                    $keyDisplay = str_replace("\0", '::', trim((string)$name));
                     $output[$keyDisplay] = $this->dumpNestedInternal($value, $depth, $level + 1, $objectCollapseLevel);
                 }
 
                 break;
             case 'object':
-                $className = get_class($var);
-                /**
-                 * @psalm-var array<string, array<string, array|string>> $output
-                 */
-                if (($objectCollapseLevel < $level) && (in_array($var, self::$objects, true))) {
-                    if ($var instanceof \Closure) {
-                        $output = $this->exportClosure($var);
-                    } else {
-                        $output = 'object@' . $this->getObjectDescription($var);
-                    }
-                } elseif ($depth <= $level) {
-                    $output = $className . ' (...)';
-                } else {
-                    $output = [];
-                    $mainKey = $this->getObjectDescription($var);
-                    $dumpValues = $this->getObjectProperties($var);
-                    if (empty($dumpValues)) {
-                        $output[$mainKey] = '{stateless object}';
-                    }
-                    foreach ($dumpValues as $key => $value) {
-                        $keyDisplay = $this->normalizeProperty((string)$key);
-                        /**
-                         * @psalm-suppress InvalidArrayOffset
-                         */
-                        $output[$mainKey][$keyDisplay] = $this->dumpNestedInternal(
-                            $value,
-                            $depth,
-                            $level + 1,
-                            $objectCollapseLevel
-                        );
-                    }
+                $objectDescription = $this->getObjectDescription($var);
+                if ($depth <= $level) {
+                    $output = $objectDescription . ' (...)';
+                    break;
+                }
+
+                if ($var instanceof \Closure) {
+                    $output = [$objectDescription => $this->exportClosure($var)];
+                    break;
+                }
+
+                if ($objectCollapseLevel < $level && in_array($var, $this->objects, true)) {
+                    $output = 'object@' . $objectDescription;
+                    break;
+                }
+
+                $output = [];
+                $properties = $this->getObjectProperties($var);
+                if (empty($properties)) {
+                    $output[$objectDescription] = '{stateless object}';
+                    break;
+                }
+                foreach ($properties as $name => $value) {
+                    $keyDisplay = $this->normalizeProperty((string) $name);
+                    /**
+                     * @psalm-suppress InvalidArrayOffset
+                     */
+                    $output[$objectDescription][$keyDisplay] = $this->dumpNestedInternal(
+                        $value,
+                        $depth,
+                        $level + 1,
+                        $objectCollapseLevel
+                    );
                 }
 
                 break;
@@ -194,14 +196,14 @@ final class VarDumper
         $property = str_replace("\0", '::', trim($property));
 
         if (strpos($property, '*::') === 0) {
-            return 'protected::' . substr($property, 3);
+            return 'protected $' . substr($property, 3);
         }
 
         if (($pos = strpos($property, '::')) !== false) {
-            return 'private::' . substr($property, $pos + 2);
+            return 'private $' . substr($property, $pos + 2);
         }
 
-        return 'public::' . $property;
+        return 'public $' . $property;
     }
 
     /**
@@ -259,7 +261,7 @@ final class VarDumper
                 if ($var instanceof \Closure) {
                     return $this->exportClosure($var);
                 }
-                if (in_array($var, self::$objects, true)) {
+                if (in_array($var, $this->objects, true)) {
                     return $this->getObjectDescription($var) . '(...)';
                 }
 
@@ -267,7 +269,7 @@ final class VarDumper
                     return get_class($var) . '(...)';
                 }
 
-                self::$objects[] = $var;
+                $this->objects[] = $var;
                 $spaces = str_repeat(' ', $level * 4);
                 $output = $this->getObjectDescription($var) . "\n" . $spaces . '(';
                 $objectProperties = $this->getObjectProperties($var);

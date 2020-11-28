@@ -345,7 +345,7 @@ final class VarDumperTest extends TestCase
     public function testAsJsonObjectsMap($var, $expectedResult): void
     {
         $exportResult = VarDumper::create($var)->asJsonObjectsMap();
-        $this->assertStringContainsString($expectedResult, $exportResult);
+        $this->assertEquals($expectedResult, $exportResult);
     }
 
     public function asJsonObjectMapDataProvider(): array
@@ -363,13 +363,13 @@ final class VarDumperTest extends TestCase
             [
                 $user,
                 <<<S
-                "stdClass#{$objectId}":{"public::id":1}
+                [{"stdClass#{$objectId}":{"public \$id":1}}]
                 S,
             ],
             [
                 $decoratedUser,
                 <<<S
-                "stdClass#{$decoratedObjectId}":{"public::id":1,"public::name":"Name","public::originalUser":"object@stdClass#{$objectId}"}
+                [{"stdClass#{$decoratedObjectId}":{"public \$id":1,"public \$name":"Name","public \$originalUser":"object@stdClass#{$objectId}"}},{"stdClass#{$objectId}":{"public \$id":1}}]
                 S,
             ],
         ];
@@ -405,6 +405,7 @@ final class VarDumperTest extends TestCase
         $objectWithClosureInProperty->a = fn () => 1;
         // @formatter:on
         $objectWithClosureInPropertyId = spl_object_id($objectWithClosureInProperty);
+        $objectWithClosureInPropertyClosureId = spl_object_id($objectWithClosureInProperty->a);
 
         $emptyObject = new stdClass();
         $emptyObjectId = spl_object_id($emptyObject);
@@ -453,6 +454,11 @@ final class VarDumperTest extends TestCase
         // @formatter:on
         $closureWithAliasedNamespaceObjectId = spl_object_id($closureWithAliasedNamespaceObject);
 
+        // @formatter:off
+        $closureInArrayObject = fn () => new \DateTimeZone('');
+        // @formatter:on
+        $closureInArrayObjectId = spl_object_id($closureInArrayObject);
+
         return [
             'empty object' => [
                 $emptyObject,
@@ -463,25 +469,25 @@ final class VarDumperTest extends TestCase
             'short function' => [
                 $shortFunctionObject,
                 <<<S
-                {"Closure#{$shortFunctionObjectId}":{"public::0":"fn () => 1"}}
+                {"Closure#{$shortFunctionObjectId}":"fn () => 1"}
                 S,
             ],
             'short static function' => [
                 $staticShortFunctionObject,
                 <<<S
-                {"Closure#{$staticShortFunctionObjectId}":{"public::0":"static fn () => 1"}}
+                {"Closure#{$staticShortFunctionObjectId}":"static fn () => 1"}
                 S,
             ],
             'function' => [
                 $functionObject,
                 <<<S
-                {"Closure#{$functionObjectId}":{"public::0":"function () {\\n            return 1;\\n        }"}}
+                {"Closure#{$functionObjectId}":"function () {\\n            return 1;\\n        }"}
                 S,
             ],
             'static function' => [
                 $staticFunctionObject,
                 <<<S
-                {"Closure#{$staticFunctionObjectId}":{"public::0":"static function () {\\n            return 1;\\n        }"}}
+                {"Closure#{$staticFunctionObjectId}":"static function () {\\n            return 1;\\n        }"}
                 S,
             ],
             'string' => [
@@ -534,32 +540,34 @@ final class VarDumperTest extends TestCase
             ],
             'closure in array' => [
                 // @formatter:off
-                [fn () => new \DateTimeZone('')],
+                [$closureInArrayObject],
                 // @formatter:on
-                '["fn () => new \\\DateTimeZone(\'\')"]',
+                <<<S
+                [{"Closure#{$closureInArrayObjectId}":"fn () => new \\\DateTimeZone('')"}]
+                S,
             ],
             'original class name' => [
                 $closureWithUsualClassNameObject,
                 <<<S
-                {"Closure#{$closureWithUsualClassNameObjectId}":{"public::0":"fn (\\\Yiisoft\\\VarDumper\\\VarDumper \$date) => new \\\DateTimeZone('')"}}
+                {"Closure#{$closureWithUsualClassNameObjectId}":"fn (\\\Yiisoft\\\VarDumper\\\VarDumper \$date) => new \\\DateTimeZone('')"}
                 S,
             ],
             'class alias' => [
                 $closureWithAliasedClassNameObject,
                 <<<S
-                {"Closure#{$closureWithAliasedClassNameObjectId}":{"public::0":"fn (\\\Yiisoft\\\VarDumper\\\VarDumper \$date) => new \\\DateTimeZone('')"}}
+                {"Closure#{$closureWithAliasedClassNameObjectId}":"fn (\\\Yiisoft\\\VarDumper\\\VarDumper \$date) => new \\\DateTimeZone('')"}
                 S,
             ],
             'namespace alias' => [
                 $closureWithAliasedNamespaceObject,
                 <<<S
-                {"Closure#{$closureWithAliasedNamespaceObjectId}":{"public::0":"fn (\\\Yiisoft\\\VarDumper\\\VarDumper \$date) => new \\\DateTimeZone('')"}}
+                {"Closure#{$closureWithAliasedNamespaceObjectId}":"fn (\\\Yiisoft\\\VarDumper\\\VarDumper \$date) => new \\\DateTimeZone('')"}
                 S,
             ],
             'closure with null-collision operator' => [
                 $closureWithNullCollisionOperatorObject,
                 <<<S
-                {"Closure#{$closureWithNullCollisionOperatorObjectId}":{"public::0":"fn () => \$_ENV['var'] ?? null"}}
+                {"Closure#{$closureWithNullCollisionOperatorObjectId}":"fn () => \$_ENV['var'] ?? null"}
                 S,
             ],
             'utf8 supported' => [
@@ -569,7 +577,7 @@ final class VarDumperTest extends TestCase
             'closure in property supported' => [
                 $objectWithClosureInProperty,
                 <<<S
-                {"stdClass#{$objectWithClosureInPropertyId}":{"public::a":"fn () => 1"}}
+                {"stdClass#{$objectWithClosureInPropertyId}":{"public \$a":{"Closure#{$objectWithClosureInPropertyClosureId}":"fn () => 1"}}}
                 S,
             ],
             'binary string' => [
