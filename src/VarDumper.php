@@ -22,7 +22,7 @@ final class VarDumper
     private $variable;
     private array $objects = [];
 
-    private ?ClosureExporter $closureExporter = null;
+    private static ?ClosureExporter $closureExporter = null;
 
     private bool $beautify = true;
 
@@ -387,11 +387,11 @@ final class VarDumper
      */
     private function exportClosure(\Closure $closure): string
     {
-        if ($this->closureExporter === null) {
-            $this->closureExporter = new ClosureExporter();
+        if (self::$closureExporter === null) {
+            self::$closureExporter = new ClosureExporter();
         }
 
-        return $this->closureExporter->export($closure);
+        return self::$closureExporter->export($closure);
     }
 
     public function asPhpString(): string
