@@ -103,6 +103,7 @@ final class VarDumper
      * PHP 5.4 or above is required to parse the exported value.
      *
      * @throws \ReflectionException
+     *
      * @return string a string representation of the variable
      */
     public function export(): string
