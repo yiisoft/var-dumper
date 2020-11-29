@@ -62,8 +62,7 @@ final class VarDumper
      */
     public function asString(int $depth = 10, bool $highlight = false): string
     {
-        $output = '';
-        $output .= $this->dumpInternal($this->variable, $depth, 0);
+        $output = $this->dumpInternal($this->variable, $depth, 0);
         if ($highlight) {
             $result = highlight_string("<?php\n" . $output, true);
             $output = preg_replace('/&lt;\\?php<br \\/>/', '', $result, 1);
@@ -103,6 +102,7 @@ final class VarDumper
      *
      * PHP 5.4 or above is required to parse the exported value.
      *
+     * @throws \ReflectionException
      * @return string a string representation of the variable
      */
     public function export(): string
@@ -140,8 +140,8 @@ final class VarDumper
                 }
 
                 $output = [];
-                foreach ($var as $name => $value) {
-                    $keyDisplay = str_replace("\0", '::', trim((string)$name));
+                foreach ($var as $key => $value) {
+                    $keyDisplay = str_replace("\0", '::', trim((string)$key));
                     $output[$keyDisplay] = $this->dumpNestedInternal($value, $depth, $level + 1, $objectCollapseLevel);
                 }
 
@@ -169,8 +169,8 @@ final class VarDumper
                     $output[$objectDescription] = '{stateless object}';
                     break;
                 }
-                foreach ($properties as $name => $value) {
-                    $keyDisplay = $this->normalizeProperty((string) $name);
+                foreach ($properties as $key => $value) {
+                    $keyDisplay = $this->normalizeProperty((string) $key);
                     /**
                      * @psalm-suppress InvalidArrayOffset
                      */
@@ -184,6 +184,7 @@ final class VarDumper
 
                 break;
             case 'resource':
+            case 'resource (closed)':
                 $output = $this->getResourceDescription($var);
                 break;
         }
@@ -219,19 +220,11 @@ final class VarDumper
     {
         $type = gettype($var);
         switch ($type) {
-            case 'boolean':
-                return $var ? 'true' : 'false';
-            case 'integer':
-            case 'double':
-                return (string)$var;
-            case 'string':
-                return "'" . addslashes($var) . "'";
             case 'resource':
+            case 'resource (closed)':
                 return '{resource}';
             case 'NULL':
                 return 'null';
-            case 'unknown type':
-                return '{unknown}';
             case 'array':
                 if ($depth <= $level) {
                     return '[...]';
@@ -249,7 +242,7 @@ final class VarDumper
                     if ($this->beautify) {
                         $output .= "\n" . $spaces . '    ';
                     }
-                    $output .= $this->dumpInternal($name, $depth, 0);
+                    $output .= $this->exportVariable($name);
                     $output .= ' => ';
                     $output .= $this->dumpInternal($var[$name], $depth, $level + 1);
                 }
@@ -261,12 +254,8 @@ final class VarDumper
                 if ($var instanceof \Closure) {
                     return $this->exportClosure($var);
                 }
-                if (in_array($var, $this->objects, true)) {
-                    return $this->getObjectDescription($var) . '(...)';
-                }
-
                 if ($depth <= $level) {
-                    return get_class($var) . '(...)';
+                    return $this->getObjectDescription($var) . ' (...)';
                 }
 
                 $this->objects[] = $var;
@@ -274,13 +263,13 @@ final class VarDumper
                 $output = $this->getObjectDescription($var) . "\n" . $spaces . '(';
                 $objectProperties = $this->getObjectProperties($var);
                 foreach ($objectProperties as $name => $value) {
-                    $propertyName = strtr(trim($name), "\0", ':');
+                    $propertyName = strtr(trim((string) $name), "\0", '::');
                     $output .= "\n" . $spaces . "    [$propertyName] => ";
                     $output .= $this->dumpInternal($value, $depth, $level + 1);
                 }
                 return $output . "\n" . $spaces . ')';
             default:
-                return $type;
+                return $this->exportVariable($var);
         }
     }
 
@@ -332,7 +321,7 @@ final class VarDumper
                         $output .= "\n" . $spaces . '    ';
                     }
                     if ($outputKeys) {
-                        $output .= $this->exportInternal($key, 0);
+                        $output .= $this->exportVariable($key);
                         $output .= ' => ';
                     }
                     $output .= $this->exportInternal($variable[$key], $level + 1);
@@ -358,11 +347,7 @@ final class VarDumper
                     }
 
                     if ($variable instanceof \IteratorAggregate) {
-                        $varAsArray = [];
-                        foreach ($variable as $key => $value) {
-                            $varAsArray[$key] = $value;
-                        }
-                        return $this->exportInternal($varAsArray, $level);
+                        return $this->exportInternal(iterator_to_array($variable), $level);
                     }
 
                     if ('__PHP_Incomplete_Class' !== get_class($variable) && method_exists($variable, '__toString')) {
