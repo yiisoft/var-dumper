@@ -4,11 +4,7 @@ declare(strict_types=1);
 
 namespace Yiisoft\VarDumper;
 
-use function define;
 use function defined;
-
-defined('T_NAME_QUALIFIED') || define('T_NAME_QUALIFIED', -4);
-defined('T_NAME_FULLY_QUALIFIED') || define('T_NAME_FULLY_QUALIFIED', -5);
 
 /**
  * UseStatementParser given a PHP file, returns a set of `use` statements from the code.
@@ -60,7 +56,10 @@ final class UseStatementParser
             }
 
             if (
-                $token[0] === T_STRING || $token[0] === T_NS_SEPARATOR || $token[0] === T_NAME_QUALIFIED || $token[0] === T_NAME_FULLY_QUALIFIED
+                $token[0] === T_STRING
+                || $token[0] === T_NS_SEPARATOR
+                || (defined('T_NAME_QUALIFIED') && $token[0] === T_NAME_QUALIFIED)
+                || (defined('T_NAME_FULLY_QUALIFIED') && $token[0] === T_NAME_FULLY_QUALIFIED)
                 || (defined('T_NAME_RELATIVE') && $token[0] === T_NAME_RELATIVE)
             ) {
                 $current .= $token[1];

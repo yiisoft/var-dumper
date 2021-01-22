@@ -10,6 +10,7 @@ use ReflectionFunction;
 
 use function array_key_exists;
 use function array_slice;
+use function defined;
 use function in_array;
 use function is_array;
 
@@ -108,8 +109,8 @@ final class ClosureExporter
 
         return $token[0] === T_STRING
             || $token[0] === T_NS_SEPARATOR
-            || $token[0] === T_NAME_QUALIFIED
-            || $token[0] === T_NAME_FULLY_QUALIFIED
+            || (defined('T_NAME_QUALIFIED') && $token[0] === T_NAME_QUALIFIED)
+            || (defined('T_NAME_FULLY_QUALIFIED') && $token[0] === T_NAME_FULLY_QUALIFIED)
             || (defined('T_NAME_RELATIVE') && $token[0] === T_NAME_RELATIVE);
     }
 }
