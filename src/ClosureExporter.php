@@ -4,6 +4,20 @@ declare(strict_types=1);
 
 namespace Yiisoft\VarDumper;
 
+use Closure;
+use ReflectionException;
+use ReflectionFunction;
+use function array_key_exists;
+use function array_slice;
+use function in_array;
+use function is_array;
+
+/**
+ * ClosureExporter exports PHP {@see \Closure} as a string containing PHP code.
+ *
+ * The string is a valid PHP expression that can be evaluated by PHP parser
+ * and the evaluation result will give back the closure instance.
+ */
 final class ClosureExporter
 {
     private UseStatementParser $useStatementParser;
@@ -13,9 +27,16 @@ final class ClosureExporter
         $this->useStatementParser = new UseStatementParser();
     }
 
-    public function export(\Closure $closure)
+    /**
+     * Export closure as a string containing PHP code.
+     *
+     * @param Closure $closure Closure to export.
+     * @return string String containing PHP code.
+     * @throws ReflectionException
+     */
+    public function export(Closure $closure): string
     {
-        $reflection = new \ReflectionFunction($closure);
+        $reflection = new ReflectionFunction($closure);
 
         $fileName = $reflection->getFileName();
         $start = $reflection->getStartLine();

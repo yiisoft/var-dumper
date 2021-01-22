@@ -97,7 +97,7 @@ final class VarDumper
     }
 
     /**
-     * Exports a variable as a string representation.
+     * Exports a variable as a string containing PHP code.
      *
      * The string is a valid PHP expression that can be evaluated by PHP parser
      * and the evaluation result will give back the variable value.

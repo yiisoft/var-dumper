@@ -4,8 +4,15 @@ declare(strict_types=1);
 
 namespace Yiisoft\VarDumper;
 
+/**
+ * UseStatementParser given a PHP file, returns a set of `use` statements from the code.
+ */
 final class UseStatementParser
 {
+    /**
+     * @param string $file File to read.
+     * @return array Use statements data.
+     */
     public function fromFile(string $file): array
     {
         $tokens = token_get_all(file_get_contents($file));
@@ -26,6 +33,12 @@ final class UseStatementParser
         return $uses;
     }
 
+    /**
+     * Normalizes raw tokens into uniform use statement data.
+     *
+     * @param array $tokens Raw tokens.
+     * @return array Normalized use statement data.
+     */
     private function normalizeUse(array $tokens): array
     {
         $commonNamespace = '\\';
