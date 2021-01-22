@@ -49,13 +49,11 @@ and the evaluation result will give back the variable value, use the following c
 
 ```php
 $string = \Yiisoft\VarDumper\VarDumper::create($variable)->export();
-$string = \Yiisoft\VarDumper\VarDumper::create($variable)->asPhpString();
 ```
 
 It is similar to `var_export()` but uses short array syntax, handles closures, and serializes objects.
 
-In the above `export()` will give you nicely formatted code and `asPhpString()` will give you shorter version without
-any formatting applied.
+In the above `export()` will give you nicely formatted code. You can remove formatting by passing `false` as an argument.
 
 ### Exporting as JSON
 

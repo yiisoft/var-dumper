@@ -34,11 +34,6 @@ final class VarDumper
     private static ?ClosureExporter $closureExporter = null;
 
     /**
-     * @var bool Whatever to format exported code.
-     */
-    private bool $beautify = true;
-
-    /**
      * @param mixed $variable Variable to dump.
      */
     private function __construct($variable)
@@ -84,7 +79,7 @@ final class VarDumper
      */
     public function asString(int $depth = 10, bool $highlight = false): string
     {
-        $output = $this->dumpInternal($this->variable, $depth, 0);
+        $output = $this->dumpInternal($this->variable, true, $depth, 0);
         if ($highlight) {
             $result = highlight_string("<?php\n" . $output, true);
             $output = preg_replace('/&lt;\\?php<br \\/>/', '', $result, 1);
@@ -139,13 +134,13 @@ final class VarDumper
      * It also handles closures with {@see ClosureExporter} and objects
      * by using the PHP functions {@see serialize()} and {@see unserialize()}.
      *
+     * @param bool $format Whatever to format code.
+     * @return string A PHP code representation of the variable.
      * @throws \ReflectionException
-     *
-     * @return string A string representation of the variable.
      */
-    public function export(): string
+    public function export(bool $format = true): string
     {
-        return $this->exportInternal($this->variable, 0);
+        return $this->exportInternal($this->variable, $format, 0);
     }
 
     private function buildObjectsCache($variable, int $depth, int $level = 0): void
@@ -247,14 +242,14 @@ final class VarDumper
 
     /**
      * @param mixed $var Variable to be dumped.
-     * @param int $depth
-     * @param int $level Depth level.
-     *
-     * @throws \ReflectionException
+     * @param bool $format Whatever to format code.
+     * @param int $depth Maximum depth.
+     * @param int $level Current depth.
      *
      * @return string
+     * @throws \ReflectionException
      */
-    private function dumpInternal($var, int $depth, int $level): string
+    private function dumpInternal($var, bool $format, int $depth, int $level): string
     {
         $type = gettype($var);
         switch ($type) {
@@ -277,15 +272,15 @@ final class VarDumper
                 $spaces = str_repeat(' ', $level * 4);
                 $output .= '[';
                 foreach ($keys as $name) {
-                    if ($this->beautify) {
+                    if ($format) {
                         $output .= "\n" . $spaces . '    ';
                     }
                     $output .= $this->exportVariable($name);
                     $output .= ' => ';
-                    $output .= $this->dumpInternal($var[$name], $depth, $level + 1);
+                    $output .= $this->dumpInternal($var[$name], $format, $depth, $level + 1);
                 }
 
-                return $this->beautify
+                return $format
                     ? $output . "\n" . $spaces . ']'
                     : $output . ']';
             case 'object':
@@ -303,7 +298,7 @@ final class VarDumper
                 foreach ($objectProperties as $name => $value) {
                     $propertyName = strtr(trim((string) $name), "\0", '::');
                     $output .= "\n" . $spaces . "    [$propertyName] => ";
-                    $output .= $this->dumpInternal($value, $depth, $level + 1);
+                    $output .= $this->dumpInternal($value, $format, $depth, $level + 1);
                 }
                 return $output . "\n" . $spaces . ')';
             default:
@@ -334,13 +329,13 @@ final class VarDumper
 
     /**
      * @param mixed $variable Variable to be exported.
-     * @param int $level Depth level.
+     * @param bool $format Whatever to format code.
+     * @param int $level Current depth.
      *
+     * @return string
      * @throws \ReflectionException
-     *
-     *@return string
      */
-    private function exportInternal($variable, int $level): string
+    private function exportInternal($variable, bool $format, int $level): string
     {
         switch (gettype($variable)) {
             case 'NULL':
@@ -355,19 +350,19 @@ final class VarDumper
                 $spaces = str_repeat(' ', $level * 4);
                 $output = '[';
                 foreach ($keys as $key) {
-                    if ($this->beautify) {
+                    if ($format) {
                         $output .= "\n" . $spaces . '    ';
                     }
                     if ($outputKeys) {
                         $output .= $this->exportVariable($key);
                         $output .= ' => ';
                     }
-                    $output .= $this->exportInternal($variable[$key], $level + 1);
-                    if ($this->beautify || next($keys) !== false) {
+                    $output .= $this->exportInternal($variable[$key], $format, $level + 1);
+                    if ($format || next($keys) !== false) {
                         $output .= ',';
                     }
                 }
-                return $this->beautify
+                return $format
                     ? $output . "\n" . $spaces . ']'
                     : $output . ']';
             case 'object':
@@ -381,11 +376,11 @@ final class VarDumper
                     // Serialize may fail, for example: if object contains a `\Closure` instance
                     // so we use a fallback.
                     if ($variable instanceof ArrayableInterface) {
-                        return $this->exportInternal($variable->toArray(), $level);
+                        return $this->exportInternal($variable->toArray(), $format, $level);
                     }
 
                     if ($variable instanceof IteratorAggregate) {
-                        return $this->exportInternal(iterator_to_array($variable), $level);
+                        return $this->exportInternal(iterator_to_array($variable), $format, $level);
                     }
 
                     if ('__PHP_Incomplete_Class' !== get_class($variable) && method_exists($variable, '__toString')) {
@@ -415,21 +410,6 @@ final class VarDumper
         }
 
         return self::$closureExporter->export($closure);
-    }
-
-    /**
-     * Export variable as PHP code string.
-     *
-     * @see export()
-     *
-     * @throws \ReflectionException
-     *
-     * @return string
-     */
-    public function asPhpString(): string
-    {
-        $this->beautify = false;
-        return $this->export();
     }
 
     private function getObjectDescription(object $object): string
