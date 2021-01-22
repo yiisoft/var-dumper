@@ -9,10 +9,18 @@ use ReflectionException;
 use ReflectionFunction;
 
 use function array_key_exists;
+use function array_filter;
+use function array_pop;
+use function array_shift;
 use function array_slice;
 use function defined;
+use function explode;
+use function implode;
 use function in_array;
 use function is_array;
+use function strpos;
+use function token_get_all;
+use function version_compare;
 
 /**
  * ClosureExporter exports PHP {@see \Closure} as a string containing PHP code.
@@ -76,8 +84,18 @@ final class ClosureExporter
                 $readableToken = $token[1] ?? $token;
                 if ($this->isNextTokenIsPartOfNamespace($token)) {
                     $buffer .= $token[1];
-                    // HERE we need to match partially because now NS can be a single token in PHP 8
-                    if (array_key_exists($buffer, $uses) && !$this->isNextTokenIsPartOfNamespace(next($tokens))) {
+                    if (
+                        version_compare(PHP_VERSION, '8.0.0', '>=')
+                        && $buffer !== '\\'
+                        && strpos($buffer, '\\') !== false
+                    ) {
+                        $usesKeys = array_filter(explode('\\', $buffer));
+                        $buffer = array_pop($usesKeys);
+                    }
+                    if (
+                        array_key_exists($buffer, $uses)
+                        && !$this->isNextTokenIsPartOfNamespace(next($tokens))
+                    ) {
                         $readableToken = $uses[$buffer];
                         $buffer = '';
                     }

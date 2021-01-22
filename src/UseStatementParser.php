@@ -54,7 +54,6 @@ final class UseStatementParser
             if (!isset($token[0])) {
                 continue;
             }
-
             if (
                 $token[0] === T_STRING
                 || $token[0] === T_NS_SEPARATOR
