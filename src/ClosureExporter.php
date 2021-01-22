@@ -74,7 +74,7 @@ final class ClosureExporter
                 $readableToken = $token[1] ?? $token;
                 if ($this->isNextTokenIsPartOfNamespace($token)) {
                     $buffer .= $token[1];
-                    if (!$this->isNextTokenIsPartOfNamespace(next($tokens)) && array_key_exists($buffer, $uses)) {
+                    if (array_key_exists($buffer, $uses) && !$this->isNextTokenIsPartOfNamespace(next($tokens))) {
                         $readableToken = $uses[$buffer];
                         $buffer = '';
                     }
