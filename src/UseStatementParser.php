@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Yiisoft\VarDumper;
 
-class UseStatementParser
+final class UseStatementParser
 {
     public function fromFile(string $file): array
     {
