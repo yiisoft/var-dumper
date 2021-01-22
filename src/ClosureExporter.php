@@ -74,6 +74,7 @@ final class ClosureExporter
                 $readableToken = $token[1] ?? $token;
                 if ($this->isNextTokenIsPartOfNamespace($token)) {
                     $buffer .= $token[1];
+                    // HERE we need to match partially because now NS can be a single token in PHP 8
                     if (array_key_exists($buffer, $uses) && !$this->isNextTokenIsPartOfNamespace(next($tokens))) {
                         $readableToken = $uses[$buffer];
                         $buffer = '';
