@@ -5,20 +5,25 @@ declare(strict_types=1);
 namespace Yiisoft\VarDumper;
 
 use Yiisoft\Arrays\ArrayableInterface;
+use function get_class;
+use function in_array;
+use function is_array;
+use function is_object;
 
 /**
- * VarDumper is intended to replace the PHP functions var_dump and print_r.
- * It can correctly identify the recursively referenced objects in a complex
- * object structure. It also has a recursive depth control to avoid indefinite
- * recursive display of some peculiar variables.
+ * VarDumper provides enhanced versions of the PHP functions {@see var_dump()}, {@see print_r()} and {@see json_encode()}:
  *
- * VarDumper can be used as follows,
- *
- * ```php
- * VarDumper::dump($var);
+ * - It can correctly identify the recursively referenced objects in a complex object structure.
+ * - It has a recursive depth control to avoid indefinite recursive display of some peculiar variables.
+ * - It can highlight output.
+ * - It can pretty-print output.
+ * - It can export closures and objects.
  */
 final class VarDumper
 {
+    /**
+     * @var mixed
+     */
     private $variable;
     private array $objects = [];
 
@@ -38,12 +43,13 @@ final class VarDumper
 
     /**
      * Displays a variable.
-     * This method achieves the similar functionality as var_dump and print_r
-     * but is more robust when handling complex objects such as Yii controllers.
      *
-     * @param mixed $variable variable to be dumped
-     * @param int $depth maximum depth that the dumper should go into the variable. Defaults to 10.
-     * @param bool $highlight whether the result should be syntax-highlighted
+     * This method achieves the similar functionality as {@see var_dump()} and {@see print_r()}
+     * but is more robust when handling complex objects.
+     *
+     * @param mixed $variable Variable to be dumped.
+     * @param int $depth Maximum depth that the dumper should go into the variable. Defaults to 10.
+     * @param bool $highlight Whether the result should be syntax-highlighted.
      */
     public static function dump($variable, int $depth = 10, bool $highlight = false): void
     {
@@ -52,13 +58,14 @@ final class VarDumper
 
     /**
      * Dumps a variable in terms of a string.
-     * This method achieves the similar functionality as var_dump and print_r
-     * but is more robust when handling complex objects such as Yii controllers.
      *
-     * @param int $depth maximum depth that the dumper should go into the variable. Defaults to 10.
-     * @param bool $highlight whether the result should be syntax-highlighted
+     * This method achieves the similar functionality as {@see var_dump()} and {@see print_r()}
+     * but is more robust when handling complex objects.
      *
-     * @return string the string representation of the variable
+     * @param int $depth Maximum depth that the dumper should go into the variable. Defaults to 10.
+     * @param bool $highlight Whether the result should be syntax-highlighted.
+     *
+     * @return string The string representation of the variable.
      */
     public function asString(int $depth = 10, bool $highlight = false): string
     {
@@ -95,16 +102,15 @@ final class VarDumper
      * The string is a valid PHP expression that can be evaluated by PHP parser
      * and the evaluation result will give back the variable value.
      *
-     * This method is similar to `var_export()`. The main difference is that
+     * This method is similar to {@see var_export()}. The main difference is that
      * it generates more compact string representation using short array syntax.
      *
-     * It also handles objects by using the PHP functions serialize() and unserialize().
-     *
-     * PHP 5.4 or above is required to parse the exported value.
+     * It also handles closures with {@see ClosureExporter} and objects
+     * by using the PHP functions {@see serialize()} and {@see unserialize()}.
      *
      * @throws \ReflectionException
      *
-     * @return string a string representation of the variable
+     * @return string A string representation of the variable.
      */
     public function export(): string
     {
@@ -209,9 +215,9 @@ final class VarDumper
     }
 
     /**
-     * @param mixed $var variable to be dumped
+     * @param mixed $var Variable to be dumped.
      * @param int $depth
-     * @param int $level depth level
+     * @param int $level Depth level.
      *
      * @throws \ReflectionException
      *
@@ -296,8 +302,8 @@ final class VarDumper
     }
 
     /**
-     * @param mixed $variable variable to be exported
-     * @param int $level depth level
+     * @param mixed $variable Variable to be exported.
+     * @param int $level Depth level.
      *
      * @throws \ReflectionException
      *
@@ -341,8 +347,8 @@ final class VarDumper
                 try {
                     return 'unserialize(' . $this->exportVariable(serialize($variable)) . ')';
                 } catch (\Exception $e) {
-                    // serialize may fail, for example: if object contains a `\Closure` instance
-                    // so we use a fallback
+                    // Serialize may fail, for example: if object contains a `\Closure` instance
+                    // so we use a fallback.
                     if ($variable instanceof ArrayableInterface) {
                         return $this->exportInternal($variable->toArray(), $level);
                     }
@@ -363,9 +369,9 @@ final class VarDumper
     }
 
     /**
-     * Exports a [[Closure]] instance.
+     * Exports a {@see \Closure} instance.
      *
-     * @param \Closure $closure closure instance.
+     * @param \Closure $closure Closure instance.
      *
      * @throws \ReflectionException
      *
