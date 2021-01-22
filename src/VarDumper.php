@@ -135,8 +135,10 @@ final class VarDumper
      * by using the PHP functions {@see serialize()} and {@see unserialize()}.
      *
      * @param bool $format Whatever to format code.
-     * @return string A PHP code representation of the variable.
+     *
      * @throws \ReflectionException
+     *
+     * @return string A PHP code representation of the variable.
      */
     public function export(bool $format = true): string
     {
@@ -246,8 +248,9 @@ final class VarDumper
      * @param int $depth Maximum depth.
      * @param int $level Current depth.
      *
-     * @return string
      * @throws \ReflectionException
+     *
+     * @return string
      */
     private function dumpInternal($var, bool $format, int $depth, int $level): string
     {
@@ -332,8 +335,9 @@ final class VarDumper
      * @param bool $format Whatever to format code.
      * @param int $level Current depth.
      *
-     * @return string
      * @throws \ReflectionException
+     *
+     * @return string
      */
     private function exportInternal($variable, bool $format, int $level): string
     {
