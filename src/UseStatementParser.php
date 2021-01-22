@@ -11,6 +11,7 @@ final class UseStatementParser
 {
     /**
      * @param string $file File to read.
+     *
      * @return array Use statements data.
      */
     public function fromFile(string $file): array
@@ -37,6 +38,7 @@ final class UseStatementParser
      * Normalizes raw tokens into uniform use statement data.
      *
      * @param array $tokens Raw tokens.
+     *
      * @return array Normalized use statement data.
      */
     private function normalizeUse(array $tokens): array

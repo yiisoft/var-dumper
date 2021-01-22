@@ -31,8 +31,10 @@ final class ClosureExporter
      * Export closure as a string containing PHP code.
      *
      * @param Closure $closure Closure to export.
-     * @return string String containing PHP code.
+     *
      * @throws ReflectionException
+     *
+     * @return string String containing PHP code.
      */
     public function export(Closure $closure): string
     {
