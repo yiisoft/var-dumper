@@ -25,11 +25,11 @@ may highlight syntax, export closures and output as JSON.
 In case you want to echo a string representing variable contents use the following code:
 
 ```php
-\Yiisoft\VarDumper\VarDumper::dump($variable, 10, true);
+\Yiisoft\VarDumper\VarDumper::dump($variable);
 ```
 
-That is useful for quick debugging. `10` is maximum recursion depth and `true` is telling dumper to
-highlight syntax.
+That is useful for quick debugging. By default, it goes deep `10` levels into variable and highlights syntax. You may
+adjust these settings via second and third argument of the method respectively.
 
 ### Getting a string
 

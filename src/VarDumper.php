@@ -66,7 +66,7 @@ final class VarDumper
      * @param int $depth Maximum depth that the dumper should go into the variable. Defaults to 10.
      * @param bool $highlight Whether the result should be syntax-highlighted.
      */
-    public static function dump($variable, int $depth = 10, bool $highlight = false): void
+    public static function dump($variable, int $depth = 10, bool $highlight = true): void
     {
         echo self::create($variable)->asString($depth, $highlight);
     }
