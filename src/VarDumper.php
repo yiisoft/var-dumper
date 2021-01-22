@@ -21,7 +21,7 @@ use function is_object;
  * - Recursively control depth to avoid indefinite recursive display of some peculiar variables.
  * - Export closures and objects.
  * - Highlight output.
- * - Pretty-print output.
+ * - Format output.
  */
 final class VarDumper
 {
@@ -98,13 +98,13 @@ final class VarDumper
      * Export variable as JSON.
      *
      * @param int $depth Maximum depth that the dumper should go into the variable.
-     * @param bool $prettyPrint Whatever to format exported code.
+     * @param bool $format Whatever to format exported code.
      *
      * @return string JSON string.
      */
-    public function asJson(int $depth = 50, bool $prettyPrint = false): string
+    public function asJson(int $depth = 50, bool $format = false): string
     {
-        return $this->asJsonInternal($this->variable, $prettyPrint, $depth, 0);
+        return $this->asJsonInternal($this->variable, $format, $depth, 0);
     }
 
     /**
@@ -426,11 +426,11 @@ final class VarDumper
         return var_export($variable, true);
     }
 
-    private function asJsonInternal($variable, bool $prettyPrint, int $depth, int $objectCollapseLevel)
+    private function asJsonInternal($variable, bool $format, int $depth, int $objectCollapseLevel)
     {
         $options = JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE;
 
-        if ($prettyPrint) {
+        if ($format) {
             $options |= JSON_PRETTY_PRINT;
         }
 
