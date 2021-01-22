@@ -61,7 +61,7 @@ final class UseStatementParser
 
             if (
                 $token[0] === T_STRING || $token[0] === T_NS_SEPARATOR || $token[0] === T_NAME_QUALIFIED || $token[0] === T_NAME_FULLY_QUALIFIED
-                || (version_compare(PHP_VERSION, '8.0.0', '>=') && $token[0] === T_NAME_RELATIVE)
+                || (defined('T_NAME_RELATIVE') && $token[0] === T_NAME_RELATIVE)
             ) {
                 $current .= $token[1];
                 continue;

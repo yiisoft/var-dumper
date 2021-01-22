@@ -106,14 +106,10 @@ final class ClosureExporter
             return false;
         }
 
-        if ($token[0] === T_STRING || $token[0] === T_NS_SEPARATOR || $token[0] === T_NAME_QUALIFIED || $token[0] === T_NAME_FULLY_QUALIFIED) {
-            return true;
-        }
-
-        if (version_compare(PHP_VERSION, '8.0.0', '>=')) {
-            return $token[0] === T_NAME_RELATIVE;
-        }
-
-        return false;
+        return $token[0] === T_STRING
+            || $token[0] === T_NS_SEPARATOR
+            || $token[0] === T_NAME_QUALIFIED
+            || $token[0] === T_NAME_FULLY_QUALIFIED
+            || (defined('T_NAME_RELATIVE') && $token[0] === T_NAME_RELATIVE);
     }
 }
