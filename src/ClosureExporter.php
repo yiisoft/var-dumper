@@ -7,6 +7,7 @@ namespace Yiisoft\VarDumper;
 use Closure;
 use ReflectionException;
 use ReflectionFunction;
+
 use function array_key_exists;
 use function array_slice;
 use function in_array;
@@ -105,6 +106,14 @@ final class ClosureExporter
             return false;
         }
 
-        return $token[0] === T_STRING || $token[0] === T_NS_SEPARATOR || $token[0] === T_NAME_QUALIFIED || $token[0] === T_NAME_FULLY_QUALIFIED || $token[0] === T_NAME_RELATIVE;
+        if ($token[0] === T_STRING || $token[0] === T_NS_SEPARATOR || $token[0] === T_NAME_QUALIFIED || $token[0] === T_NAME_FULLY_QUALIFIED) {
+            return true;
+        }
+
+        if (version_compare(PHP_VERSION, '8.0.0', '>=')) {
+            return $token[0] === T_NAME_RELATIVE;
+        }
+
+        return false;
     }
 }
