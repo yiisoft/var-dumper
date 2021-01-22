@@ -104,6 +104,6 @@ final class ClosureExporter
             return false;
         }
 
-        return $token[0] === T_STRING || $token[0] === T_NS_SEPARATOR;
+        return $token[0] === T_STRING || $token[0] === T_NS_SEPARATOR || $token[0] === T_NAME_QUALIFIED || $token[0] === T_NAME_FULLY_QUALIFIED || $token[0] === T_NAME_RELATIVE;
     }
 }
