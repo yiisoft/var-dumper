@@ -48,6 +48,7 @@ final class VarDumper
 
     /**
      * @param mixed $variable Variable to dump.
+     *
      * @return static An instance containing variable to dump.
      */
     public static function create($variable): self
@@ -103,6 +104,7 @@ final class VarDumper
      *
      * @param int $depth Maximum depth that the dumper should go into the variable.
      * @param bool $prettyPrint Whatever to format exported code.
+     *
      * @return string JSON string.
      */
     public function asJson(int $depth = 50, bool $prettyPrint = false): string
@@ -115,6 +117,7 @@ final class VarDumper
      *
      * @param int $depth Maximum depth that the dumper should go into the variable.
      * @param bool $prettyPrint Whatever to format exported code.
+     *
      * @return string JSON string containing summary.
      */
     public function asJsonObjectsMap(int $depth = 50, bool $prettyPrint = false): string
@@ -419,8 +422,9 @@ final class VarDumper
      *
      * @see export()
      *
-     * @return string
      * @throws \ReflectionException
+     *
+     * @return string
      */
     public function asPhpString(): string
     {
