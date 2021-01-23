@@ -15,7 +15,7 @@
 [![static analysis](https://github.com/yiisoft/var-dumper/workflows/static%20analysis/badge.svg)](https://github.com/yiisoft/var-dumper/actions?query=workflow%3A%22static+analysis%22)
 [![type-coverage](https://shepherd.dev/github/yiisoft/var-dumper/coverage.svg)](https://shepherd.dev/github/yiisoft/var-dumper)
 
-`VarDumper` enhances functionality of `var_dump()`, `print_r()`, and `var_export()`. It is dealing with recursive references,
+`VarDumper` enhances functionality of `var_dump()` and `var_export()`. It is dealing with recursive references,
 may highlight syntax, export closures and output as JSON.
 
 ## General usage
@@ -31,7 +31,7 @@ In case you want to echo a string representing variable contents use the followi
 That is useful for quick debugging. By default, it goes deep `10` levels into variable and highlights syntax. You may
 adjust these settings via second and third argument of the method respectively.
 
-### Getting a string
+### Formatting debug string
 
 To get a string representing variable contents, same as above but without `echo`:
 
@@ -54,18 +54,6 @@ $string = \Yiisoft\VarDumper\VarDumper::create($variable)->export();
 It is similar to `var_export()` but uses short array syntax, handles closures, and serializes objects.
 
 In the above `export()` will give you nicely formatted code. You can remove formatting by passing `false` as an argument.
-
-### Exporting as JSON
-
-In order to export value as JSON, use the following:
-
-```php
-$json = \Yiisoft\VarDumper\VarDumper::create($variable)->asJson(50, true);
-$jsonMap = \Yiisoft\VarDumper\VarDumper::create($variable)->asJsonObjectsMap(50, true);
-```
-
-`50` above is depth of export, `true` tells the method to output formatted JSON. `asJsonObjectsMap()` is a special
-method that doesn't go deep into object structure but returns you a summary of topmost items.
 
 ## Unit testing
 
