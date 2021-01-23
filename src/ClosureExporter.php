@@ -4,6 +4,29 @@ declare(strict_types=1);
 
 namespace Yiisoft\VarDumper;
 
+use Closure;
+use ReflectionException;
+use ReflectionFunction;
+
+use function array_key_exists;
+use function array_filter;
+use function array_pop;
+use function array_shift;
+use function array_slice;
+use function defined;
+use function explode;
+use function implode;
+use function in_array;
+use function is_array;
+use function strpos;
+use function token_get_all;
+
+/**
+ * ClosureExporter exports PHP {@see \Closure} as a string containing PHP code.
+ *
+ * The string is a valid PHP expression that can be evaluated by PHP parser
+ * and the evaluation result will give back the closure instance.
+ */
 final class ClosureExporter
 {
     private UseStatementParser $useStatementParser;
@@ -13,9 +36,18 @@ final class ClosureExporter
         $this->useStatementParser = new UseStatementParser();
     }
 
-    public function export(\Closure $closure)
+    /**
+     * Export closure as a string containing PHP code.
+     *
+     * @param Closure $closure Closure to export.
+     *
+     * @throws ReflectionException
+     *
+     * @return string String containing PHP code.
+     */
+    public function export(Closure $closure): string
     {
-        $reflection = new \ReflectionFunction($closure);
+        $reflection = new ReflectionFunction($closure);
 
         $fileName = $reflection->getFileName();
         $start = $reflection->getStartLine();
@@ -51,7 +83,18 @@ final class ClosureExporter
                 $readableToken = $token[1] ?? $token;
                 if ($this->isNextTokenIsPartOfNamespace($token)) {
                     $buffer .= $token[1];
-                    if (!$this->isNextTokenIsPartOfNamespace(next($tokens)) && array_key_exists($buffer, $uses)) {
+                    if (
+                        PHP_VERSION_ID >= 80000
+                        && $buffer !== '\\'
+                        && strpos($buffer, '\\') !== false
+                    ) {
+                        $usesKeys = array_filter(explode('\\', $buffer));
+                        $buffer = array_pop($usesKeys);
+                    }
+                    if (
+                        array_key_exists($buffer, $uses)
+                        && !$this->isNextTokenIsPartOfNamespace(next($tokens))
+                    ) {
                         $readableToken = $uses[$buffer];
                         $buffer = '';
                     }
@@ -81,6 +124,10 @@ final class ClosureExporter
             return false;
         }
 
-        return $token[0] === T_STRING || $token[0] === T_NS_SEPARATOR;
+        return $token[0] === T_STRING
+            || $token[0] === T_NS_SEPARATOR
+            || (defined('T_NAME_QUALIFIED') && $token[0] === T_NAME_QUALIFIED)
+            || (defined('T_NAME_FULLY_QUALIFIED') && $token[0] === T_NAME_FULLY_QUALIFIED)
+            || (defined('T_NAME_RELATIVE') && $token[0] === T_NAME_RELATIVE);
     }
 }

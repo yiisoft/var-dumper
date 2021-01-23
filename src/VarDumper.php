@@ -4,65 +4,82 @@ declare(strict_types=1);
 
 namespace Yiisoft\VarDumper;
 
+use Closure;
+use Exception;
+use IteratorAggregate;
 use Yiisoft\Arrays\ArrayableInterface;
+use function get_class;
+use function in_array;
+use function is_array;
+use function is_object;
 
 /**
- * VarDumper is intended to replace the PHP functions var_dump and print_r.
- * It can correctly identify the recursively referenced objects in a complex
- * object structure. It also has a recursive depth control to avoid indefinite
- * recursive display of some peculiar variables.
+ * VarDumper provides enhanced versions of the PHP functions {@see var_dump()}, {@see print_r()} and {@see json_encode()}.
+ * It can:
  *
- * VarDumper can be used as follows,
- *
- * ```php
- * VarDumper::dump($var);
+ * - Correctly identify the recursively referenced objects in a complex object structure.
+ * - Recursively control depth to avoid indefinite recursive display of some peculiar variables.
+ * - Export closures and objects.
+ * - Highlight output.
+ * - Format output.
  */
 final class VarDumper
 {
+    /**
+     * @var mixed Variable to dump.
+     */
     private $variable;
     private array $objects = [];
 
     private static ?ClosureExporter $closureExporter = null;
 
-    private bool $beautify = true;
-
+    /**
+     * @param mixed $variable Variable to dump.
+     */
     private function __construct($variable)
     {
         $this->variable = $variable;
     }
 
+    /**
+     * @param mixed $variable Variable to dump.
+     *
+     * @return static An instance containing variable to dump.
+     */
     public static function create($variable): self
     {
         return new self($variable);
     }
 
     /**
-     * Displays a variable.
-     * This method achieves the similar functionality as var_dump and print_r
-     * but is more robust when handling complex objects such as Yii controllers.
+     * Prints a variable.
      *
-     * @param mixed $variable variable to be dumped
-     * @param int $depth maximum depth that the dumper should go into the variable. Defaults to 10.
-     * @param bool $highlight whether the result should be syntax-highlighted
+     * This method achieves the similar functionality as {@see var_dump()} and {@see print_r()}
+     * but is more robust when handling complex objects.
+     *
+     * @param mixed $variable Variable to be dumped.
+     * @param int $depth Maximum depth that the dumper should go into the variable. Defaults to 10.
+     * @param bool $highlight Whether the result should be syntax-highlighted.
      */
-    public static function dump($variable, int $depth = 10, bool $highlight = false): void
+    public static function dump($variable, int $depth = 10, bool $highlight = true): void
     {
         echo self::create($variable)->asString($depth, $highlight);
     }
 
     /**
      * Dumps a variable in terms of a string.
-     * This method achieves the similar functionality as var_dump and print_r
-     * but is more robust when handling complex objects such as Yii controllers.
      *
-     * @param int $depth maximum depth that the dumper should go into the variable. Defaults to 10.
-     * @param bool $highlight whether the result should be syntax-highlighted
+     * This method achieves the similar functionality as {@see var_dump()} and {@see print_r()}
+     * but is more robust when handling complex objects.
      *
-     * @return string the string representation of the variable
+     * @param int $depth Maximum depth that the dumper should go into the variable. Defaults to 10.
+     * @param bool $highlight Whether the result should be syntax-highlighted.
+     *
+     * @return string The string representation of the variable.
      */
     public function asString(int $depth = 10, bool $highlight = false): string
     {
-        $output = $this->dumpInternal($this->variable, $depth, 0);
+        $output = $this->dumpInternal($this->variable, true, $depth, 0);
         if ($highlight) {
             $result = highlight_string("<?php\n" . $output, true);
             $output = preg_replace('/&lt;\\?php<br \\/>/', '', $result, 1);
@@ -77,11 +94,27 @@ final class VarDumper
         return $this->dumpNestedInternal($variable, $depth, 0, $objectCollapseLevel);
     }
 
-    public function asJson(int $depth = 50, bool $prettyPrint = false): string
+    /**
+     * Export variable as JSON.
+     *
+     * @param int $depth Maximum depth that the dumper should go into the variable.
+     * @param bool $format Whatever to format exported code.
+     *
+     * @return string JSON string.
+     */
+    public function asJson(int $depth = 50, bool $format = false): string
     {
-        return $this->asJsonInternal($this->variable, $prettyPrint, $depth, 0);
+        return $this->asJsonInternal($this->variable, $format, $depth, 0);
     }
 
+    /**
+     * Export variable as JSON summary of topmost items.
+     *
+     * @param int $depth Maximum depth that the dumper should go into the variable.
+     * @param bool $prettyPrint Whatever to format exported code.
+     *
+     * @return string JSON string containing summary.
+     */
     public function asJsonObjectsMap(int $depth = 50, bool $prettyPrint = false): string
     {
         $this->buildObjectsCache($this->variable, $depth);
@@ -90,25 +123,26 @@ final class VarDumper
     }
 
     /**
-     * Exports a variable as a string representation.
+     * Exports a variable as a string containing PHP code.
      *
      * The string is a valid PHP expression that can be evaluated by PHP parser
      * and the evaluation result will give back the variable value.
      *
-     * This method is similar to `var_export()`. The main difference is that
+     * This method is similar to {@see var_export()}. The main difference is that
      * it generates more compact string representation using short array syntax.
      *
-     * It also handles objects by using the PHP functions serialize() and unserialize().
+     * It also handles closures with {@see ClosureExporter} and objects
+     * by using the PHP functions {@see serialize()} and {@see unserialize()}.
      *
-     * PHP 5.4 or above is required to parse the exported value.
+     * @param bool $format Whatever to format code.
      *
      * @throws \ReflectionException
      *
-     * @return string a string representation of the variable
+     * @return string A PHP code representation of the variable.
      */
-    public function export(): string
+    public function export(bool $format = true): string
     {
-        return $this->exportInternal($this->variable, 0);
+        return $this->exportInternal($this->variable, $format, 0);
     }
 
     private function buildObjectsCache($variable, int $depth, int $level = 0): void
@@ -154,7 +188,7 @@ final class VarDumper
                     break;
                 }
 
-                if ($var instanceof \Closure) {
+                if ($var instanceof Closure) {
                     $output = [$objectDescription => $this->exportClosure($var)];
                     break;
                 }
@@ -209,15 +243,16 @@ final class VarDumper
     }
 
     /**
-     * @param mixed $var variable to be dumped
-     * @param int $depth
-     * @param int $level depth level
+     * @param mixed $var Variable to be dumped.
+     * @param bool $format Whatever to format code.
+     * @param int $depth Maximum depth.
+     * @param int $level Current depth.
      *
      * @throws \ReflectionException
      *
      * @return string
      */
-    private function dumpInternal($var, int $depth, int $level): string
+    private function dumpInternal($var, bool $format, int $depth, int $level): string
     {
         $type = gettype($var);
         switch ($type) {
@@ -240,19 +275,19 @@ final class VarDumper
                 $spaces = str_repeat(' ', $level * 4);
                 $output .= '[';
                 foreach ($keys as $name) {
-                    if ($this->beautify) {
+                    if ($format) {
                         $output .= "\n" . $spaces . '    ';
                     }
                     $output .= $this->exportVariable($name);
                     $output .= ' => ';
-                    $output .= $this->dumpInternal($var[$name], $depth, $level + 1);
+                    $output .= $this->dumpInternal($var[$name], $format, $depth, $level + 1);
                 }
 
-                return $this->beautify
+                return $format
                     ? $output . "\n" . $spaces . ']'
                     : $output . ']';
             case 'object':
-                if ($var instanceof \Closure) {
+                if ($var instanceof Closure) {
                     return $this->exportClosure($var);
                 }
                 if ($depth <= $level) {
@@ -266,7 +301,7 @@ final class VarDumper
                 foreach ($objectProperties as $name => $value) {
                     $propertyName = strtr(trim((string) $name), "\0", '::');
                     $output .= "\n" . $spaces . "    [$propertyName] => ";
-                    $output .= $this->dumpInternal($value, $depth, $level + 1);
+                    $output .= $this->dumpInternal($value, $format, $depth, $level + 1);
                 }
                 return $output . "\n" . $spaces . ')';
             default:
@@ -296,14 +331,15 @@ final class VarDumper
     }
 
     /**
-     * @param mixed $variable variable to be exported
-     * @param int $level depth level
+     * @param mixed $variable Variable to be exported.
+     * @param bool $format Whatever to format code.
+     * @param int $level Current depth.
      *
      * @throws \ReflectionException
      *
-     *@return string
+     * @return string
      */
-    private function exportInternal($variable, int $level): string
+    private function exportInternal($variable, bool $format, int $level): string
     {
         switch (gettype($variable)) {
             case 'NULL':
@@ -318,37 +354,37 @@ final class VarDumper
                 $spaces = str_repeat(' ', $level * 4);
                 $output = '[';
                 foreach ($keys as $key) {
-                    if ($this->beautify) {
+                    if ($format) {
                         $output .= "\n" . $spaces . '    ';
                     }
                     if ($outputKeys) {
                         $output .= $this->exportVariable($key);
                         $output .= ' => ';
                     }
-                    $output .= $this->exportInternal($variable[$key], $level + 1);
-                    if ($this->beautify || next($keys) !== false) {
+                    $output .= $this->exportInternal($variable[$key], $format, $level + 1);
+                    if ($format || next($keys) !== false) {
                         $output .= ',';
                     }
                 }
-                return $this->beautify
+                return $format
                     ? $output . "\n" . $spaces . ']'
                     : $output . ']';
             case 'object':
-                if ($variable instanceof \Closure) {
+                if ($variable instanceof Closure) {
                     return $this->exportClosure($variable);
                 }
 
                 try {
                     return 'unserialize(' . $this->exportVariable(serialize($variable)) . ')';
-                } catch (\Exception $e) {
-                    // serialize may fail, for example: if object contains a `\Closure` instance
-                    // so we use a fallback
+                } catch (Exception $e) {
+                    // Serialize may fail, for example: if object contains a `\Closure` instance
+                    // so we use a fallback.
                     if ($variable instanceof ArrayableInterface) {
-                        return $this->exportInternal($variable->toArray(), $level);
+                        return $this->exportInternal($variable->toArray(), $format, $level);
                     }
 
-                    if ($variable instanceof \IteratorAggregate) {
-                        return $this->exportInternal(iterator_to_array($variable), $level);
+                    if ($variable instanceof IteratorAggregate) {
+                        return $this->exportInternal(iterator_to_array($variable), $format, $level);
                     }
 
                     if ('__PHP_Incomplete_Class' !== get_class($variable) && method_exists($variable, '__toString')) {
@@ -363,27 +399,21 @@ final class VarDumper
     }
 
     /**
-     * Exports a [[Closure]] instance.
+     * Exports a {@see \Closure} instance.
      *
-     * @param \Closure $closure closure instance.
+     * @param Closure $closure Closure instance.
      *
      * @throws \ReflectionException
      *
      * @return string
      */
-    private function exportClosure(\Closure $closure): string
+    private function exportClosure(Closure $closure): string
     {
         if (self::$closureExporter === null) {
             self::$closureExporter = new ClosureExporter();
         }
 
         return self::$closureExporter->export($closure);
-    }
-
-    public function asPhpString(): string
-    {
-        $this->beautify = false;
-        return $this->export();
     }
 
     private function getObjectDescription(object $object): string
@@ -396,11 +426,11 @@ final class VarDumper
         return var_export($variable, true);
     }
 
-    private function asJsonInternal($variable, bool $prettyPrint, int $depth, int $objectCollapseLevel)
+    private function asJsonInternal($variable, bool $format, int $depth, int $objectCollapseLevel)
     {
         $options = JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE;
 
-        if ($prettyPrint) {
+        if ($format) {
             $options |= JSON_PRETTY_PRINT;
         }
 

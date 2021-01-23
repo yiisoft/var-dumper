@@ -212,18 +212,18 @@ final class VarDumperTest extends TestCase
     }
 
     /**
-     * @dataProvider asPhpStringDataProvider
+     * @dataProvider exportWithoutFormattingDataProvider
      *
      * @param mixed $var
      * @param string $expectedResult
      */
-    public function testAsPhpString($var, $expectedResult): void
+    public function testExportWithoutFormatting($var, $expectedResult): void
     {
-        $exportResult = VarDumper::create($var)->asPhpString();
+        $exportResult = VarDumper::create($var)->export(false);
         $this->assertEqualsWithoutLE($expectedResult, $exportResult);
     }
 
-    public function asPhpStringDataProvider(): array
+    public function exportWithoutFormattingDataProvider(): array
     {
         return [
             'short function' => [

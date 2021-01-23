@@ -4,8 +4,18 @@ declare(strict_types=1);
 
 namespace Yiisoft\VarDumper;
 
-class UseStatementParser
+use function defined;
+
+/**
+ * UseStatementParser given a PHP file, returns a set of `use` statements from the code.
+ */
+final class UseStatementParser
 {
+    /**
+     * @param string $file File to read.
+     *
+     * @return array Use statements data.
+     */
     public function fromFile(string $file): array
     {
         $tokens = token_get_all(file_get_contents($file));
@@ -26,6 +36,13 @@ class UseStatementParser
         return $uses;
     }
 
+    /**
+     * Normalizes raw tokens into uniform use statement data.
+     *
+     * @param array $tokens Raw tokens.
+     *
+     * @return array Normalized use statement data.
+     */
     private function normalizeUse(array $tokens): array
     {
         $commonNamespace = '\\';
@@ -37,7 +54,13 @@ class UseStatementParser
             if (!isset($token[0])) {
                 continue;
             }
-            if ($token[0] === T_STRING || $token[0] === T_NS_SEPARATOR) {
+            if (
+                $token[0] === T_STRING
+                || $token[0] === T_NS_SEPARATOR
+                || (defined('T_NAME_QUALIFIED') && $token[0] === T_NAME_QUALIFIED)
+                || (defined('T_NAME_FULLY_QUALIFIED') && $token[0] === T_NAME_FULLY_QUALIFIED)
+                || (defined('T_NAME_RELATIVE') && $token[0] === T_NAME_RELATIVE)
+            ) {
                 $current .= $token[1];
                 continue;
             }
