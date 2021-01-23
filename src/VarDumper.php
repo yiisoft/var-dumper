@@ -14,7 +14,8 @@ use function is_array;
 use function is_object;
 
 /**
- * VarDumper provides enhanced versions of the PHP functions {@see var_dump()}, {@see print_r()} and {@see json_encode()}.
+ * VarDumper provides enhanced versions of the PHP functions {@see var_dump()} and {@see var_export()}.
+ *
  * It can:
  *
  * - Correctly identify the recursively referenced objects in a complex object structure.
@@ -95,31 +96,29 @@ final class VarDumper
     }
 
     /**
-     * Export variable as JSON.
+     * Export variable information as array.
      *
      * @param int $depth Maximum depth that the dumper should go into the variable.
-     * @param bool $format Whatever to format exported code.
      *
-     * @return string JSON string.
+     * @return array Variable information as array.
      */
-    public function asJson(int $depth = 50, bool $format = false): string
+    public function asArray(int $depth = 50): array
     {
-        return $this->asJsonInternal($this->variable, $format, $depth, 0);
+        return $this->asArrayInternal($this->variable, $depth, 0);
     }
 
     /**
-     * Export variable as JSON summary of topmost items.
+     * Export variable topmost items summary as array.
      *
      * @param int $depth Maximum depth that the dumper should go into the variable.
-     * @param bool $prettyPrint Whatever to format exported code.
      *
-     * @return string JSON string containing summary.
+     * @return array Array containing topmost items summary.
      */
-    public function asJsonObjectsMap(int $depth = 50, bool $prettyPrint = false): string
+    public function asArraySummary(int $depth = 50): array
     {
         $this->buildObjectsCache($this->variable, $depth);
 
-        return $this->asJsonInternal($this->objects, $prettyPrint, $depth, 1);
+        return $this->asArrayInternal($this->objects, $depth, 1);
     }
 
     /**
@@ -426,14 +425,8 @@ final class VarDumper
         return var_export($variable, true);
     }
 
-    private function asJsonInternal($variable, bool $format, int $depth, int $objectCollapseLevel)
+    private function asArrayInternal($variable, int $depth, int $objectCollapseLevel)
     {
-        $options = JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE;
-
-        if ($format) {
-            $options |= JSON_PRETTY_PRINT;
-        }
-
-        return json_encode($this->dumpNested($variable, $depth, $objectCollapseLevel), $options);
+        return $this->dumpNested($variable, $depth, $objectCollapseLevel);
     }
 }

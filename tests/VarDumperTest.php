@@ -344,7 +344,7 @@ final class VarDumperTest extends TestCase
      */
     public function testAsJsonObjectsMap($var, $expectedResult): void
     {
-        $exportResult = VarDumper::create($var)->asJsonObjectsMap();
+        $exportResult = VarDumper::create($var)->asArraySummary();
         $this->assertEquals($expectedResult, $exportResult);
     }
 
@@ -380,7 +380,7 @@ final class VarDumperTest extends TestCase
      */
     public function testAsJson($variable, string $result): void
     {
-        $output = VarDumper::create($variable)->asJson();
+        $output = VarDumper::create($variable)->asArray();
         $this->assertEqualsWithoutLE($result, $output);
     }
 
