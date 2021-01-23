@@ -52,7 +52,7 @@ final class VarDumper
     }
 
     /**
-     * Displays a variable.
+     * Prints a variable.
      *
      * This method achieves the similar functionality as {@see var_dump()} and {@see print_r()}
      * but is more robust when handling complex objects.
