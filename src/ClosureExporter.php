@@ -118,6 +118,10 @@ final class ClosureExporter
         return implode('', $closureTokens);
     }
 
+    /**
+     * @param mixed $token
+     * @return bool
+     */
     private function isNextTokenIsPartOfNamespace($token): bool
     {
         if (!is_array($token)) {

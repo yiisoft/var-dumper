@@ -47,7 +47,6 @@ final class UseStatementParser
     {
         $commonNamespace = '\\';
         $current = '';
-        $alias = null;
         $uses = [];
 
         foreach ($tokens as $token) {
@@ -66,11 +65,7 @@ final class UseStatementParser
             }
             if ($token === ',' || $token === ';') {
                 if ($current !== '') {
-                    if ($alias === null) {
-                        $uses[] = $commonNamespace . $current;
-                    } else {
-                        $uses[$alias] = $commonNamespace . $current;
-                    }
+                    $uses[] = $commonNamespace . $current;
                     $current = '';
                 }
             }
@@ -99,7 +94,8 @@ final class UseStatementParser
                 $alias = mb_substr($use, $delimiterPosition + 1);
                 $result[$alias] = mb_substr($use, 0, $delimiterPosition);
             } else {
-                $result[substr(strrchr($use, '\\'), 1)] = $use;
+                $part = strrchr($use, '\\');
+                $result[$part === false ? $use : substr($part, 1)] = $use;
             }
         }
 

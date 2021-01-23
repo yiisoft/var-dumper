@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Yiisoft\VarDumper;
 
+use __PHP_Incomplete_Class;
 use Closure;
 use Exception;
 use IteratorAggregate;
@@ -175,9 +176,9 @@ final class VarDumper
         }
     }
 
-    private function getObjectProperties($var): array
+    private function getObjectProperties(object $var): array
     {
-        if ('__PHP_Incomplete_Class' !== get_class($var) && method_exists($var, '__debugInfo')) {
+        if (!$var instanceof __PHP_Incomplete_Class && method_exists($var, '__debugInfo')) {
             $var = $var->__debugInfo();
         }
 
@@ -275,6 +276,10 @@ final class VarDumper
         return get_class($object) . '#' . spl_object_id($object);
     }
 
+    /**
+     * @param mixed $variable
+     * @return string
+     */
     private function exportVariable($variable): string
     {
         return var_export($variable, true);
