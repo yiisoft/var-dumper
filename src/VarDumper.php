@@ -9,12 +9,9 @@ use Exception;
 use IteratorAggregate;
 use Yiisoft\Arrays\ArrayableInterface;
 use function get_class;
-use function in_array;
-use function is_array;
-use function is_object;
 
 /**
- * VarDumper provides enhanced versions of the PHP functions {@see var_dump()}, {@see print_r()} and {@see json_encode()}.
+ * VarDumper provides enhanced versions of the PHP functions {@see var_dump()} and {@see var_export()}.
  * It can:
  *
  * - Correctly identify the recursively referenced objects in a complex object structure.
@@ -88,40 +85,6 @@ final class VarDumper
         return $output;
     }
 
-    private function dumpNested($variable, int $depth, int $objectCollapseLevel)
-    {
-        $this->buildObjectsCache($variable, $depth);
-        return $this->dumpNestedInternal($variable, $depth, 0, $objectCollapseLevel);
-    }
-
-    /**
-     * Export variable as JSON.
-     *
-     * @param int $depth Maximum depth that the dumper should go into the variable.
-     * @param bool $format Whatever to format exported code.
-     *
-     * @return string JSON string.
-     */
-    public function asJson(int $depth = 50, bool $format = false): string
-    {
-        return $this->asJsonInternal($this->variable, $format, $depth, 0);
-    }
-
-    /**
-     * Export variable as JSON summary of topmost items.
-     *
-     * @param int $depth Maximum depth that the dumper should go into the variable.
-     * @param bool $prettyPrint Whatever to format exported code.
-     *
-     * @return string JSON string containing summary.
-     */
-    public function asJsonObjectsMap(int $depth = 50, bool $prettyPrint = false): string
-    {
-        $this->buildObjectsCache($this->variable, $depth);
-
-        return $this->asJsonInternal($this->objects, $prettyPrint, $depth, 1);
-    }
-
     /**
      * Exports a variable as a string containing PHP code.
      *
@@ -143,103 +106,6 @@ final class VarDumper
     public function export(bool $format = true): string
     {
         return $this->exportInternal($this->variable, $format, 0);
-    }
-
-    private function buildObjectsCache($variable, int $depth, int $level = 0): void
-    {
-        if ($depth <= $level) {
-            return;
-        }
-        if (is_object($variable)) {
-            if (in_array($variable, $this->objects, true)) {
-                return;
-            }
-            $this->objects[] = $variable;
-            $variable = $this->getObjectProperties($variable);
-        }
-        if (is_array($variable)) {
-            foreach ($variable as $value) {
-                $this->buildObjectsCache($value, $depth, $level + 1);
-            }
-        }
-    }
-
-    private function dumpNestedInternal($var, int $depth, int $level, int $objectCollapseLevel = 0)
-    {
-        $output = $var;
-
-        switch (gettype($var)) {
-            case 'array':
-                if ($depth <= $level) {
-                    return 'array [...]';
-                }
-
-                $output = [];
-                foreach ($var as $key => $value) {
-                    $keyDisplay = str_replace("\0", '::', trim((string)$key));
-                    $output[$keyDisplay] = $this->dumpNestedInternal($value, $depth, $level + 1, $objectCollapseLevel);
-                }
-
-                break;
-            case 'object':
-                $objectDescription = $this->getObjectDescription($var);
-                if ($depth <= $level) {
-                    $output = $objectDescription . ' (...)';
-                    break;
-                }
-
-                if ($var instanceof Closure) {
-                    $output = [$objectDescription => $this->exportClosure($var)];
-                    break;
-                }
-
-                if ($objectCollapseLevel < $level && in_array($var, $this->objects, true)) {
-                    $output = 'object@' . $objectDescription;
-                    break;
-                }
-
-                $output = [];
-                $properties = $this->getObjectProperties($var);
-                if (empty($properties)) {
-                    $output[$objectDescription] = '{stateless object}';
-                    break;
-                }
-                foreach ($properties as $key => $value) {
-                    $keyDisplay = $this->normalizeProperty((string) $key);
-                    /**
-                     * @psalm-suppress InvalidArrayOffset
-                     */
-                    $output[$objectDescription][$keyDisplay] = $this->dumpNestedInternal(
-                        $value,
-                        $depth,
-                        $level + 1,
-                        $objectCollapseLevel
-                    );
-                }
-
-                break;
-            case 'resource':
-            case 'resource (closed)':
-                $output = $this->getResourceDescription($var);
-                break;
-        }
-
-        return $output;
-    }
-
-    private function normalizeProperty(string $property): string
-    {
-        $property = str_replace("\0", '::', trim($property));
-
-        if (strpos($property, '*::') === 0) {
-            return 'protected $' . substr($property, 3);
-        }
-
-        if (($pos = strpos($property, '::')) !== false) {
-            return 'private $' . substr($property, $pos + 2);
-        }
-
-        return 'public $' . $property;
     }
 
     /**
@@ -316,18 +182,6 @@ final class VarDumper
         }
 
         return (array)$var;
-    }
-
-    private function getResourceDescription($resource)
-    {
-        $type = get_resource_type($resource);
-        if ($type === 'stream') {
-            $desc = stream_get_meta_data($resource);
-        } else {
-            $desc = '{resource}';
-        }
-
-        return $desc;
     }
 
     /**
@@ -424,16 +278,5 @@ final class VarDumper
     private function exportVariable($variable): string
     {
         return var_export($variable, true);
-    }
-
-    private function asJsonInternal($variable, bool $format, int $depth, int $objectCollapseLevel)
-    {
-        $options = JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE;
-
-        if ($format) {
-            $options |= JSON_PRETTY_PRINT;
-        }
-
-        return json_encode($this->dumpNested($variable, $depth, $objectCollapseLevel), $options);
     }
 }
