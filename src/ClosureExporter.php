@@ -20,7 +20,6 @@ use function in_array;
 use function is_array;
 use function strpos;
 use function token_get_all;
-use function version_compare;
 
 /**
  * ClosureExporter exports PHP {@see \Closure} as a string containing PHP code.
@@ -85,7 +84,7 @@ final class ClosureExporter
                 if ($this->isNextTokenIsPartOfNamespace($token)) {
                     $buffer .= $token[1];
                     if (
-                        version_compare(PHP_VERSION, '8.0.0', '>=')
+                        PHP_VERSION_ID >= 80000
                         && $buffer !== '\\'
                         && strpos($buffer, '\\') !== false
                     ) {
