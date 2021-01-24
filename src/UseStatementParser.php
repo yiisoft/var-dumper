@@ -91,6 +91,7 @@ final class UseStatementParser
     /**
      * @param array $uses
      * @psalm-param list<string> $uses
+     *
      * @return array<string, string>
      */
     private function replaceAliases(array $uses): array
