@@ -1,8 +1,8 @@
 <p align="center">
     <a href="https://github.com/yiisoft" target="_blank">
-        <img src="https://avatars0.githubusercontent.com/u/993323" height="100px">
+         <img src="https://yiisoft.github.io/docs/images/yii_logo.svg" height="100px">
     </a>
-    <h1 align="center">Yii - VarDumper</h1>
+    <h1 align="center">Yii VarDumper</h1>
     <br>
 </p>
 
@@ -17,6 +17,18 @@
 
 `VarDumper` enhances functionality of `var_dump()` and `var_export()`. It is dealing with recursive references,
 may highlight syntax, export closures and output as JSON.
+
+## Requirements
+
+- PHP 7.4 or higher.
+
+## Installation
+
+The package could be installed with composer:
+
+```shell
+composer require yiisoft/var-dumper --prefer-dist
+```
 
 ## General usage
 
@@ -55,7 +67,9 @@ It is similar to `var_export()` but uses short array syntax, handles closures, a
 
 In the above `export()` will give you nicely formatted code. You can remove formatting by passing `false` as an argument.
 
-## Unit testing
+## Testing
+
+### Unit testing
 
 The package is tested with [PHPUnit](https://phpunit.de/). To run tests:
 
@@ -63,21 +77,29 @@ The package is tested with [PHPUnit](https://phpunit.de/). To run tests:
 ./vendor/bin/phpunit
 ```
 
-## Mutation testing
+### Mutation testing
 
-The package tests are checked with [Infection](https://infection.github.io/) mutation framework. To run it:
+The package tests are checked with [Infection](https://infection.github.io/) mutation framework with
+[Infection Static Analysis Plugin](https://github.com/Roave/infection-static-analysis-plugin). To run it:
 
 ```shell
-./vendor/bin/infection
+./vendor/bin/roave-infection-static-analysis-plugin
 ```
 
-## Static analysis
+### Static analysis
 
 The code is statically analyzed with [Psalm](https://psalm.dev/). To run static analysis:
 
 ```shell
 ./vendor/bin/psalm
 ```
+
+## License
+
+The Yii VarDumper Helper is free software. It is released under the terms of the BSD License.
+Please see [`LICENSE`](./LICENSE.md) for more information.
+
+Maintained by [Yii Software](https://www.yiiframework.com/).
 
 ## Support the project
 
@@ -90,10 +112,3 @@ The code is statically analyzed with [Psalm](https://psalm.dev/). To run static 
 [![Telegram](https://img.shields.io/badge/telegram-join-1DA1F2?style=flat&logo=telegram)](https://t.me/yii3en)
 [![Facebook](https://img.shields.io/badge/facebook-join-1DA1F2?style=flat&logo=facebook&logoColor=ffffff)](https://www.facebook.com/groups/yiitalk)
 [![Slack](https://img.shields.io/badge/slack-join-1DA1F2?style=flat&logo=slack)](https://yiiframework.com/go/slack)
-
-## License
-
-The Yii - VarDumper Helper is free software. It is released under the terms of the BSD License.
-Please see [`LICENSE`](./LICENSE.md) for more information.
-
-Maintained by [Yii Software](https://www.yiiframework.com/).

@@ -1,7 +1,7 @@
 {
     "name": "yiisoft/var-dumper",
     "type": "library",
-    "description": "Yii - VarDumper helper",
+    "description": "Yii VarDumper helper",
     "keywords": [
         "yii",
         "framework",
