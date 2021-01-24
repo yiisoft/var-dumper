@@ -19,6 +19,7 @@ final class UseStatementParser
      * @throws RuntimeException if there is a problem reading file.
      *
      * @return array Use statements data.
+     * @psalm-return array<string, string>
      */
     public function fromFile(string $file): array
     {
@@ -60,14 +61,15 @@ final class UseStatementParser
      * @param array $tokens Raw tokens.
      *
      * @return array Normalized use statement data.
+     * @psalm-return array<string, string>
      */
     private function normalizeUse(array $tokens): array
     {
         $commonNamespace = '\\';
         $current = '';
-        $alias = null;
         $uses = [];
 
+        /** @psalm-var array<int, int|string>|string $token */
         foreach ($tokens as $token) {
             if (!isset($token[0])) {
                 continue;
@@ -84,11 +86,7 @@ final class UseStatementParser
             }
             if ($token === ',' || $token === ';') {
                 if ($current !== '') {
-                    if ($alias === null) {
-                        $uses[] = $commonNamespace . $current;
-                    } else {
-                        $uses[$alias] = $commonNamespace . $current;
-                    }
+                    $uses[] = $commonNamespace . $current;
                     $current = '';
                 }
             }
@@ -108,6 +106,12 @@ final class UseStatementParser
         return $this->replaceAliases($uses);
     }
 
+    /**
+     * @param array $uses
+     * @psalm-param list<string> $uses
+     *
+     * @return array<string, string>
+     */
     private function replaceAliases(array $uses): array
     {
         $result = [];
@@ -117,7 +121,8 @@ final class UseStatementParser
                 $alias = mb_substr($use, $delimiterPosition + 1);
                 $result[$alias] = mb_substr($use, 0, $delimiterPosition);
             } else {
-                $result[substr(strrchr($use, '\\'), 1)] = $use;
+                $part = strrchr($use, '\\');
+                $result[$part === false ? $use : substr($part, 1)] = $use;
             }
         }
 
