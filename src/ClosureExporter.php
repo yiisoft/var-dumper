@@ -8,18 +8,10 @@ use Closure;
 use ReflectionException;
 use ReflectionFunction;
 
-use function array_key_exists;
-use function array_filter;
-use function array_pop;
-use function array_shift;
 use function array_slice;
 use function defined;
-use function explode;
-use function implode;
 use function in_array;
 use function is_array;
-use function strpos;
-use function token_get_all;
 
 /**
  * ClosureExporter exports PHP {@see \Closure} as a string containing PHP code.
