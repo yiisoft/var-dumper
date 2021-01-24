@@ -9,17 +9,11 @@ use ReflectionException;
 use ReflectionFunction;
 
 use function array_key_exists;
-use function array_filter;
-use function array_pop;
-use function array_shift;
 use function array_slice;
 use function defined;
-use function explode;
-use function implode;
 use function in_array;
 use function is_array;
-use function strpos;
-use function token_get_all;
+use function is_string;
 
 /**
  * ClosureExporter exports PHP {@see \Closure} as a string containing PHP code.
@@ -66,17 +60,10 @@ final class ClosureExporter
 
         $closureTokens = [];
         $pendingParenthesisCount = 0;
-        $isShortClosure = false;
         $buffer = '';
         foreach ($tokens as $token) {
-            if (!isset($token[0])) {
-                continue;
-            }
             if (in_array($token[0], [T_FUNCTION, T_FN, T_STATIC], true)) {
                 $closureTokens[] = $token[1];
-                if (!$isShortClosure && $token[0] === T_FN) {
-                    $isShortClosure = true;
-                }
                 continue;
             }
             if ($closureTokens !== []) {
@@ -99,16 +86,18 @@ final class ClosureExporter
                         $buffer = '';
                     }
                 }
-                if ($token === '{' || $token === '[') {
-                    $pendingParenthesisCount++;
-                } elseif ($token === '}' || $token === ']') {
-                    if ($pendingParenthesisCount === 0) {
-                        break;
-                    }
-                    $pendingParenthesisCount--;
-                } elseif ($token === ',' || $token === ';') {
-                    if ($pendingParenthesisCount === 0) {
-                        break;
+                if (is_string($token)) {
+                    if ($this->isOpenParenthesis($token)) {
+                        $pendingParenthesisCount++;
+                    } elseif ($this->isCloseParenthesis($token)) {
+                        if ($pendingParenthesisCount === 0) {
+                            break;
+                        }
+                        $pendingParenthesisCount--;
+                    } elseif ($token === ',' || $token === ';') {
+                        if ($pendingParenthesisCount === 0) {
+                            break;
+                        }
                     }
                 }
                 $closureTokens[] = $readableToken;
@@ -118,6 +107,21 @@ final class ClosureExporter
         return implode('', $closureTokens);
     }
 
+    private function isOpenParenthesis(string $value): bool
+    {
+        return in_array($value, ['{', '[', '(']);
+    }
+
+    private function isCloseParenthesis(string $value): bool
+    {
+        return in_array($value, ['}', ']', ')']);
+    }
+
+    /**
+     * @param array|string $token
+     *
+     * @return bool
+     */
     private function isNextTokenIsPartOfNamespace($token): bool
     {
         if (!is_array($token)) {
