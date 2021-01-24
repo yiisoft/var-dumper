@@ -17,8 +17,8 @@ final class ClosureExporterTest extends TestCase
         });
 
         $this->assertEquals('function (int $test): int {
-           return 42 + $test;
-        })', $output);
+            return 42 + $test;
+        }', $output);
     }
 
     public function testStatic(): void
@@ -30,7 +30,7 @@ final class ClosureExporterTest extends TestCase
 
         $this->assertEquals('static function (int $test): int {
             return 42 + $test;
-        })', $output);
+        }', $output);
     }
 
     public function testShort(): void
