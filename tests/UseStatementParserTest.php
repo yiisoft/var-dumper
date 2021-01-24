@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Yiisoft\VarDumper\Tests;
 
 use PHPUnit\Framework\TestCase;
+use RuntimeException;
 use Yiisoft\VarDumper\UseStatementParser;
 
 final class UseStatementParserTest extends TestCase
@@ -54,6 +55,15 @@ final class UseStatementParserTest extends TestCase
                 ],
             ],
         ]);
+    }
+
+    public function testIncorrectFile(): void
+    {
+        $parser = new UseStatementParser();
+
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('File "non-exists-file" does not exist.');
+        $parser->fromFile('non-exists-file');
     }
 
     private function saveExamplesToTemporaryFile(array $examples): array
