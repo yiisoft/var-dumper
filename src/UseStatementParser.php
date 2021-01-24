@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Yiisoft\VarDumper;
 
-use Throwable;
+use RuntimeException;
 
 use function defined;
 
@@ -17,16 +17,22 @@ final class UseStatementParser
      * @param string $file File to read.
      *
      * @return array Use statements data.
+     * @throws RuntimeException if there is a problem reading file.
      */
     public function fromFile(string $file): array
     {
-        try {
-            $fileContent = file_get_contents($file);
-        } catch (Throwable $e) {
-            throw new FailedReadFileException($e->getMessage());
+        if (!file_exists($file)) {
+            throw new RuntimeException('File "' . $file . '" does not exist.');
         }
+
+        if (!is_readable($file)) {
+            throw new RuntimeException('File "' . $file . '" is not readable.');
+        }
+
+        $fileContent = file_get_contents($file);
+
         if ($fileContent === false) {
-            throw new FailedReadFileException('Failed read file "' . $file . '".');
+            throw new RuntimeException('Failed to read file "' . $file . '".');
         }
 
         $tokens = token_get_all($fileContent);

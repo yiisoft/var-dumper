@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Yiisoft\VarDumper\Tests;
 
 use PHPUnit\Framework\TestCase;
-use Yiisoft\VarDumper\FailedReadFileException;
+use RuntimeException;
 use Yiisoft\VarDumper\UseStatementParser;
 
 final class UseStatementParserTest extends TestCase
@@ -61,8 +61,8 @@ final class UseStatementParserTest extends TestCase
     {
         $parser = new UseStatementParser();
 
-        $this->expectException(FailedReadFileException::class);
-        $this->expectExceptionMessageMatches('/.*No such file or directory.*/');
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('File "non-exists-file" does not exist.');
         $parser->fromFile('non-exists-file');
     }
 
