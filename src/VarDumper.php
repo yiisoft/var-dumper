@@ -7,7 +7,9 @@ namespace Yiisoft\VarDumper;
 use Closure;
 use Exception;
 use IteratorAggregate;
+use ReflectionException;
 use Yiisoft\Arrays\ArrayableInterface;
+
 use function get_class;
 
 /**
@@ -99,7 +101,7 @@ final class VarDumper
      *
      * @param bool $format Whatever to format code.
      *
-     * @throws \ReflectionException
+     * @throws ReflectionException
      *
      * @return string A PHP code representation of the variable.
      */
@@ -114,7 +116,7 @@ final class VarDumper
      * @param int $depth Maximum depth.
      * @param int $level Current depth.
      *
-     * @throws \ReflectionException
+     * @throws ReflectionException
      *
      * @return string
      */
@@ -165,7 +167,7 @@ final class VarDumper
                 $output = $this->getObjectDescription($var) . "\n" . $spaces . '(';
                 $objectProperties = $this->getObjectProperties($var);
                 foreach ($objectProperties as $name => $value) {
-                    $propertyName = strtr(trim((string) $name), "\0", '::');
+                    $propertyName = strtr(trim((string)$name), "\0", '::');
                     $output .= "\n" . $spaces . "    [$propertyName] => ";
                     $output .= $this->dumpInternal($value, $format, $depth, $level + 1);
                 }
@@ -189,7 +191,7 @@ final class VarDumper
      * @param bool $format Whatever to format code.
      * @param int $level Current depth.
      *
-     * @throws \ReflectionException
+     * @throws ReflectionException
      *
      * @return string
      */
@@ -257,7 +259,7 @@ final class VarDumper
      *
      * @param Closure $closure Closure instance.
      *
-     * @throws \ReflectionException
+     * @throws ReflectionException
      *
      * @return string
      */
