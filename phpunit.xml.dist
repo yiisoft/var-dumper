@@ -10,7 +10,7 @@
     </exclude>
   </coverage>
   <testsuites>
-    <testsuite name="Yii - VarDumper tests">
+    <testsuite name="Yii VarDumper tests">
       <directory>./tests</directory>
     </testsuite>
   </testsuites>
