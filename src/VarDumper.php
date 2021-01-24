@@ -165,6 +165,8 @@ final class VarDumper
                 $spaces = str_repeat(' ', $level * 4);
                 $output = $this->getObjectDescription($var) . "\n" . $spaces . '(';
                 $objectProperties = $this->getObjectProperties($var);
+
+                /** @psalm-var mixed $value */
                 foreach ($objectProperties as $name => $value) {
                     $propertyName = strtr(trim((string) $name), "\0", '::');
                     $output .= "\n" . $spaces . "    [$propertyName] => ";
@@ -179,6 +181,7 @@ final class VarDumper
     private function getObjectProperties(object $var): array
     {
         if (!$var instanceof __PHP_Incomplete_Class && method_exists($var, '__debugInfo')) {
+            /** @var array $var */
             $var = $var->__debugInfo();
         }
 

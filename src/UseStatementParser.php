@@ -15,6 +15,7 @@ final class UseStatementParser
      * @param string $file File to read.
      *
      * @return array Use statements data.
+     * @psalm-return array<string, string>
      */
     public function fromFile(string $file): array
     {
@@ -42,6 +43,7 @@ final class UseStatementParser
      * @param array $tokens Raw tokens.
      *
      * @return array Normalized use statement data.
+     * @psalm-return array<string, string>
      */
     private function normalizeUse(array $tokens): array
     {
@@ -49,6 +51,7 @@ final class UseStatementParser
         $current = '';
         $uses = [];
 
+        /** @psalm-var array<int, int|string>|string $token */
         foreach ($tokens as $token) {
             if (!isset($token[0])) {
                 continue;
@@ -85,6 +88,11 @@ final class UseStatementParser
         return $this->replaceAliases($uses);
     }
 
+    /**
+     * @param array $uses
+     * @psalm-param list<string> $uses
+     * @return array<string, string>
+     */
     private function replaceAliases(array $uses): array
     {
         $result = [];
