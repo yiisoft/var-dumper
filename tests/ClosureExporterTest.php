@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Yiisoft\VarDumper\Tests;
 
-
 use PHPUnit\Framework\TestCase;
 use Yiisoft\VarDumper\ClosureExporter;
 
@@ -14,7 +13,7 @@ final class ClosureExporterTest extends TestCase
     {
         $exporter = new ClosureExporter();
         $output = $exporter->export(function (int $test): int {
-           return 42 + $test;
+            return 42 + $test;
         });
 
         $this->assertEquals('function (int $test): int {
@@ -58,6 +57,4 @@ final class ClosureExporterTest extends TestCase
 
         $this->assertEquals('static fn (int $test): int => 42 + $test', $output);
     }
-
-
 }
