@@ -16,8 +16,9 @@ final class UseStatementParser
     /**
      * @param string $file File to read.
      *
-     * @return array Use statements data.
      * @throws RuntimeException if there is a problem reading file.
+     *
+     * @return array Use statements data.
      */
     public function fromFile(string $file): array
     {
