@@ -120,6 +120,7 @@ final class ClosureExporter
 
     /**
      * @param mixed $token
+     *
      * @return bool
      */
     private function isNextTokenIsPartOfNamespace($token): bool
