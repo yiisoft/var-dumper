@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Yiisoft\VarDumper;
 
+use Throwable;
+
 use function defined;
 
 /**
@@ -18,7 +20,16 @@ final class UseStatementParser
      */
     public function fromFile(string $file): array
     {
-        $tokens = token_get_all(file_get_contents($file));
+        try {
+            $fileContent = file_get_contents($file);
+        } catch (Throwable $e) {
+            throw new FailedReadFileException($e->getMessage());
+        }
+        if ($fileContent === false) {
+            throw new FailedReadFileException('Failed read file "' . $file . '".');
+        }
+
+        $tokens = token_get_all($fileContent);
         array_shift($tokens);
 
         $uses = [];
