@@ -8,10 +8,12 @@ use Closure;
 use ReflectionException;
 use ReflectionFunction;
 
+use function array_key_exists;
 use function array_slice;
 use function defined;
 use function in_array;
 use function is_array;
+use function is_string;
 
 /**
  * ClosureExporter exports PHP {@see \Closure} as a string containing PHP code.
