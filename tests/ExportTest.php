@@ -2,14 +2,11 @@
 
 declare(strict_types=1);
 
-
 namespace Yiisoft\VarDumper\Tests;
-
 
 use PHPUnit\Framework\TestCase;
 use Yiisoft\VarDumper\ClosureExporter;
 use Yiisoft\VarDumper\VarDumper;
-
 
 class ExportTest extends TestCase
 {
