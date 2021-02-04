@@ -6,7 +6,16 @@ namespace Yiisoft\VarDumper;
 
 use RuntimeException;
 
-use function defined;
+use function array_merge;
+use function array_slice;
+use function file_exists;
+use function file_get_contents;
+use function is_array;
+use function is_readable;
+use function mb_substr;
+use function strpos;
+use function strrchr;
+use function substr;
 
 /**
  * UseStatementParser given a PHP file, returns a set of `use` statements from the code.
@@ -39,15 +48,15 @@ final class UseStatementParser
 
         $tokens = token_get_all($fileContent);
         array_shift($tokens);
-
         $uses = [];
+
         foreach ($tokens as $i => $token) {
-            if (!isset($token[0])) {
+            if (!is_array($token)) {
                 continue;
             }
 
-            if ($token[0] === T_USE) {
-                $uses = array_merge($uses, $this->normalizeUse(array_slice($tokens, $i + 1)));
+            if ($token[0] === T_USE && isset($tokens[$i + 2]) && TokenHelper::isPartOfNamespace($tokens[$i + 2])) {
+                $uses = array_merge($uses, $this->normalize(array_slice($tokens, $i + 1)));
                 continue;
             }
         }
@@ -63,7 +72,7 @@ final class UseStatementParser
      * @return array Normalized use statement data.
      * @psalm-return array<string, string>
      */
-    private function normalizeUse(array $tokens): array
+    private function normalize(array $tokens): array
     {
         $commonNamespace = '\\';
         $current = '';
@@ -71,16 +80,7 @@ final class UseStatementParser
 
         /** @psalm-var array<int, int|string>|string $token */
         foreach ($tokens as $token) {
-            if (!isset($token[0])) {
-                continue;
-            }
-            if (
-                $token[0] === T_STRING
-                || $token[0] === T_NS_SEPARATOR
-                || (defined('T_NAME_QUALIFIED') && $token[0] === T_NAME_QUALIFIED)
-                || (defined('T_NAME_FULLY_QUALIFIED') && $token[0] === T_NAME_FULLY_QUALIFIED)
-                || (defined('T_NAME_RELATIVE') && $token[0] === T_NAME_RELATIVE)
-            ) {
+            if (TokenHelper::isPartOfNamespace($token)) {
                 $current .= $token[1];
                 continue;
             }
@@ -115,15 +115,18 @@ final class UseStatementParser
     private function replaceAliases(array $uses): array
     {
         $result = [];
+
         foreach ($uses as $use) {
             $delimiterPosition = strpos($use, '@');
+
             if ($delimiterPosition !== false) {
                 $alias = mb_substr($use, $delimiterPosition + 1);
                 $result[$alias] = mb_substr($use, 0, $delimiterPosition);
-            } else {
-                $part = strrchr($use, '\\');
-                $result[$part === false ? $use : substr($part, 1)] = $use;
+                continue;
             }
+
+            $part = strrchr($use, '\\');
+            $result[$part === false ? $use : substr($part, 1)] = $use;
         }
 
         return $result;
