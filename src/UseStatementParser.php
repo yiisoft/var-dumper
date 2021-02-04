@@ -54,7 +54,7 @@ final class UseStatementParser
                 continue;
             }
 
-            if ($token[0] === T_USE) {
+            if ($token[0] === T_USE && isset($tokens[$i + 2]) && TokenHelper::isPartOfNamespace($tokens[$i + 2])) {
                 $uses = $uses + $this->normalize(array_slice($tokens, $i + 1));
                 continue;
             }
