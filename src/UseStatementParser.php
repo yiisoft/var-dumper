@@ -6,7 +6,6 @@ namespace Yiisoft\VarDumper;
 
 use RuntimeException;
 
-use function array_merge;
 use function array_slice;
 use function file_exists;
 use function file_get_contents;
@@ -55,8 +54,8 @@ final class UseStatementParser
                 continue;
             }
 
-            if ($token[0] === T_USE && isset($tokens[$i + 2]) && TokenHelper::isPartOfNamespace($tokens[$i + 2])) {
-                $uses = array_merge($uses, $this->normalize(array_slice($tokens, $i + 1)));
+            if ($token[0] === T_USE) {
+                $uses = $uses + $this->normalize(array_slice($tokens, $i + 1));
                 continue;
             }
         }
