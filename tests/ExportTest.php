@@ -17,7 +17,7 @@ class ExportTest extends TestCase
 
         $source = [
             ClosureExporter::class => static fn () => new ClosureExporter(),
-            UseStatementParser::class => static function () use ($var) {
+            UseStatementParser::class => static function () {
                 return new UseStatementParser();
             },
         ];

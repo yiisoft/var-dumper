@@ -16,6 +16,7 @@ final class TokenHelper
      * Whether the token is part of the namespace.
      *
      * @param array|string $token
+     *
      * @return bool
      */
     public static function isPartOfNamespace($token): bool
