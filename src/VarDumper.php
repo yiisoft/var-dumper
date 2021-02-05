@@ -235,7 +235,7 @@ final class VarDumper
                 }
 
                 try {
-                    return 'unserialize(' . $this->exportVariable(serialize($variable)) . ')';
+                    return "\Opis\Closure\unserialize({$this->exportVariable(\Opis\Closure\serialize($variable))})";
                 } catch (Exception $e) {
                     // Serialize may fail, for example: if object contains a `\Closure` instance
                     // so we use a fallback.
