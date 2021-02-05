@@ -63,6 +63,7 @@ final class ClosureExporter
 
         $buffer = '';
         $closureTokens = [];
+        $previousUsePart = '';
         $pendingParenthesisCount = 0;
 
         foreach ($tokens as $token) {
@@ -78,8 +79,24 @@ final class ClosureExporter
                         $usesKeys = array_filter(explode('\\', $buffer));
                         $buffer = array_pop($usesKeys);
                     }
+                    if (!empty($previousUsePart) && $buffer === '\\') {
+                        continue;
+                    }
                     if (isset($uses[$buffer])) {
-                        $readableToken = $uses[$buffer];
+                        if ($this->isUseNamespaceAlias($buffer, $uses)) {
+                            $previousUsePart = $uses[$buffer];
+                            $buffer = '';
+                            continue;
+                        }
+                        $readableToken = (empty($previousUsePart) || strpos($uses[$buffer], $previousUsePart) === false)
+                            ? $previousUsePart . $uses[$buffer]
+                            : $uses[$buffer]
+                        ;
+                        $buffer = '';
+                        $previousUsePart = '';
+                    } elseif (isset($uses[$token[1]])) {
+                        $readableToken = $uses[$token[1]];
+                        $previousUsePart = '';
                         $buffer = '';
                     }
                 }
@@ -97,6 +114,7 @@ final class ClosureExporter
                         }
                     }
                 }
+
                 $closureTokens[] = $readableToken;
             }
         }
@@ -112,5 +130,17 @@ final class ClosureExporter
     private function isCloseParenthesis(string $value): bool
     {
         return in_array($value, ['}', ']', ')']);
+    }
+
+    private function isUseNamespaceAlias(string $useKey, array $uses): bool
+    {
+        if (!isset($uses[$useKey])) {
+            return false;
+        }
+
+        $usesKeys = array_filter(explode('\\', (string) $uses[$useKey]));
+        $lastPartUse = array_pop($usesKeys);
+
+        return isset($uses[$lastPartUse]) && $uses[$lastPartUse] !== $uses[$useKey];
     }
 }
