@@ -23,12 +23,13 @@ use function substr;
 final class UseStatementParser
 {
     /**
+     * Returns a set of `use` statements from the code of the specified file.
+     *
      * @param string $file File to read.
      *
      * @throws RuntimeException if there is a problem reading file.
      *
-     * @return array Use statements data.
-     * @psalm-return array<string, string>
+     * @return array<string, string> Use statements data.
      */
     public function fromFile(string $file): array
     {
@@ -55,7 +56,7 @@ final class UseStatementParser
                 continue;
             }
 
-            if ($token[0] === T_USE && isset($tokens[$i + 2]) && $this->isPartOfNamespace($tokens[$i + 2])) {
+            if ($token[0] === T_USE && isset($tokens[$i + 2]) && $this->isTokenIsPartOfUse($tokens[$i + 2])) {
                 $uses = $uses + $this->normalize(array_slice($tokens, $i + 1));
                 continue;
             }
@@ -65,13 +66,13 @@ final class UseStatementParser
     }
 
     /**
-     * Whether the token is part of the namespace.
+     * Checks whether the token is part of the use statement data.
      *
-     * @param array|string $token
+     * @param array|string $token PHP token.
      *
-     * @return bool
+     * @return bool Whether the token is part of the use statement data.
      */
-    public function isPartOfNamespace($token): bool
+    public function isTokenIsPartOfUse($token): bool
     {
         if (!is_array($token)) {
             return false;
@@ -87,10 +88,9 @@ final class UseStatementParser
     /**
      * Normalizes raw tokens into uniform use statement data.
      *
-     * @param array $tokens Raw tokens.
+     * @param array<int, array<int, int|string>|string> $tokens Raw tokens.
      *
-     * @return array Normalized use statement data.
-     * @psalm-return array<string, string>
+     * @return array<string, string> Normalized use statement data.
      */
     private function normalize(array $tokens): array
     {
@@ -98,9 +98,8 @@ final class UseStatementParser
         $current = '';
         $uses = [];
 
-        /** @psalm-var array<int, int|string>|string $token */
         foreach ($tokens as $token) {
-            if ($this->isPartOfNamespace($token)) {
+            if ($this->isTokenIsPartOfUse($token)) {
                 $current .= $token[1];
                 continue;
             }
@@ -127,10 +126,11 @@ final class UseStatementParser
     }
 
     /**
-     * @param array $uses
-     * @psalm-param list<string> $uses
+     * Replaces aliases for the use statement data.
      *
-     * @return array<string, string>
+     * @param string[] $uses Raw uses.
+     *
+     * @return array<string, string> Use statement data with the replaced aliases.
      */
     private function replaceAliases(array $uses): array
     {
