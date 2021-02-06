@@ -39,6 +39,10 @@ final class UseStatementParserTest extends TestCase
 
     public function testNotReadable(): void
     {
+        if (DIRECTORY_SEPARATOR === '\\') {
+            self::markTestSkipped('Skip on OS Windows');
+        }
+
         $parser = new UseStatementParser();
         $file = tmpfile();
         $filename = stream_get_meta_data($file)['uri'];
