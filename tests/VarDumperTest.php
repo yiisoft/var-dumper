@@ -418,19 +418,19 @@ final class VarDumperTest extends TestCase
 
     public function testExportClosureWithAnImmutableInstanceOfClosureExporter(): void
     {
-        $varDumper1 = VarDumper::create(fn ():int => 1);
+        $varDumper1 = VarDumper::create(fn (): int => 1);
         $reflection1 = new ReflectionClass($varDumper1);
         $closureExporter1 = $reflection1->getStaticPropertyValue('closureExporter');
 
         $this->assertInstanceOf(ClosureExporter::class, $closureExporter1);
-        $this->assertSame('fn ():int => 1', $varDumper1->export());
+        $this->assertSame('fn (): int => 1', $varDumper1->export());
 
-        $varDumper2 = VarDumper::create(fn ():int => 2);
+        $varDumper2 = VarDumper::create(fn (): int => 2);
         $reflection2 = new ReflectionClass($varDumper2);
         $closureExporter2 = $reflection2->getStaticPropertyValue('closureExporter');
 
         $this->assertInstanceOf(ClosureExporter::class, $closureExporter2);
-        $this->assertSame('fn ():int => 2', $varDumper2->export());
+        $this->assertSame('fn (): int => 2', $varDumper2->export());
         $this->assertSame($closureExporter1, $closureExporter2);
     }
 
