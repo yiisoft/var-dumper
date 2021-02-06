@@ -169,7 +169,6 @@ final class ClosureExporter
         return isset($uses[$lastPart]) && $uses[$lastPart] !== $uses[$useKey];
     }
 
-
     /**
      * Checks whether the value of the token is an opening parenthesis.
      *

@@ -11,8 +11,10 @@ if (!function_exists('d')) {
      * @param mixed ...$variables Variables to be dumped.
      *
      * @see \Yiisoft\VarDumper\VarDumper::dump()
+     *
+     * @psalm-suppress MixedAssignment
      */
-    function d(...$variables)
+    function d(...$variables): void
     {
         foreach ($variables as $variable) {
             VarDumper::dump($variable, 10, PHP_SAPI !== 'cli');
@@ -27,8 +29,10 @@ if (!function_exists('dd')) {
      * @param mixed ...$variables Variables to be dumped.
      *
      * @see \Yiisoft\VarDumper\VarDumper::dump()
+     *
+     * @psalm-suppress MixedAssignment
      */
-    function dd(...$variables)
+    function dd(...$variables): void
     {
         foreach ($variables as $variable) {
             VarDumper::dump($variable, 10, PHP_SAPI !== 'cli');
