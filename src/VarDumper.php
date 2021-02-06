@@ -93,6 +93,7 @@ final class VarDumper
     public function asString(int $depth = 10, bool $highlight = false): string
     {
         $output = $this->dumpInternal($this->variable, true, $depth, 0);
+
         if ($highlight) {
             $result = highlight_string("<?php\n" . $output, true);
             $output = preg_replace('/&lt;\\?php<br \\/>/', '', $result, 1);
