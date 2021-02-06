@@ -4,11 +4,27 @@ declare(strict_types=1);
 
 namespace Yiisoft\VarDumper\Tests;
 
+use DateTimeZone;
 use PHPUnit\Framework\TestCase;
+use ReflectionException;
 use stdClass;
 use Yiisoft\VarDumper as VD;
+use Yiisoft\VarDumper\Tests\TestAsset\DummyArrayableWithClosure;
+use Yiisoft\VarDumper\Tests\TestAsset\DummyDebugInfo;
+use Yiisoft\VarDumper\Tests\TestAsset\DummyIteratorAggregateWithClosure;
+use Yiisoft\VarDumper\Tests\TestAsset\DummyStringableWithClosure;
 use Yiisoft\VarDumper\VarDumper;
 use Yiisoft\VarDumper\VarDumper as Dumper;
+
+use function fopen;
+use function get_class;
+use function highlight_string;
+use function iterator_to_array;
+use function preg_replace;
+use function spl_object_id;
+use function str_replace;
+use function unserialize;
+use function var_export;
 
 /**
  * @group helpers
@@ -20,8 +36,10 @@ final class VarDumperTest extends TestCase
      *
      * @param mixed $var
      * @param string $expectedResult
+     *
+     * @throws ReflectionException
      */
-    public function testExport($var, $expectedResult): void
+    public function testExport($var, string $expectedResult): void
     {
         $exportResult = VarDumper::create($var)->export();
         $this->assertEqualsWithoutLE($expectedResult, $exportResult);
@@ -29,9 +47,9 @@ final class VarDumperTest extends TestCase
 
     public function exportDataProvider(): array
     {
-        $customDebugInfo = new CustomDebugInfo();
-        $customDebugInfo->volume = 10;
-        $customDebugInfo->unitPrice = 15;
+        $dummyDebugInfo = new DummyDebugInfo();
+        $dummyDebugInfo->volume = 10;
+        $dummyDebugInfo->unitPrice = 15;
 
         $incompleteObject = unserialize('O:16:"nonExistingClass":0:{}');
 
@@ -50,9 +68,9 @@ final class VarDumperTest extends TestCase
 
         return [
             'custom debug info' => [
-                $customDebugInfo,
+                $dummyDebugInfo,
                 <<<S
-                unserialize('O:39:"Yiisoft\\\VarDumper\\\Tests\\\CustomDebugInfo":2:{s:6:"volume";i:10;s:9:"unitPrice";i:15;}')
+                unserialize('O:48:"Yiisoft\\\VarDumper\\\Tests\\\TestAsset\\\\DummyDebugInfo":2:{s:6:"volume";i:10;s:9:"unitPrice";i:15;}')
                 S,
             ],
             'incomplete object' => [
@@ -157,7 +175,7 @@ final class VarDumperTest extends TestCase
             ],
             'closure in array' => [
                 // @formatter:off
-                [fn () => new \DateTimeZone('')],
+                [fn () => new DateTimeZone('')],
                 // @formatter:on
                 <<<S
                 [
@@ -167,19 +185,19 @@ final class VarDumperTest extends TestCase
             ],
             'original class name' => [
                 // @formatter:off
-                static fn (VarDumper $date) => new \DateTimeZone(''),
+                static fn (VarDumper $date) => new DateTimeZone(''),
                 // @formatter:on
                 "static fn (\Yiisoft\VarDumper\VarDumper \$date) => new \DateTimeZone('')",
             ],
             'class alias' => [
                 // @formatter:off
-                fn (Dumper $date) => new \DateTimeZone(''),
+                fn (Dumper $date) => new DateTimeZone(''),
                 // @formatter:on
                 "fn (\Yiisoft\VarDumper\VarDumper \$date) => new \DateTimeZone('')",
             ],
             'namespace alias' => [
                 // @formatter:off
-                fn (VD\VarDumper $date) => new \DateTimeZone(''),
+                fn (VD\VarDumper $date) => new DateTimeZone(''),
                 // @formatter:on
                 "fn (\Yiisoft\VarDumper\VarDumper \$date) => new \DateTimeZone('')",
             ],
@@ -216,8 +234,10 @@ final class VarDumperTest extends TestCase
      *
      * @param mixed $var
      * @param string $expectedResult
+     *
+     * @throws ReflectionException
      */
-    public function testExportWithoutFormatting($var, $expectedResult): void
+    public function testExportWithoutFormatting($var, string $expectedResult): void
     {
         $exportResult = VarDumper::create($var)->export(false);
         $this->assertEqualsWithoutLE($expectedResult, $exportResult);
@@ -304,25 +324,25 @@ final class VarDumperTest extends TestCase
             ],
             'closure in array' => [
                 // @formatter:off
-                [fn () => new \DateTimeZone('')],
+                [fn () => new DateTimeZone('')],
                 // @formatter:on
                 "[fn () => new \DateTimeZone('')]",
             ],
             'original class name' => [
                 // @formatter:off
-                fn (VarDumper $date) => new \DateTimeZone(''),
+                fn (VarDumper $date) => new DateTimeZone(''),
                 // @formatter:on
                 "fn (\Yiisoft\VarDumper\VarDumper \$date) => new \DateTimeZone('')",
             ],
             'class alias' => [
                 // @formatter:off
-                fn (Dumper $date) => new \DateTimeZone(''),
+                fn (Dumper $date) => new DateTimeZone(''),
                 // @formatter:on
                 "fn (\Yiisoft\VarDumper\VarDumper \$date) => new \DateTimeZone('')",
             ],
             'namespace alias' => [
                 // @formatter:off
-                fn (VD\VarDumper $date) => new \DateTimeZone(''),
+                fn (VD\VarDumper $date) => new DateTimeZone(''),
                 // @formatter:on
                 "fn (\Yiisoft\VarDumper\VarDumper \$date) => new \DateTimeZone('')",
             ],
@@ -336,17 +356,39 @@ final class VarDumperTest extends TestCase
     }
 
     /**
-     * Asserting two strings equality ignoring line endings.
+     * @dataProvider exportWithObjectSerializationFailDataProvider
      *
-     * @param string $expected
-     * @param string $actual
-     * @param string $message
+     * @param object $object
+     * @param string $expectedResult
+     *
+     * @throws ReflectionException
      */
-    protected function assertEqualsWithoutLE(string $expected, string $actual, string $message = ''): void
+    public function testExportWithObjectSerializationFail(object $object, string $expectedResult): void
     {
-        $expected = str_replace(["\r\n", '\r\n'], ["\n", '\n'], $expected);
-        $actual = str_replace(["\r\n", '\r\n'], ["\n", '\n'], $actual);
-        $this->assertEquals($expected, $actual, $message);
+        $exportResult = VarDumper::create($object)->export();
+        $this->assertEqualsWithoutLE($expectedResult, $exportResult);
+    }
+
+    public function exportWithObjectSerializationFailDataProvider(): array
+    {
+        return [
+            'Anonymous-instance' => [
+                $object = new class () {},
+                var_export(VarDumper::create($object)->asString(), true),
+            ],
+            'ArrayableInterface-instance-with-Closure' => [
+                $object = new DummyArrayableWithClosure(),
+                VarDumper::create($object->toArray())->export(),
+            ],
+            'IteratorAggregate-instance-with-Closure' => [
+                $object = new DummyIteratorAggregateWithClosure(),
+                VarDumper::create(iterator_to_array($object))->export(),
+            ],
+            'Stringable-instance-with-Closure' => [
+                $object = new DummyStringableWithClosure(),
+                VarDumper::create($object->__toString())->export(),
+            ],
+        ];
     }
 
     /**
@@ -363,10 +405,10 @@ final class VarDumperTest extends TestCase
 
     public function asStringDataProvider(): array
     {
-        $customDebugInfo = new CustomDebugInfo();
-        $customDebugInfo->volume = 10;
-        $customDebugInfo->unitPrice = 15;
-        $customDebugInfoObjectId = spl_object_id($customDebugInfo);
+        $dummyDebugInfo = new DummyDebugInfo();
+        $dummyDebugInfo->volume = 10;
+        $dummyDebugInfo->unitPrice = 15;
+        $dummyDebugInfoObjectId = spl_object_id($dummyDebugInfo);
 
         $incompleteObject = unserialize('O:16:"nonExistingClass":0:{}');
         $incompleteObjectId = spl_object_id($incompleteObject);
@@ -382,9 +424,9 @@ final class VarDumperTest extends TestCase
 
         return [
             'custom debug info' => [
-                $customDebugInfo,
+                $dummyDebugInfo,
                 <<<S
-                Yiisoft\VarDumper\Tests\CustomDebugInfo#{$customDebugInfoObjectId}
+                Yiisoft\VarDumper\Tests\TestAsset\DummyDebugInfo#{$dummyDebugInfoObjectId}
                 (
                     [volume] => 10
                     [totalPrice] => 150
@@ -498,7 +540,7 @@ final class VarDumperTest extends TestCase
             ],
             'closure in array' => [
                 // @formatter:off
-                [fn () => new \DateTimeZone('')],
+                [fn () => new DateTimeZone('')],
                 // @formatter:on
                 <<<S
                 [
@@ -508,19 +550,19 @@ final class VarDumperTest extends TestCase
             ],
             'original class name' => [
                 // @formatter:off
-                static fn (VarDumper $date) => new \DateTimeZone(''),
+                static fn (VarDumper $date) => new DateTimeZone(''),
                 // @formatter:on
                 "static fn (\Yiisoft\VarDumper\VarDumper \$date) => new \DateTimeZone('')",
             ],
             'class alias' => [
                 // @formatter:off
-                fn (Dumper $date) => new \DateTimeZone(''),
+                fn (Dumper $date) => new DateTimeZone(''),
                 // @formatter:on
                 "fn (\Yiisoft\VarDumper\VarDumper \$date) => new \DateTimeZone('')",
             ],
             'namespace alias' => [
                 // @formatter:off
-                fn (VD\VarDumper $date) => new \DateTimeZone(''),
+                fn (VD\VarDumper $date) => new DateTimeZone(''),
                 // @formatter:on
                 "fn (\Yiisoft\VarDumper\VarDumper \$date) => new \DateTimeZone('')",
             ],
@@ -544,5 +586,48 @@ final class VarDumperTest extends TestCase
                 S,
             ],
         ];
+    }
+
+    public function testDumpWithHighlight(): void
+    {
+        $var = 'content';
+        $result = highlight_string("<?php\n'{$var}'", true);
+        $output = preg_replace('/&lt;\\?php<br \\/>/', '', $result, 1);
+        VarDumper::dump($var);
+        $this->expectOutputString($output);
+    }
+
+    public function testDumpWithOutHighlight(): void
+    {
+        $var = 'content';
+        VarDumper::dump($var, 10, false);
+        $this->expectOutputString("'{$var}'");
+    }
+
+    public function testDumpWithoutDepthForArray(): void
+    {
+        VarDumper::dump(['content'], 0, false);
+        $this->expectOutputString('[...]');
+    }
+
+    public function testDumpWithoutDepthForObject(): void
+    {
+        $object = new DummyDebugInfo();
+        VarDumper::dump($object, 0, false);
+        $this->expectOutputString(get_class($object) . '#' . spl_object_id($object) . ' (...)');
+    }
+
+    /**
+     * Asserting two strings equality ignoring line endings.
+     *
+     * @param string $expected
+     * @param string $actual
+     * @param string $message
+     */
+    private function assertEqualsWithoutLE(string $expected, string $actual, string $message = ''): void
+    {
+        $expected = str_replace(["\r\n", '\r\n'], ["\n", '\n'], $expected);
+        $actual = str_replace(["\r\n", '\r\n'], ["\n", '\n'], $actual);
+        $this->assertEquals($expected, $actual, $message);
     }
 }

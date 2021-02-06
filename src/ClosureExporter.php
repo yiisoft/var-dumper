@@ -80,14 +80,14 @@ final class ClosureExporter
 
             if ($this->useStatementParser->isTokenIsPartOfUse($token)) {
                 $buffer .= $token[1];
-                if (PHP_VERSION_ID >= 80000 && $this->isUseConsistingOfMultipleParts($buffer)) {
+                if ($this->isUseConsistingOfMultipleParts($buffer)) {
                     $buffer = $this->getUseLastPart($buffer);
                 }
                 if (!empty($previousUsePart) && $buffer === '\\') {
                     continue;
                 }
                 if (isset($uses[$buffer])) {
-                    if ($this->isNotFullUseAlias($buffer, $uses)) {
+                    if ($this->isNotFullUseAlias($uses[$buffer], $uses)) {
                         $previousUsePart = $uses[$buffer];
                         $buffer = '';
                         continue;
@@ -154,19 +154,15 @@ final class ClosureExporter
     /**
      * Checks whether the use statement data is not a full use statement data alias.
      *
-     * @param string $useKey The use statement data key.
+     * @param string $use The use statement data to check.
      * @param array<string, string> $uses The use statement data.
      *
      * @return bool Whether the use statement data is not a full use statement data alias.
      */
-    private function isNotFullUseAlias(string $useKey, array $uses): bool
+    private function isNotFullUseAlias(string $use, array $uses): bool
     {
-        if (!isset($uses[$useKey])) {
-            return false;
-        }
-
-        $lastPart = $this->getUseLastPart($uses[$useKey]);
-        return isset($uses[$lastPart]) && $uses[$lastPart] !== $uses[$useKey];
+        $lastPart = $this->getUseLastPart($use);
+        return isset($uses[$lastPart]) && $uses[$lastPart] !== $use;
     }
 
     /**

@@ -8,9 +8,9 @@ use RuntimeException;
 
 use function array_slice;
 use function defined;
-use function file_exists;
 use function file_get_contents;
 use function is_array;
+use function is_file;
 use function is_readable;
 use function mb_substr;
 use function strpos;
@@ -33,18 +33,18 @@ final class UseStatementParser
      */
     public function fromFile(string $file): array
     {
-        if (!file_exists($file)) {
-            throw new RuntimeException('File "' . $file . '" does not exist.');
+        if (!is_file($file)) {
+            throw new RuntimeException("File \"{$file}\" does not exist.");
         }
 
         if (!is_readable($file)) {
-            throw new RuntimeException('File "' . $file . '" is not readable.');
+            throw new RuntimeException("File \"{$file}\" is not readable.");
         }
 
         $fileContent = file_get_contents($file);
 
         if ($fileContent === false) {
-            throw new RuntimeException('Failed to read file "' . $file . '".');
+            throw new RuntimeException("Failed to read file \"{$file}\".");
         }
 
         $tokens = token_get_all($fileContent);
