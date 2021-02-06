@@ -8,12 +8,17 @@ use Closure;
 use ReflectionException;
 use ReflectionFunction;
 
-use function array_key_exists;
+use function array_filter;
+use function array_pop;
+use function array_shift;
 use function array_slice;
-use function defined;
+use function explode;
+use function file;
+use function implode;
 use function in_array;
-use function is_array;
 use function is_string;
+use function strpos;
+use function token_get_all;
 
 /**
  * ClosureExporter exports PHP {@see \Closure} as a string containing PHP code.
@@ -48,19 +53,19 @@ final class ClosureExporter
         $end = $reflection->getEndLine();
 
         if ($fileName === false || $start === false || $end === false || ($fileContent = file($fileName)) === false) {
-            return 'function() {/* Error: unable to determine Closure source */}';
+            return 'function () {/* Error: unable to determine Closure source */}';
         }
 
         --$start;
         $uses = $this->useStatementParser->fromFile($fileName);
-
-        $source = implode('', array_slice($fileContent, $start, $end - $start));
-        $tokens = token_get_all('<?php ' . $source);
+        $tokens = token_get_all('<?php ' . implode('', array_slice($fileContent, $start, $end - $start)));
         array_shift($tokens);
 
-        $closureTokens = [];
-        $pendingParenthesisCount = 0;
         $buffer = '';
+        $closureTokens = [];
+        $previousUsePart = '';
+        $pendingParenthesisCount = 0;
+
         foreach ($tokens as $token) {
             if (in_array($token[0], [T_FUNCTION, T_FN, T_STATIC], true)) {
                 $closureTokens[] = $token[1];
@@ -68,21 +73,30 @@ final class ClosureExporter
             }
             if ($closureTokens !== []) {
                 $readableToken = $token[1] ?? $token;
-                if ($this->isNextTokenIsPartOfNamespace($token)) {
+                if (TokenHelper::isPartOfNamespace($token)) {
                     $buffer .= $token[1];
-                    if (
-                        PHP_VERSION_ID >= 80000
-                        && $buffer !== '\\'
-                        && strpos($buffer, '\\') !== false
-                    ) {
+                    if (PHP_VERSION_ID >= 80000 && $buffer !== '\\' && strpos($buffer, '\\') !== false) {
                         $usesKeys = array_filter(explode('\\', $buffer));
                         $buffer = array_pop($usesKeys);
                     }
-                    if (
-                        array_key_exists($buffer, $uses)
-                        && !$this->isNextTokenIsPartOfNamespace(next($tokens))
-                    ) {
-                        $readableToken = $uses[$buffer];
+                    if (!empty($previousUsePart) && $buffer === '\\') {
+                        continue;
+                    }
+                    if (isset($uses[$buffer])) {
+                        if ($this->isUseNamespaceAlias($buffer, $uses)) {
+                            $previousUsePart = $uses[$buffer];
+                            $buffer = '';
+                            continue;
+                        }
+                        $readableToken = (empty($previousUsePart) || strpos($uses[$buffer], $previousUsePart) === false)
+                            ? $previousUsePart . $uses[$buffer]
+                            : $uses[$buffer]
+                        ;
+                        $buffer = '';
+                        $previousUsePart = '';
+                    } elseif (isset($uses[$token[1]])) {
+                        $readableToken = $uses[$token[1]];
+                        $previousUsePart = '';
                         $buffer = '';
                     }
                 }
@@ -100,6 +114,7 @@ final class ClosureExporter
                         }
                     }
                 }
+
                 $closureTokens[] = $readableToken;
             }
         }
@@ -117,21 +132,15 @@ final class ClosureExporter
         return in_array($value, ['}', ']', ')']);
     }
 
-    /**
-     * @param array|string $token
-     *
-     * @return bool
-     */
-    private function isNextTokenIsPartOfNamespace($token): bool
+    private function isUseNamespaceAlias(string $useKey, array $uses): bool
     {
-        if (!is_array($token)) {
+        if (!isset($uses[$useKey])) {
             return false;
         }
 
-        return $token[0] === T_STRING
-            || $token[0] === T_NS_SEPARATOR
-            || (defined('T_NAME_QUALIFIED') && $token[0] === T_NAME_QUALIFIED)
-            || (defined('T_NAME_FULLY_QUALIFIED') && $token[0] === T_NAME_FULLY_QUALIFIED)
-            || (defined('T_NAME_RELATIVE') && $token[0] === T_NAME_RELATIVE);
+        $usesKeys = array_filter(explode('\\', (string) $uses[$useKey]));
+        $lastPartUse = array_pop($usesKeys);
+
+        return isset($uses[$lastPartUse]) && $uses[$lastPartUse] !== $uses[$useKey];
     }
 }
