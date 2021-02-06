@@ -29,9 +29,6 @@ use function str_replace;
 use function unserialize;
 use function var_export;
 
-/**
- * @group helpers
- */
 final class VarDumperTest extends TestCase
 {
     /**
