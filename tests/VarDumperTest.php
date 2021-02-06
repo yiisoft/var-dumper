@@ -635,6 +635,24 @@ final class VarDumperTest extends TestCase
         ];
     }
 
+    /**
+     * @dataProvider asStringDataProvider
+     *
+     * @param mixed $variable
+     * @param string $result
+     */
+    public function testDFunction($variable, string $result): void
+    {
+        d($variable);
+        $this->expectOutputString($result);
+    }
+
+    public function testDFunctionWithMultipleVariables(): void
+    {
+        d([], 123, true);
+        $this->expectOutputString('[]123true');
+    }
+
     public function testDumpWithHighlight(): void
     {
         $var = 'content';
