@@ -635,16 +635,10 @@ final class VarDumperTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider asStringDataProvider
-     *
-     * @param mixed $variable
-     * @param string $result
-     */
-    public function testDFunction($variable, string $result): void
+    public function testDFunction(): void
     {
-        d($variable);
-        $this->expectOutputString($result);
+        d($variable = 'content');
+        $this->expectOutputString("'{$variable}'");
     }
 
     public function testDFunctionWithMultipleVariables(): void
