@@ -7,6 +7,7 @@ namespace Yiisoft\VarDumper;
 use RuntimeException;
 
 use function array_slice;
+use function defined;
 use function file_exists;
 use function file_get_contents;
 use function is_array;
@@ -54,13 +55,33 @@ final class UseStatementParser
                 continue;
             }
 
-            if ($token[0] === T_USE && isset($tokens[$i + 2]) && TokenHelper::isPartOfNamespace($tokens[$i + 2])) {
+            if ($token[0] === T_USE && isset($tokens[$i + 2]) && $this->isPartOfNamespace($tokens[$i + 2])) {
                 $uses = $uses + $this->normalize(array_slice($tokens, $i + 1));
                 continue;
             }
         }
 
         return $uses;
+    }
+
+    /**
+     * Whether the token is part of the namespace.
+     *
+     * @param array|string $token
+     *
+     * @return bool
+     */
+    public function isPartOfNamespace($token): bool
+    {
+        if (!is_array($token)) {
+            return false;
+        }
+
+        return $token[0] === T_STRING
+            || $token[0] === T_NS_SEPARATOR
+            || (defined('T_NAME_QUALIFIED') && $token[0] === T_NAME_QUALIFIED)
+            || (defined('T_NAME_FULLY_QUALIFIED') && $token[0] === T_NAME_FULLY_QUALIFIED)
+            || (defined('T_NAME_RELATIVE') && $token[0] === T_NAME_RELATIVE);
     }
 
     /**
@@ -79,7 +100,7 @@ final class UseStatementParser
 
         /** @psalm-var array<int, int|string>|string $token */
         foreach ($tokens as $token) {
-            if (TokenHelper::isPartOfNamespace($token)) {
+            if ($this->isPartOfNamespace($token)) {
                 $current .= $token[1];
                 continue;
             }

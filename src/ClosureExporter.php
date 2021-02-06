@@ -73,7 +73,7 @@ final class ClosureExporter
             }
             if ($closureTokens !== []) {
                 $readableToken = $token[1] ?? $token;
-                if (TokenHelper::isPartOfNamespace($token)) {
+                if ($this->useStatementParser->isPartOfNamespace($token)) {
                     $buffer .= $token[1];
                     if (PHP_VERSION_ID >= 80000 && $buffer !== '\\' && strpos($buffer, '\\') !== false) {
                         $usesKeys = array_filter(explode('\\', $buffer));
