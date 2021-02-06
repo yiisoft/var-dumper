@@ -43,6 +43,16 @@ In case you want to echo a string representing variable contents use the followi
 That is useful for quick debugging. By default, it goes deep `10` levels into variable and highlights syntax. You may
 adjust these settings via second and third argument of the method respectively.
 
+For convenience, you can use the functions:
+
+```php
+// Prints variables:
+d($variable, /* Further variables to dump. */);
+
+// Prints variables and terminate the current script:
+dd($variable, /* Further variables to dump. */);
+```
+
 ### Formatting debug string
 
 To get a string representing variable contents, same as above but without `echo`:
@@ -66,8 +76,6 @@ $string = \Yiisoft\VarDumper\VarDumper::create($variable)->export();
 It is similar to `var_export()` but uses short array syntax, handles closures, and serializes objects.
 
 In the above `export()` will give you nicely formatted code. You can remove formatting by passing `false` as an argument.
-
-## Testing
 
 ### Unit testing
 
@@ -94,21 +102,21 @@ The code is statically analyzed with [Psalm](https://psalm.dev/). To run static 
 ./vendor/bin/psalm
 ```
 
-## License
-
-The Yii VarDumper Helper is free software. It is released under the terms of the BSD License.
-Please see [`LICENSE`](./LICENSE.md) for more information.
-
-Maintained by [Yii Software](https://www.yiiframework.com/).
-
-## Support the project
+### Support the project
 
 [![Open Collective](https://img.shields.io/badge/Open%20Collective-sponsor-7eadf1?logo=open%20collective&logoColor=7eadf1&labelColor=555555)](https://opencollective.com/yiisoft)
 
-## Follow updates
+### Follow updates
 
 [![Official website](https://img.shields.io/badge/Powered_by-Yii_Framework-green.svg?style=flat)](https://www.yiiframework.com/)
 [![Twitter](https://img.shields.io/badge/twitter-follow-1DA1F2?logo=twitter&logoColor=1DA1F2&labelColor=555555?style=flat)](https://twitter.com/yiiframework)
-[![Telegram](https://img.shields.io/badge/telegram-join-1DA1F2?style=flat&logo=telegram)](https://t.me/yii3en)
+[![Telegram](https://img.shields.io/badge/telegram-join-1DA1F2?style=flat&logo=telegram)](https://t.me/yii3ru)
 [![Facebook](https://img.shields.io/badge/facebook-join-1DA1F2?style=flat&logo=facebook&logoColor=ffffff)](https://www.facebook.com/groups/yiitalk)
 [![Slack](https://img.shields.io/badge/slack-join-1DA1F2?style=flat&logo=slack)](https://yiiframework.com/go/slack)
+
+## License
+
+The Yii Caching Library is free software. It is released under the terms of the BSD License.
+Please see [`LICENSE`](./LICENSE.md) for more information.
+
+Maintained by [Yii Software](https://www.yiiframework.com/).

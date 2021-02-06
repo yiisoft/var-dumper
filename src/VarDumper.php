@@ -11,7 +11,20 @@ use IteratorAggregate;
 use ReflectionException;
 use Yiisoft\Arrays\ArrayableInterface;
 
+use function array_keys;
+use function count;
 use function get_class;
+use function gettype;
+use function highlight_string;
+use function method_exists;
+use function next;
+use function preg_replace;
+use function range;
+use function spl_object_id;
+use function str_repeat;
+use function strtr;
+use function trim;
+use function var_export;
 
 /**
  * VarDumper provides enhanced versions of the PHP functions {@see var_dump()} and {@see var_export()}.
@@ -80,6 +93,7 @@ final class VarDumper
     public function asString(int $depth = 10, bool $highlight = false): string
     {
         $output = $this->dumpInternal($this->variable, true, $depth, 0);
+
         if ($highlight) {
             $result = highlight_string("<?php\n" . $output, true);
             $output = preg_replace('/&lt;\\?php<br \\/>/', '', $result, 1);
@@ -123,8 +137,7 @@ final class VarDumper
      */
     private function dumpInternal($var, bool $format, int $depth, int $level): string
     {
-        $type = gettype($var);
-        switch ($type) {
+        switch (gettype($var)) {
             case 'resource':
             case 'resource (closed)':
                 return '{resource}';
@@ -143,6 +156,7 @@ final class VarDumper
                 $keys = array_keys($var);
                 $spaces = str_repeat(' ', $level * 4);
                 $output .= '[';
+
                 foreach ($keys as $name) {
                     if ($format) {
                         $output .= "\n" . $spaces . '    ';
@@ -159,6 +173,7 @@ final class VarDumper
                 if ($var instanceof Closure) {
                     return $this->exportClosure($var);
                 }
+
                 if ($depth <= $level) {
                     return $this->getObjectDescription($var) . ' (...)';
                 }
@@ -170,7 +185,7 @@ final class VarDumper
 
                 /** @psalm-var mixed $value */
                 foreach ($objectProperties as $name => $value) {
-                    $propertyName = strtr(trim((string)$name), "\0", '::');
+                    $propertyName = strtr(trim((string) $name), "\0", '::');
                     $output .= "\n" . $spaces . "    [$propertyName] => ";
                     $output .= $this->dumpInternal($value, $format, $depth, $level + 1);
                 }
@@ -178,16 +193,6 @@ final class VarDumper
             default:
                 return $this->exportVariable($var);
         }
-    }
-
-    private function getObjectProperties(object $var): array
-    {
-        if (!$var instanceof __PHP_Incomplete_Class && method_exists($var, '__debugInfo')) {
-            /** @var array $var */
-            $var = $var->__debugInfo();
-        }
-
-        return (array)$var;
     }
 
     /**
@@ -213,6 +218,7 @@ final class VarDumper
                 $outputKeys = ($keys !== range(0, count($variable) - 1));
                 $spaces = str_repeat(' ', $level * 4);
                 $output = '[';
+
                 foreach ($keys as $key) {
                     if ($format) {
                         $output .= "\n" . $spaces . '    ';
@@ -226,6 +232,7 @@ final class VarDumper
                         $output .= ',';
                     }
                 }
+
                 return $format
                     ? $output . "\n" . $spaces . ']'
                     : $output . ']';
@@ -235,10 +242,9 @@ final class VarDumper
                 }
 
                 try {
-                    return 'unserialize(' . $this->exportVariable(serialize($variable)) . ')';
+                    return "unserialize({$this->exportVariable(serialize($variable))})";
                 } catch (Exception $e) {
-                    // Serialize may fail, for example: if object contains a `\Closure` instance
-                    // so we use a fallback.
+                    // Serialize may fail, for example: if object contains a `\Closure` instance so we use a fallback.
                     if ($variable instanceof ArrayableInterface) {
                         return $this->exportInternal($variable->toArray(), $format, $level);
                     }
@@ -276,11 +282,6 @@ final class VarDumper
         return self::$closureExporter->export($closure);
     }
 
-    private function getObjectDescription(object $object): string
-    {
-        return get_class($object) . '#' . spl_object_id($object);
-    }
-
     /**
      * @param mixed $variable
      *
@@ -289,5 +290,20 @@ final class VarDumper
     private function exportVariable($variable): string
     {
         return var_export($variable, true);
+    }
+
+    private function getObjectDescription(object $object): string
+    {
+        return get_class($object) . '#' . spl_object_id($object);
+    }
+
+    private function getObjectProperties(object $var): array
+    {
+        if (!$var instanceof __PHP_Incomplete_Class && method_exists($var, '__debugInfo')) {
+            /** @var array $var */
+            $var = $var->__debugInfo();
+        }
+
+        return (array) $var;
     }
 }

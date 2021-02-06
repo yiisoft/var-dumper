@@ -71,76 +71,121 @@ final class ClosureExporter
                 $closureTokens[] = $token[1];
                 continue;
             }
-            if ($closureTokens !== []) {
-                $readableToken = $token[1] ?? $token;
-                if (TokenHelper::isPartOfNamespace($token)) {
-                    $buffer .= $token[1];
-                    if (PHP_VERSION_ID >= 80000 && $buffer !== '\\' && strpos($buffer, '\\') !== false) {
-                        $usesKeys = array_filter(explode('\\', $buffer));
-                        $buffer = array_pop($usesKeys);
-                    }
-                    if (!empty($previousUsePart) && $buffer === '\\') {
+
+            if ($closureTokens === []) {
+                continue;
+            }
+
+            $readableToken = is_array($token) ? $token[1] : $token;
+
+            if ($this->useStatementParser->isTokenIsPartOfUse($token)) {
+                $buffer .= $token[1];
+                if ($this->isUseConsistingOfMultipleParts($buffer)) {
+                    $buffer = $this->getUseLastPart($buffer);
+                }
+                if (!empty($previousUsePart) && $buffer === '\\') {
+                    continue;
+                }
+                if (isset($uses[$buffer])) {
+                    if ($this->isNotFullUseAlias($uses[$buffer], $uses)) {
+                        $previousUsePart = $uses[$buffer];
+                        $buffer = '';
                         continue;
                     }
-                    if (isset($uses[$buffer])) {
-                        if ($this->isUseNamespaceAlias($buffer, $uses)) {
-                            $previousUsePart = $uses[$buffer];
-                            $buffer = '';
-                            continue;
-                        }
-                        $readableToken = (empty($previousUsePart) || strpos($uses[$buffer], $previousUsePart) === false)
-                            ? $previousUsePart . $uses[$buffer]
-                            : $uses[$buffer]
-                        ;
-                        $buffer = '';
-                        $previousUsePart = '';
-                    } elseif (isset($uses[$token[1]])) {
-                        $readableToken = $uses[$token[1]];
-                        $previousUsePart = '';
-                        $buffer = '';
-                    }
+                    $readableToken = (empty($previousUsePart) || strpos($uses[$buffer], $previousUsePart) === false)
+                        ? $previousUsePart . $uses[$buffer]
+                        : $uses[$buffer]
+                    ;
+                    $buffer = '';
+                    $previousUsePart = '';
+                } elseif (isset($uses[$token[1]])) {
+                    $readableToken = $uses[$token[1]];
+                    $previousUsePart = '';
+                    $buffer = '';
                 }
-                if (is_string($token)) {
-                    if ($this->isOpenParenthesis($token)) {
-                        $pendingParenthesisCount++;
-                    } elseif ($this->isCloseParenthesis($token)) {
-                        if ($pendingParenthesisCount === 0) {
-                            break;
-                        }
-                        $pendingParenthesisCount--;
-                    } elseif ($token === ',' || $token === ';') {
-                        if ($pendingParenthesisCount === 0) {
-                            break;
-                        }
-                    }
-                }
-
-                $closureTokens[] = $readableToken;
             }
+
+            if (is_string($token)) {
+                if ($this->isOpenParenthesis($token)) {
+                    $pendingParenthesisCount++;
+                } elseif ($this->isCloseParenthesis($token)) {
+                    if ($pendingParenthesisCount === 0) {
+                        break;
+                    }
+                    $pendingParenthesisCount--;
+                } elseif ($token === ',' || $token === ';') {
+                    if ($pendingParenthesisCount === 0) {
+                        break;
+                    }
+                }
+            }
+
+            $closureTokens[] = $readableToken;
         }
 
         return implode('', $closureTokens);
     }
 
+    /**
+     * Returns the last part from the use statement data.
+     *
+     * @param string $use The full use statement data.
+     *
+     * @return string The last part from the use statement data.
+     */
+    private function getUseLastPart(string $use): string
+    {
+        $parts = array_filter(explode('\\', $use));
+        return array_pop($parts);
+    }
+
+    /**
+     * Checks whether the use statement data consists of multiple parts.
+     *
+     * @param string $use The use statement data.
+     *
+     * @return bool Whether the use statement data consists of multiple parts.
+     */
+    private function isUseConsistingOfMultipleParts(string $use): bool
+    {
+        return $use !== '\\' && strpos($use, '\\') !== false;
+    }
+
+    /**
+     * Checks whether the use statement data is not a full use statement data alias.
+     *
+     * @param string $use The use statement data to check.
+     * @param array<string, string> $uses The use statement data.
+     *
+     * @return bool Whether the use statement data is not a full use statement data alias.
+     */
+    private function isNotFullUseAlias(string $use, array $uses): bool
+    {
+        $lastPart = $this->getUseLastPart($use);
+        return isset($uses[$lastPart]) && $uses[$lastPart] !== $use;
+    }
+
+    /**
+     * Checks whether the value of the token is an opening parenthesis.
+     *
+     * @param string $value The token value.
+     *
+     * @return bool Whether the value of the token is an opening parenthesis.
+     */
     private function isOpenParenthesis(string $value): bool
     {
         return in_array($value, ['{', '[', '(']);
     }
 
+    /**
+     * Checks whether the value of the token is a closing parenthesis.
+     *
+     * @param string $value The token value.
+     *
+     * @return bool Whether the value of the token is a closing parenthesis.
+     */
     private function isCloseParenthesis(string $value): bool
     {
         return in_array($value, ['}', ']', ')']);
-    }
-
-    private function isUseNamespaceAlias(string $useKey, array $uses): bool
-    {
-        if (!isset($uses[$useKey])) {
-            return false;
-        }
-
-        $usesKeys = array_filter(explode('\\', (string) $uses[$useKey]));
-        $lastPartUse = array_pop($usesKeys);
-
-        return isset($uses[$lastPartUse]) && $uses[$lastPartUse] !== $uses[$useKey];
     }
 }

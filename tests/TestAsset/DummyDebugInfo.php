@@ -2,24 +2,24 @@
 
 declare(strict_types=1);
 
-namespace Yiisoft\VarDumper\Tests;
+namespace Yiisoft\VarDumper\Tests\TestAsset;
 
 /**
  * CustomDebugInfo serves for the testing of `__debugInfo()` PHP magic method.
  *
- * @see VarDumperTest
+ * @see \Yiisoft\VarDumper\Tests\VarDumperTest
  */
-class CustomDebugInfo
+final class DummyDebugInfo
 {
-    public $volume;
-    public $unitPrice;
+    public int $volume;
+    public int $unitPrice;
 
     /**
-     * @see http://php.net/manual/en/language.oop5.magic.php#language.oop5.magic.debuginfo
+     * @see https://www.php.net/manual/en/language.oop5.magic.php#object.debuginfo
      *
      * @return array
      */
-    public function __debugInfo()
+    public function __debugInfo(): array
     {
         return [
             'volume' => $this->volume,

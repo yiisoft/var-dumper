@@ -7,9 +7,10 @@ namespace Yiisoft\VarDumper;
 use RuntimeException;
 
 use function array_slice;
-use function file_exists;
+use function defined;
 use function file_get_contents;
 use function is_array;
+use function is_file;
 use function is_readable;
 use function mb_substr;
 use function strpos;
@@ -22,27 +23,28 @@ use function substr;
 final class UseStatementParser
 {
     /**
+     * Returns a set of `use` statements from the code of the specified file.
+     *
      * @param string $file File to read.
      *
      * @throws RuntimeException if there is a problem reading file.
      *
-     * @return array Use statements data.
-     * @psalm-return array<string, string>
+     * @return array<string, string> Use statements data.
      */
     public function fromFile(string $file): array
     {
-        if (!file_exists($file)) {
-            throw new RuntimeException('File "' . $file . '" does not exist.');
+        if (!is_file($file)) {
+            throw new RuntimeException("File \"{$file}\" does not exist.");
         }
 
         if (!is_readable($file)) {
-            throw new RuntimeException('File "' . $file . '" is not readable.');
+            throw new RuntimeException("File \"{$file}\" is not readable.");
         }
 
         $fileContent = file_get_contents($file);
 
         if ($fileContent === false) {
-            throw new RuntimeException('Failed to read file "' . $file . '".');
+            throw new RuntimeException("Failed to read file \"{$file}\".");
         }
 
         $tokens = token_get_all($fileContent);
@@ -54,7 +56,7 @@ final class UseStatementParser
                 continue;
             }
 
-            if ($token[0] === T_USE && isset($tokens[$i + 2]) && TokenHelper::isPartOfNamespace($tokens[$i + 2])) {
+            if ($token[0] === T_USE && isset($tokens[$i + 2]) && $this->isTokenIsPartOfUse($tokens[$i + 2])) {
                 $uses = $uses + $this->normalize(array_slice($tokens, $i + 1));
                 continue;
             }
@@ -64,12 +66,31 @@ final class UseStatementParser
     }
 
     /**
+     * Checks whether the token is part of the use statement data.
+     *
+     * @param array|string $token PHP token.
+     *
+     * @return bool Whether the token is part of the use statement data.
+     */
+    public function isTokenIsPartOfUse($token): bool
+    {
+        if (!is_array($token)) {
+            return false;
+        }
+
+        return $token[0] === T_STRING
+            || $token[0] === T_NS_SEPARATOR
+            || (defined('T_NAME_QUALIFIED') && $token[0] === T_NAME_QUALIFIED)
+            || (defined('T_NAME_FULLY_QUALIFIED') && $token[0] === T_NAME_FULLY_QUALIFIED)
+            || (defined('T_NAME_RELATIVE') && $token[0] === T_NAME_RELATIVE);
+    }
+
+    /**
      * Normalizes raw tokens into uniform use statement data.
      *
-     * @param array $tokens Raw tokens.
+     * @param array<int, array<int, int|string>|string> $tokens Raw tokens.
      *
-     * @return array Normalized use statement data.
-     * @psalm-return array<string, string>
+     * @return array<string, string> Normalized use statement data.
      */
     private function normalize(array $tokens): array
     {
@@ -77,9 +98,8 @@ final class UseStatementParser
         $current = '';
         $uses = [];
 
-        /** @psalm-var array<int, int|string>|string $token */
         foreach ($tokens as $token) {
-            if (TokenHelper::isPartOfNamespace($token)) {
+            if ($this->isTokenIsPartOfUse($token)) {
                 $current .= $token[1];
                 continue;
             }
@@ -106,10 +126,11 @@ final class UseStatementParser
     }
 
     /**
-     * @param array $uses
-     * @psalm-param list<string> $uses
+     * Replaces aliases for the use statement data.
      *
-     * @return array<string, string>
+     * @param string[] $uses Raw uses.
+     *
+     * @return array<string, string> Use statement data with the replaced aliases.
      */
     private function replaceAliases(array $uses): array
     {
