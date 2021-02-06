@@ -6,13 +6,16 @@ namespace Yiisoft\VarDumper\Tests;
 
 use DateTimeZone;
 use PHPUnit\Framework\TestCase;
+use ReflectionClass;
 use ReflectionException;
 use stdClass;
 use Yiisoft\VarDumper as VD;
+use Yiisoft\VarDumper\ClosureExporter;
 use Yiisoft\VarDumper\Tests\TestAsset\DummyArrayableWithClosure;
 use Yiisoft\VarDumper\Tests\TestAsset\DummyDebugInfo;
 use Yiisoft\VarDumper\Tests\TestAsset\DummyIteratorAggregateWithClosure;
 use Yiisoft\VarDumper\Tests\TestAsset\DummyStringableWithClosure;
+use Yiisoft\VarDumper\UseStatementParser;
 use Yiisoft\VarDumper\VarDumper;
 use Yiisoft\VarDumper\VarDumper as Dumper;
 
@@ -389,6 +392,46 @@ final class VarDumperTest extends TestCase
                 VarDumper::create($object->__toString())->export(),
             ],
         ];
+    }
+
+    public function testExportWithClosureArray(): void
+    {
+        $var = [
+            ClosureExporter::class => static fn () => new ClosureExporter(),
+            UseStatementParser::class => static function ($container) {
+                return $container->get(UseStatementParser::class);
+            },
+        ];
+
+        $exportResult = preg_replace('/\s/', '', VarDumper::create($var)->export());
+        $expectedResult = preg_replace('/\s/', '', <<<S
+            [
+                'Yiisoft\\\\VarDumper\\\\ClosureExporter' => static fn () => new \Yiisoft\VarDumper\ClosureExporter(),
+                'Yiisoft\\\\VarDumper\\\\UseStatementParser' => static function (\$container) {
+                    return \$container->get(\Yiisoft\VarDumper\UseStatementParser::class);
+                },
+            ]
+        S);
+
+        $this->assertEqualsWithoutLE($expectedResult, $exportResult);
+    }
+
+    public function testExportClosureWithAnImmutableInstanceOfClosureExporter(): void
+    {
+        $varDumper1 = VarDumper::create(fn ():int => 1);
+        $reflection1 = new ReflectionClass($varDumper1);
+        $closureExporter1 = $reflection1->getStaticPropertyValue('closureExporter');
+
+        $this->assertInstanceOf(ClosureExporter::class, $closureExporter1);
+        $this->assertSame('fn ():int => 1', $varDumper1->export());
+
+        $varDumper2 = VarDumper::create(fn ():int => 2);
+        $reflection2 = new ReflectionClass($varDumper2);
+        $closureExporter2 = $reflection2->getStaticPropertyValue('closureExporter');
+
+        $this->assertInstanceOf(ClosureExporter::class, $closureExporter2);
+        $this->assertSame('fn ():int => 2', $varDumper2->export());
+        $this->assertSame($closureExporter1, $closureExporter2);
     }
 
     /**
