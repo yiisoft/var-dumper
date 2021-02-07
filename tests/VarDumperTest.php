@@ -641,7 +641,7 @@ final class VarDumperTest extends TestCase
     public function testDFunctionWithMultipleVariables(): void
     {
         d([], 123, true);
-        $this->expectOutputString('[]'. PHP_EOL . '123' . PHP_EOL . 'true' . PHP_EOL);
+        $this->expectOutputString('[]' . PHP_EOL . '123' . PHP_EOL . 'true' . PHP_EOL);
     }
 
     public function testDumpWithHighlight(): void
