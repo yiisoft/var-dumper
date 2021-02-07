@@ -16,8 +16,14 @@ if (!function_exists('d')) {
      */
     function d(...$variables): void
     {
+        $highlight = PHP_SAPI !== 'cli';
+
         foreach ($variables as $variable) {
-            VarDumper::dump($variable, 10, PHP_SAPI !== 'cli');
+            VarDumper::dump($variable, 10, $highlight);
+
+            if (!$highlight) {
+                echo PHP_EOL;
+            }
         }
     }
 }
@@ -34,9 +40,16 @@ if (!function_exists('dd')) {
      */
     function dd(...$variables): void
     {
+        $highlight = PHP_SAPI !== 'cli';
+
         foreach ($variables as $variable) {
-            VarDumper::dump($variable, 10, PHP_SAPI !== 'cli');
+            VarDumper::dump($variable, 10, $highlight);
+
+            if (!$highlight) {
+                echo PHP_EOL;
+            }
         }
+
         die();
     }
 }
