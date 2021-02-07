@@ -14,6 +14,7 @@ use Yiisoft\VarDumper\ClosureExporter;
 use Yiisoft\VarDumper\Tests\TestAsset\DummyArrayableWithClosure;
 use Yiisoft\VarDumper\Tests\TestAsset\DummyDebugInfo;
 use Yiisoft\VarDumper\Tests\TestAsset\DummyIteratorAggregateWithClosure;
+use Yiisoft\VarDumper\Tests\TestAsset\DummyJsonSerializableWithClosure;
 use Yiisoft\VarDumper\Tests\TestAsset\DummyStringableWithClosure;
 use Yiisoft\VarDumper\UseStatementParser;
 use Yiisoft\VarDumper\VarDumper;
@@ -379,6 +380,10 @@ final class VarDumperTest extends TestCase
             'ArrayableInterface-instance-with-Closure' => [
                 $object = new DummyArrayableWithClosure(),
                 VarDumper::create($object->toArray())->export(),
+            ],
+            'JsonSerializable-instance-with-Closure' => [
+                $object = new DummyJsonSerializableWithClosure(),
+                VarDumper::create($object->jsonSerialize())->export(),
             ],
             'IteratorAggregate-instance-with-Closure' => [
                 $object = new DummyIteratorAggregateWithClosure(),
