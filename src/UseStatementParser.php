@@ -57,7 +57,7 @@ final class UseStatementParser
             }
 
             if ($token[0] === T_USE && isset($tokens[$i + 2]) && $this->isTokenIsPartOfUse($tokens[$i + 2])) {
-                $uses = $uses + $this->normalize(array_slice($tokens, $i + 1));
+                $uses += $this->normalize(array_slice($tokens, $i + 1));
                 continue;
             }
         }
