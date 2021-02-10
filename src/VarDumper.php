@@ -8,6 +8,7 @@ use __PHP_Incomplete_Class;
 use Closure;
 use Exception;
 use IteratorAggregate;
+use JsonSerializable;
 use ReflectionException;
 use Yiisoft\Arrays\ArrayableInterface;
 
@@ -247,6 +248,10 @@ final class VarDumper
                     // Serialize may fail, for example: if object contains a `\Closure` instance so we use a fallback.
                     if ($variable instanceof ArrayableInterface) {
                         return $this->exportInternal($variable->toArray(), $format, $level);
+                    }
+
+                    if ($variable instanceof JsonSerializable) {
+                        return $this->exportInternal($variable->jsonSerialize(), $format, $level);
                     }
 
                     if ($variable instanceof IteratorAggregate) {

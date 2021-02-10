@@ -14,6 +14,7 @@ use Yiisoft\VarDumper\ClosureExporter;
 use Yiisoft\VarDumper\Tests\TestAsset\DummyArrayableWithClosure;
 use Yiisoft\VarDumper\Tests\TestAsset\DummyDebugInfo;
 use Yiisoft\VarDumper\Tests\TestAsset\DummyIteratorAggregateWithClosure;
+use Yiisoft\VarDumper\Tests\TestAsset\DummyJsonSerializableWithClosure;
 use Yiisoft\VarDumper\Tests\TestAsset\DummyStringableWithClosure;
 use Yiisoft\VarDumper\UseStatementParser;
 use Yiisoft\VarDumper\VarDumper;
@@ -380,6 +381,10 @@ final class VarDumperTest extends TestCase
                 $object = new DummyArrayableWithClosure(),
                 VarDumper::create($object->toArray())->export(),
             ],
+            'JsonSerializable-instance-with-Closure' => [
+                $object = new DummyJsonSerializableWithClosure(),
+                VarDumper::create($object->jsonSerialize())->export(),
+            ],
             'IteratorAggregate-instance-with-Closure' => [
                 $object = new DummyIteratorAggregateWithClosure(),
                 VarDumper::create(iterator_to_array($object))->export(),
@@ -635,13 +640,13 @@ final class VarDumperTest extends TestCase
     public function testDFunction(): void
     {
         d($variable = 'content');
-        $this->expectOutputString("'{$variable}'");
+        $this->expectOutputString("'{$variable}'" . PHP_EOL);
     }
 
     public function testDFunctionWithMultipleVariables(): void
     {
         d([], 123, true);
-        $this->expectOutputString('[]123true');
+        $this->expectOutputString('[]' . PHP_EOL . '123' . PHP_EOL . 'true' . PHP_EOL);
     }
 
     public function testDumpWithHighlight(): void

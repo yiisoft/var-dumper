@@ -16,7 +16,7 @@
 [![type-coverage](https://shepherd.dev/github/yiisoft/var-dumper/coverage.svg)](https://shepherd.dev/github/yiisoft/var-dumper)
 
 `VarDumper` enhances functionality of `var_dump()` and `var_export()`. It is dealing with recursive references,
-may highlight syntax, export closures and output as JSON.
+may highlight syntax and export closures.
 
 ## Requirements
 
