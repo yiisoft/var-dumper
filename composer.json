@@ -1,7 +1,7 @@
 {
     "name": "yiisoft/var-dumper",
     "type": "library",
-    "description": "Yii VarDumper helper",
+    "description": "Yii VarDumper",
     "keywords": [
         "yii",
         "framework",
@@ -17,8 +17,6 @@
         "wiki": "http://www.yiiframework.com/wiki/",
         "irc": "irc://irc.freenode.net/yii"
     },
-    "minimum-stability": "dev",
-    "prefer-stable": true,
     "require": {
         "php": "^7.4|^8.0",
         "ext-json": "*",
@@ -41,11 +39,6 @@
     "autoload-dev": {
         "psr-4": {
             "Yiisoft\\VarDumper\\Tests\\": "tests"
-        }
-    },
-    "extra": {
-        "branch-alias": {
-            "dev-master": "3.0.x-dev"
         }
     },
     "config": {
