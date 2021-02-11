@@ -43,7 +43,6 @@ final class VarDumper
      * @var mixed Variable to dump.
      */
     private $variable;
-    private array $objects = [];
 
     private static ?ClosureExporter $closureExporter = null;
 
@@ -179,7 +178,6 @@ final class VarDumper
                     return $this->getObjectDescription($var) . ' (...)';
                 }
 
-                $this->objects[] = $var;
                 $spaces = str_repeat(' ', $level * 4);
                 $output = $this->getObjectDescription($var) . "\n" . $spaces . '(';
                 $objectProperties = $this->getObjectProperties($var);
