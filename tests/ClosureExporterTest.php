@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace Yiisoft\VarDumper\Tests;
 
+use DateTimeZone;
 use PHPUnit\Framework\TestCase;
 use Yiisoft\VarDumper\ClosureExporter;
+use Yiisoft\Yii\Debug as D;
 
 final class ClosureExporterTest extends TestCase
 {
@@ -56,5 +58,13 @@ final class ClosureExporterTest extends TestCase
         $output = $exporter->export(static fn (int $test): int => 42 + $test);
 
         $this->assertEquals('static fn (int $test): int => 42 + $test', $output);
+    }
+
+    public function testShortWithImport(): void
+    {
+        $exporter = new ClosureExporter();
+        $fn = fn (D\Dumper $date) => new DateTimeZone('');
+        $output = $exporter->export($fn);
+        $this->assertEquals('fn (\Yiisoft\Yii\Debug\Dumper $date) => new \DateTimeZone(\'\')', $output);
     }
 }

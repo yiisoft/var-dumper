@@ -16,6 +16,7 @@ use function explode;
 use function file;
 use function implode;
 use function in_array;
+use function is_array;
 use function is_string;
 use function strpos;
 use function token_get_all;
