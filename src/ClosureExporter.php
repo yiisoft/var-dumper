@@ -16,9 +16,13 @@ use function explode;
 use function file;
 use function implode;
 use function in_array;
+use function is_array;
 use function is_string;
+use function mb_strlen;
+use function mb_substr;
 use function strpos;
 use function token_get_all;
+use function trim;
 
 /**
  * ClosureExporter exports PHP {@see \Closure} as a string containing PHP code.
@@ -61,12 +65,11 @@ final class ClosureExporter
         $tokens = token_get_all('<?php ' . implode('', array_slice($fileContent, $start, $end - $start)));
         array_shift($tokens);
 
-        $buffer = '';
+        $bufferUse = '';
         $closureTokens = [];
-        $previousUsePart = '';
         $pendingParenthesisCount = 0;
 
-        foreach ($tokens as $token) {
+        foreach ($tokens as $i => $token) {
             if (in_array($token[0], [T_FUNCTION, T_FN, T_STATIC], true)) {
                 $closureTokens[] = $token[1];
                 continue;
@@ -79,29 +82,29 @@ final class ClosureExporter
             $readableToken = is_array($token) ? $token[1] : $token;
 
             if ($this->useStatementParser->isTokenIsPartOfUse($token)) {
-                $buffer .= $token[1];
-                if ($this->isUseConsistingOfMultipleParts($buffer)) {
-                    $buffer = $this->getUseLastPart($buffer);
-                }
-                if (!empty($previousUsePart) && $buffer === '\\') {
-                    continue;
-                }
-                if (isset($uses[$buffer])) {
-                    if ($this->isNotFullUseAlias($uses[$buffer], $uses)) {
-                        $previousUsePart = $uses[$buffer];
-                        $buffer = '';
+                if ($this->isUseConsistingOfMultipleParts($readableToken)) {
+                    $readableToken = $this->processFullUse($readableToken, $uses);
+                    $bufferUse = '';
+                } elseif (isset($uses[$readableToken])) {
+                    if (isset($tokens[$i + 2]) && $this->useStatementParser->isTokenIsPartOfUse($tokens[$i + 2])) {
+                        $bufferUse .= $uses[$readableToken];
                         continue;
                     }
-                    $readableToken = (empty($previousUsePart) || strpos($uses[$buffer], $previousUsePart) === false)
-                        ? $previousUsePart . $uses[$buffer]
-                        : $uses[$buffer]
-                    ;
-                    $buffer = '';
-                    $previousUsePart = '';
-                } elseif (isset($uses[$token[1]])) {
-                    $readableToken = $uses[$token[1]];
-                    $previousUsePart = '';
-                    $buffer = '';
+                    $readableToken = $uses[$readableToken];
+                }
+                if (!empty($bufferUse)) {
+                    $readableToken = '\\' . trim($readableToken, '\\');
+                    if ($readableToken === '\\') {
+                        continue;
+                    }
+                    if (isset($tokens[$i + 2]) && $this->useStatementParser->isTokenIsPartOfUse($tokens[$i + 2])) {
+                        $bufferUse .= $readableToken;
+                        continue;
+                    }
+                    if ($bufferUse !== $readableToken && strpos($readableToken, $bufferUse) === false) {
+                        $readableToken = $bufferUse . $readableToken;
+                    }
+                    $bufferUse = '';
                 }
             }
 
@@ -136,7 +139,34 @@ final class ClosureExporter
     private function getUseLastPart(string $use): string
     {
         $parts = array_filter(explode('\\', $use));
-        return array_pop($parts);
+        return (string) array_pop($parts);
+    }
+
+    /**
+     * Processes and returns the full use statement data.
+     *
+     * @param string $use The use statement data to process.
+     * @param array<string, string> $uses The use statement data.
+     *
+         * @return string The processed full use statement.
+     */
+    private function processFullUse(string $use, array $uses): string
+    {
+        $lastPart = $this->getUseLastPart($use);
+
+        if (isset($uses[$lastPart])) {
+            return $uses[$lastPart];
+        }
+
+        $result = '';
+
+        do {
+            $lastPart = $this->getUseLastPart($use);
+            $use = mb_substr($use, 0, -mb_strlen("\\{$lastPart}"));
+            $result = ($uses[$lastPart] ?? $lastPart) . '\\' . $result;
+        } while (!empty($lastPart) && !isset($uses[$lastPart]));
+
+        return '\\' . trim($result, '\\');
     }
 
     /**
@@ -149,20 +179,6 @@ final class ClosureExporter
     private function isUseConsistingOfMultipleParts(string $use): bool
     {
         return $use !== '\\' && strpos($use, '\\') !== false;
-    }
-
-    /**
-     * Checks whether the use statement data is not a full use statement data alias.
-     *
-     * @param string $use The use statement data to check.
-     * @param array<string, string> $uses The use statement data.
-     *
-     * @return bool Whether the use statement data is not a full use statement data alias.
-     */
-    private function isNotFullUseAlias(string $use, array $uses): bool
-    {
-        $lastPart = $this->getUseLastPart($use);
-        return isset($uses[$lastPart]) && $uses[$lastPart] !== $use;
     }
 
     /**
