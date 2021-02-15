@@ -1,10 +1,9 @@
 # Yii VarDumper
 
 
-## 1.0.2 under development
+## 1.0.2 February 15, 2021
 
 - Bug #49: Fix the issue of exporting closures when using PHP 8 (devanych)
-
 
 ## 1.0.1 February 11, 2021
 
