@@ -3,7 +3,7 @@
 
 ## 1.0.2 under development
 
-- Bug #49: Fix the issue of exporting closures when using PHP 8.
+- Bug #49: Fix the issue of exporting closures when using PHP 8. (devanych)
 
 
 ## 1.0.1 February 11, 2021
