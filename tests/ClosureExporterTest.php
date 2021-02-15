@@ -7,6 +7,7 @@ namespace Yiisoft\VarDumper\Tests;
 use DateTimeZone;
 use PHPUnit\Framework\TestCase;
 use Yiisoft\VarDumper\ClosureExporter;
+use Yiisoft\VarDumper as V;
 use Yiisoft\Yii\Debug as D;
 
 final class ClosureExporterTest extends TestCase
@@ -63,8 +64,21 @@ final class ClosureExporterTest extends TestCase
     public function testShortWithImport(): void
     {
         $exporter = new ClosureExporter();
-        $fn = fn (D\Dumper $date) => new DateTimeZone('');
-        $output = $exporter->export($fn);
-        $this->assertEquals('fn (\Yiisoft\Yii\Debug\Dumper $date) => new \DateTimeZone(\'\')', $output);
+        $output = $exporter->export(fn (V\VarDumper $date) => new DateTimeZone(''));
+        $this->assertSame("fn (\Yiisoft\VarDumper\VarDumper \$date) => new \DateTimeZone('')", $output);
+    }
+
+    public function testShortWithImportNotFoundClass(): void
+    {
+        $exporter = new ClosureExporter();
+
+        $output = $exporter->export(static fn (D\Dumper $date) => new DateTimeZone(''));
+        $this->assertSame("static fn (\Yiisoft\Yii\Debug\Dumper \$date) => new \DateTimeZone('')", $output);
+
+        $output = $exporter->export(fn (D\A\B\C $date) => new DateTimeZone(''));
+        $this->assertSame("fn (\Yiisoft\Yii\Debug\A\B\C \$date) => new \DateTimeZone('')", $output);
+
+        $output = $exporter->export(fn (\E\F\G\H\I\J\K\L\M\N $date) => new DateTimeZone(''));
+        $this->assertSame("fn (\E\F\G\H\I\J\K\L\M\N \$date) => new \DateTimeZone('')", $output);
     }
 }
