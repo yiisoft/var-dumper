@@ -3,7 +3,7 @@
 
 ## 1.0.2 under development
 
-- no changes in this release.
+- Bug #49: Fix the issue of exporting closures when using PHP 8.
 
 
 ## 1.0.1 February 11, 2021
