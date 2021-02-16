@@ -91,16 +91,13 @@ final class ClosureExporter
                         continue;
                     }
                     $readableToken = $uses[$readableToken];
+                } elseif ($readableToken === '\\' && isset($tokens[$i - 1][1]) && $tokens[$i - 1][1] === '\\') {
+                    continue;
+                } elseif (isset($tokens[$i + 1]) && $this->useStatementParser->isTokenIsPartOfUse($tokens[$i + 1])) {
+                    $bufferUse .= $readableToken;
+                    continue;
                 }
                 if (!empty($bufferUse)) {
-                    $readableToken = '\\' . trim($readableToken, '\\');
-                    if ($readableToken === '\\') {
-                        continue;
-                    }
-                    if (isset($tokens[$i + 2]) && $this->useStatementParser->isTokenIsPartOfUse($tokens[$i + 2])) {
-                        $bufferUse .= $readableToken;
-                        continue;
-                    }
                     if ($bufferUse !== $readableToken && strpos($readableToken, $bufferUse) === false) {
                         $readableToken = $bufferUse . $readableToken;
                     }
