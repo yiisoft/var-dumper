@@ -3,7 +3,7 @@
 
 ## 1.0.3 under development
 
-- no changes in this release.
+- Bug #50: Fix the issue of exporting closures with use long namespace under PHP 7.4 (devanych)
 
 
 ## 1.0.2 February 15, 2021
