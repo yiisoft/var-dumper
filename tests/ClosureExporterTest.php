@@ -81,4 +81,11 @@ final class ClosureExporterTest extends TestCase
         $output = $exporter->export(fn (\E\F\G\H\I\J\K\L\M\N $date) => new DateTimeZone(''));
         $this->assertSame("fn (\E\F\G\H\I\J\K\L\M\N \$date) => new \DateTimeZone('')", $output);
     }
+
+    public function testLongWithExistingImport(): void
+    {
+        $exporter = new ClosureExporter();
+        $output = $exporter->export(fn (\Yiisoft\VarDumper\ClosureExporter $date) => new DateTimeZone(''));
+        $this->assertSame("fn (\Yiisoft\VarDumper\ClosureExporter \$date) => new \DateTimeZone('')", $output);
+    }
 }
