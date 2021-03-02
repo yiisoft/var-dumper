@@ -20,10 +20,7 @@ if (!function_exists('d')) {
 
         foreach ($variables as $variable) {
             VarDumper::dump($variable, 10, $highlight);
-
-            if (!$highlight) {
-                echo PHP_EOL;
-            }
+            echo $highlight ? '<br>' : PHP_EOL;
         }
     }
 }
@@ -44,10 +41,7 @@ if (!function_exists('dd')) {
 
         foreach ($variables as $variable) {
             VarDumper::dump($variable, 10, $highlight);
-
-            if (!$highlight) {
-                echo PHP_EOL;
-            }
+            echo $highlight ? '<br>' : PHP_EOL;
         }
 
         die();
