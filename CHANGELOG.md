@@ -3,7 +3,7 @@
 
 ## 1.0.4 under development
 
-- Bug #51: Add a line break in the `d()` and `dd()` functions for highlight mode. (devanych)
+- Bug #51: Add a line break in the `d()` and `dd()` functions for highlight mode (devanych)
 
 
 ## 1.0.3 February 16, 2021
