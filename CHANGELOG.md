@@ -1,6 +1,11 @@
 # Yii VarDumper
 
 
+## 1.0.5 under development
+
+- no changes in this release.
+
+
 ## 1.0.4 March 15, 2021
 
 - Bug #51: Add a line break in the `d()` and `dd()` functions for highlight mode (devanych)
