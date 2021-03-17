@@ -1,6 +1,11 @@
 # Yii VarDumper
 
 
+## 1.0.6 under development
+
+- no changes in this release.
+
+
 ## 1.0.5 March 17, 2021
 
 - Bug #53: Fix `\Yiisoft\VarDumper\ClosureExporter::export()` method fail when exporting a static method call (devanych)
