@@ -88,4 +88,11 @@ final class ClosureExporterTest extends TestCase
         $output = $exporter->export(fn (\Yiisoft\VarDumper\ClosureExporter $date) => new DateTimeZone(''));
         $this->assertSame("fn (\Yiisoft\VarDumper\ClosureExporter \$date) => new \DateTimeZone('')", $output);
     }
+    
+    public function testStaticMethodCallImport(): void
+    {
+        $exporter = new ClosureExporter();
+        $output = $exporter->export(fn (DateTimeZone $date) => DateTimeZone::listAbbreviations());
+        $this->assertSame("fn (\DateTimeZone \$date) => \DateTimeZone::listAbbreviations()", $output);
+    }
 }
