@@ -3,8 +3,7 @@
 
 ## 1.0.5 under development
 
-- no changes in this release.
-
+- Bug #53: Fix `\Yiisoft\VarDumper\ClosureExporter::export()` method fail when exporting a static method call (devanych)
 
 ## 1.0.4 March 15, 2021
 

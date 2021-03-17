@@ -86,7 +86,7 @@ final class ClosureExporter
                     $readableToken = $this->processFullUse($readableToken, $uses);
                     $bufferUse = '';
                 } elseif (isset($uses[$readableToken])) {
-                    if (isset($tokens[$i + 2]) && $this->useStatementParser->isTokenIsPartOfUse($tokens[$i + 2])) {
+                    if (isset($tokens[$i + 1]) && $this->useStatementParser->isTokenIsPartOfUse($tokens[$i + 1])) {
                         $bufferUse .= $uses[$readableToken];
                         continue;
                     }
