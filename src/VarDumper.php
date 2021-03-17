@@ -43,7 +43,8 @@ final class VarDumper
      * @var mixed Variable to dump.
      */
     private $variable;
-
+    private array $useVarInClosures;
+    private bool $serializeObjects;
     private static ?ClosureExporter $closureExporter = null;
 
     /**
@@ -115,13 +116,18 @@ final class VarDumper
      * by using the PHP functions {@see serialize()} and {@see unserialize()}.
      *
      * @param bool $format Whatever to format code.
-     *
-     * @throws ReflectionException
+     * @param array $useVarInClosures Array of variabels used in `use` statement (['$params', '$config'])
+     * @param bool $serializeObjects If it is true all objects will be serialized except objects with closure(s). If it
+     *                               is false only objects of internal classes will be serialized.
      *
      * @return string A PHP code representation of the variable.
+     * @throws ReflectionException
+     *
      */
-    public function export(bool $format = true): string
+    public function export(bool $format = true, array $useVarInClosures = [], bool $serializeObjects = true): string
     {
+        $this->useVarInClosures = $useVarInClosures;
+        $this->serializeObjects = $serializeObjects;
         return $this->exportInternal($this->variable, $format, 0);
     }
 
@@ -131,9 +137,9 @@ final class VarDumper
      * @param int $depth Maximum depth.
      * @param int $level Current depth.
      *
+     * @return string
      * @throws ReflectionException
      *
-     * @return string
      */
     private function dumpInternal($var, bool $format, int $depth, int $level): string
     {
@@ -199,12 +205,13 @@ final class VarDumper
      * @param bool $format Whatever to format code.
      * @param int $level Current depth.
      *
+     * @return string
      * @throws ReflectionException
      *
-     * @return string
      */
     private function exportInternal($variable, bool $format, int $level): string
     {
+        $spaces = str_repeat(' ', $level * 4);
         switch (gettype($variable)) {
             case 'NULL':
                 return 'null';
@@ -215,7 +222,6 @@ final class VarDumper
 
                 $keys = array_keys($variable);
                 $outputKeys = ($keys !== range(0, count($variable) - 1));
-                $spaces = str_repeat(' ', $level * 4);
                 $output = '[';
 
                 foreach ($keys as $key) {
@@ -237,34 +243,96 @@ final class VarDumper
                     : $output . ']';
             case 'object':
                 if ($variable instanceof Closure) {
-                    return $this->exportClosure($variable);
+                    return $this->exportClosure($variable, $level);
                 }
 
                 try {
-                    return "unserialize({$this->exportVariable(serialize($variable))})";
+                    $reflectionClass = new \ReflectionClass($variable);
+                    if ($this->serializeObjects || $reflectionClass->isInternal() || $reflectionClass->isAnonymous()) {
+                        return "unserialize({$this->exportVariable(serialize($variable))})";
+                    }
+
+                    return $this->exportObject($variable, $format, $level);
                 } catch (Exception $e) {
                     // Serialize may fail, for example: if object contains a `\Closure` instance so we use a fallback.
-                    if ($variable instanceof ArrayableInterface) {
-                        return $this->exportInternal($variable->toArray(), $format, $level);
+                    if ($this->serializeObjects && !$reflectionClass->isAnonymous()) {
+                        try {
+                            return $this->exportObject($variable, $format, $level);
+                        } catch (Exception $e) {
+                            return $this->exportObjectFallback($variable, $format, $level);
+                        }
                     }
 
-                    if ($variable instanceof JsonSerializable) {
-                        return $this->exportInternal($variable->jsonSerialize(), $format, $level);
-                    }
-
-                    if ($variable instanceof IteratorAggregate) {
-                        return $this->exportInternal(iterator_to_array($variable), $format, $level);
-                    }
-
-                    if ('__PHP_Incomplete_Class' !== get_class($variable) && method_exists($variable, '__toString')) {
-                        return $this->exportVariable($variable->__toString());
-                    }
-
-                    return $this->exportVariable(self::create($variable)->asString());
+                    return $this->exportObjectFallback($variable, $format, $level);
                 }
             default:
                 return $this->exportVariable($variable);
         }
+    }
+
+    private function getPropertyName(string $property)
+    {
+        $property = str_replace("\0", '::', trim($property));
+
+        if (strpos($property, '*::') === 0) {
+            return substr($property, 3);
+        }
+
+        if (($pos = strpos($property, '::')) !== false) {
+            return substr($property, $pos + 2);
+        }
+
+        return $property;
+    }
+
+    private function exportObjectFallback(object $variable, bool $format, int $level): string
+    {
+        if ($variable instanceof ArrayableInterface) {
+            return $this->exportInternal($variable->toArray(), $format, $level);
+        }
+
+        if ($variable instanceof JsonSerializable) {
+            return $this->exportInternal($variable->jsonSerialize(), $format, $level);
+        }
+
+        if ($variable instanceof IteratorAggregate) {
+            return $this->exportInternal(iterator_to_array($variable), $format, $level);
+        }
+
+        if ('__PHP_Incomplete_Class' !== get_class($variable) && method_exists($variable, '__toString')) {
+            return $this->exportVariable($variable->__toString());
+        }
+
+        return $this->exportVariable(self::create($variable)->asString());
+    }
+
+    private function exportObject(object $variable, bool $format, int $level): string
+    {
+        $spaces = str_repeat(' ', $level * 4);
+        $objectProperties = $this->getObjectProperties($variable);
+        $class = get_class($variable);
+        $use = $this->useVarInClosures === [] ? '' : ' use (' . implode(',', $this->useVarInClosures).  ')';
+        $lines = [
+            '(static function ()' . $use . ' {',
+            '    $class = new \ReflectionClass(\'' . $class . '\');',
+            '    $object = $class->newInstanceWithoutConstructor();',
+            '    (function ()' . $use . ' {',
+        ];
+        $endLines = [
+            '    })->bindTo($object, \'' . $class . '\')();',
+            '',
+            '    return $object;',
+            '})()',
+        ];
+
+        /** @psalm-var mixed $value */
+        foreach ($objectProperties as $name => $value) {
+            $propertyName = $this->getPropertyName($name);
+            $lines[] = '        $this->' . $propertyName . ' = ' .
+                $this->exportInternal($value, $format, $level + 2) . ';';
+        }
+
+        return implode("\n" . ($format ? $spaces : ''), array_merge($lines, $endLines));
     }
 
     /**
@@ -272,17 +340,17 @@ final class VarDumper
      *
      * @param Closure $closure Closure instance.
      *
+     * @return string
      * @throws ReflectionException
      *
-     * @return string
      */
-    private function exportClosure(Closure $closure): string
+    private function exportClosure(Closure $closure, int $level = 0): string
     {
         if (self::$closureExporter === null) {
             self::$closureExporter = new ClosureExporter();
         }
 
-        return self::$closureExporter->export($closure);
+        return self::$closureExporter->export($closure, $level);
     }
 
     /**
