@@ -44,7 +44,7 @@ final class ClosureExporter
      *
      * @param Closure $closure Closure to export.
      *
-     * @param int $level Level for padding
+     * @param int $level Level for padding.
      *
      * @throws ReflectionException
      *
