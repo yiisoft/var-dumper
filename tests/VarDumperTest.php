@@ -488,7 +488,7 @@ final class VarDumperTest extends TestCase
 
     public function testExportClosureWithAnImmutableInstanceOfClosureExporter(): void
     {
-        self::markTestSkipped('Must be reviewed');
+        //self::markTestSkipped('Must be reviewed');
         $varDumper1 = VarDumper::create(fn (): int => 1);
         $reflection1 = new ReflectionClass($varDumper1);
         $closureExporter1 = $reflection1->getStaticPropertyValue('closureExporter');
