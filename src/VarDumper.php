@@ -120,9 +120,9 @@ final class VarDumper
      * by using the PHP functions {@see serialize()} and {@see unserialize()}.
      *
      * @param bool $format Whatever to format code.
-     * @param array $useVarInClosures Array of variabels used in `use` statement (['$params', '$config'])
+     * @param array $useVarInClosures Array of variables used in `use` statement (['$params', '$config'])
      * @param bool $serializeObjects If it is true all objects will be serialized except objects with closure(s). If it
-     *                               is false only objects of internal classes will be serialized.
+     * is false only objects of internal classes will be serialized.
      *
      * @return string A PHP code representation of the variable.
      * @throws ReflectionException
