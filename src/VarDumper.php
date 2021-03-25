@@ -259,7 +259,7 @@ final class VarDumper
                     return $this->exportObject($variable, $format, $level);
                 } catch (Exception $e) {
                     // Serialize may fail, for example: if object contains a `\Closure` instance so we use a fallback.
-                    if ($this->serializeObjects && !$reflectionClass->isAnonymous()) {
+                    if ($this->serializeObjects && !$reflectionClass->isAnonymous() || $reflectionClass->getName() === 'stdClass') {
                         try {
                             return $this->exportObject($variable, $format, $level);
                         } catch (Exception $e) {
