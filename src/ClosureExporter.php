@@ -128,7 +128,7 @@ final class ClosureExporter
         return $this->formatClosure(implode('', $closureTokens), $level);
     }
 
-    private function formatClosure(string $code, int $level)
+    private function formatClosure(string $code, int $level): string
     {
         if ($level <= 0) {
             return $code;

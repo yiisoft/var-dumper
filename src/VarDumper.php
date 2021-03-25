@@ -9,6 +9,7 @@ use Closure;
 use Exception;
 use IteratorAggregate;
 use JsonSerializable;
+use ReflectionClass;
 use ReflectionException;
 use Yiisoft\Arrays\ArrayableInterface;
 
@@ -43,8 +44,8 @@ final class VarDumper
      * @var mixed Variable to dump.
      */
     private $variable;
-    private array $useVarInClosures;
-    private bool $serializeObjects;
+    private array $useVarInClosures = [];
+    private bool $serializeObjects = true;
     private static ?ClosureExporter $closureExporter = null;
 
     /**
@@ -74,6 +75,8 @@ final class VarDumper
      * @param mixed $variable Variable to be dumped.
      * @param int $depth Maximum depth that the dumper should go into the variable. Defaults to 10.
      * @param bool $highlight Whether the result should be syntax-highlighted.
+     *
+     * @throws ReflectionException
      */
     public static function dump($variable, int $depth = 10, bool $highlight = true): void
     {
@@ -90,6 +93,7 @@ final class VarDumper
      * @param bool $highlight Whether the result should be syntax-highlighted.
      *
      * @return string The string representation of the variable.
+     * @throws ReflectionException
      */
     public function asString(int $depth = 10, bool $highlight = false): string
     {
@@ -246,8 +250,8 @@ final class VarDumper
                     return $this->exportClosure($variable, $level);
                 }
 
+                $reflectionClass = new ReflectionClass($variable);
                 try {
-                    $reflectionClass = new \ReflectionClass($variable);
                     if ($this->serializeObjects || $reflectionClass->isInternal() || $reflectionClass->isAnonymous()) {
                         return "unserialize({$this->exportVariable(serialize($variable))})";
                     }
@@ -270,7 +274,7 @@ final class VarDumper
         }
     }
 
-    private function getPropertyName(string $property)
+    private function getPropertyName(string $property): string
     {
         $property = str_replace("\0", '::', trim($property));
 
@@ -285,6 +289,14 @@ final class VarDumper
         return $property;
     }
 
+
+    /**
+     * @param object $variable
+     * @param bool $format
+     * @param int $level
+     * @return string
+     * @throws ReflectionException
+     */
     private function exportObjectFallback(object $variable, bool $format, int $level): string
     {
         if ($variable instanceof ArrayableInterface) {
@@ -326,6 +338,7 @@ final class VarDumper
         ];
 
         /** @psalm-var mixed $value */
+        /** @psalm-var string $name */
         foreach ($objectProperties as $name => $value) {
             $propertyName = $this->getPropertyName($name);
             $lines[] = '        $this->' . $propertyName . ' = ' .
