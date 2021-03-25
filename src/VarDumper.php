@@ -311,6 +311,7 @@ final class VarDumper
             return $this->exportInternal(iterator_to_array($variable), $format, $level);
         }
 
+        /** @psalm-suppress RedundantCondition */
         if ('__PHP_Incomplete_Class' !== get_class($variable) && method_exists($variable, '__toString')) {
             return $this->exportVariable($variable->__toString());
         }
