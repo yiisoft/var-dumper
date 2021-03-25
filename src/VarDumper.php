@@ -338,8 +338,10 @@ final class VarDumper
             '})()',
         ];
 
-        /** @psalm-var mixed $value */
-        /** @psalm-var string $name */
+        /**
+         * @psalm-var mixed $value
+         * @psalm-var string $name
+         */
         foreach ($objectProperties as $name => $value) {
             $propertyName = $this->getPropertyName($name);
             $lines[] = '        $this->' . $propertyName . ' = ' .
