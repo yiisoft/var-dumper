@@ -389,20 +389,16 @@ final class VarDumperTest extends TestCase
     {
         $objectWithClosureInProperty = new stdClass();
         $objectWithClosureInProperty->a = fn () => 1;
+        $objectWithClosureInPropertyId = spl_object_id($objectWithClosureInProperty);
 
         return [
-            'closure in property' => [
+            'closure in stdClass property' => [
                 $objectWithClosureInProperty,
                 <<<S
-                (static function () {
-                    \$class = new \ReflectionClass('stdClass');
-                    \$object = \$class->newInstanceWithoutConstructor();
-                    (function () {
-                        \$this->a = fn () => 1;
-                    })->bindTo(\$object, 'stdClass')();
-
-                    return \$object;
-                })()
+                'stdClass#{$objectWithClosureInPropertyId}
+                (
+                    [a] => fn () => 1
+                )'
                 S,
             ],
             'ArrayableInterface-instance-with-Closure' => [

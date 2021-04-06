@@ -250,18 +250,18 @@ final class VarDumper
                     return $this->exportClosure($variable, $level);
                 }
 
-                $reflectionClass = new ReflectionClass($variable);
+                $reflectionObject = new \ReflectionObject($variable);
                 try {
-                    if ($this->serializeObjects || $reflectionClass->isInternal() || $reflectionClass->isAnonymous()) {
+                    if ($this->serializeObjects || $reflectionObject->isInternal() || $reflectionObject->isAnonymous()) {
                         return "unserialize({$this->exportVariable(serialize($variable))})";
                     }
 
-                    return $this->exportObject($variable, $format, $level);
+                    return $this->exportObject($variable, $reflectionObject, $format, $level);
                 } catch (Exception $e) {
                     // Serialize may fail, for example: if object contains a `\Closure` instance so we use a fallback.
-                    if ($this->serializeObjects && !$reflectionClass->isAnonymous() || $reflectionClass->getName() === \stdClass::class) {
+                    if ($this->serializeObjects && !$reflectionObject->isInternal() && !$reflectionObject->isAnonymous()) {
                         try {
-                            return $this->exportObject($variable, $format, $level);
+                            return $this->exportObject($variable, $reflectionObject,  $format, $level);
                         } catch (Exception $e) {
                             return $this->exportObjectFallback($variable, $format, $level);
                         }
@@ -319,18 +319,25 @@ final class VarDumper
         return $this->exportVariable(self::create($variable)->asString());
     }
 
-    private function exportObject(object $variable, bool $format, int $level): string
+    private function exportObject(object $variable, \ReflectionObject $reflectionObject, bool $format, int $level): string
     {
         $spaces = str_repeat(' ', $level * 4);
         $objectProperties = $this->getObjectProperties($variable);
         $class = get_class($variable);
         $use = $this->useVarInClosures === [] ? '' : ' use (' . implode(',', $this->useVarInClosures).  ')';
-        $lines = [
-            '(static function ()' . $use . ' {',
-            '    $class = new \ReflectionClass(\'' . $class . '\');',
-            '    $object = $class->newInstanceWithoutConstructor();',
-            '    (function ()' . $use . ' {',
-        ];
+        $lines = ['(static function ()' . $use . ' {',];
+        if ($reflectionObject->getConstructor() === null) {
+            $lines = array_merge($lines, [
+                '    $object = new ' . $class . '();',
+                '    (function ()' . $use . ' {',
+            ]);
+        } else {
+            $lines = array_merge($lines, [
+                '    $class = new \ReflectionClass(\'' . $class . '\');',
+                '    $object = $class->newInstanceWithoutConstructor();',
+                '    (function ()' . $use . ' {',
+            ]);
+        }
         $endLines = [
             '    })->bindTo($object, \'' . $class . '\')();',
             '',
