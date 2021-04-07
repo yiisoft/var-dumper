@@ -3,7 +3,7 @@
 
 ## 1.0.6 April 7, 2021
 
-- Add support of closure export (yiiliveext)
+- Enh #54: Add support of closure export (yiiliveext)
 
 ## 1.0.5 March 17, 2021
 
