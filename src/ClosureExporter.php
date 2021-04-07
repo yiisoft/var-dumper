@@ -43,7 +43,6 @@ final class ClosureExporter
      * Export closure as a string containing PHP code.
      *
      * @param Closure $closure Closure to export.
-     *
      * @param int $level Level for padding.
      *
      * @throws ReflectionException

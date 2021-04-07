@@ -23,7 +23,6 @@ use Yiisoft\VarDumper\VarDumper as Dumper;
 use function fopen;
 use function get_class;
 use function highlight_string;
-use function iterator_to_array;
 use function preg_replace;
 use function spl_object_id;
 use function str_replace;

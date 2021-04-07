@@ -9,7 +9,7 @@ use Closure;
 use Exception;
 use IteratorAggregate;
 use JsonSerializable;
-use ReflectionClass;
+use ReflectionObject;
 use ReflectionException;
 use Yiisoft\Arrays\ArrayableInterface;
 
@@ -92,8 +92,9 @@ final class VarDumper
      * @param int $depth Maximum depth that the dumper should go into the variable. Defaults to 10.
      * @param bool $highlight Whether the result should be syntax-highlighted.
      *
-     * @return string The string representation of the variable.
      * @throws ReflectionException
+     *
+     * @return string The string representation of the variable.* @return string The string representation of the variable.
      */
     public function asString(int $depth = 10, bool $highlight = false): string
     {
@@ -124,9 +125,9 @@ final class VarDumper
      * @param bool $serializeObjects If it is true all objects will be serialized except objects with closure(s). If it
      * is false only objects of internal classes will be serialized.
      *
-     * @return string A PHP code representation of the variable.
      * @throws ReflectionException
      *
+     * @return string A PHP code representation of the variable.
      */
     public function export(bool $format = true, array $useVarInClosures = [], bool $serializeObjects = true): string
     {
@@ -209,9 +210,9 @@ final class VarDumper
      * @param bool $format Whatever to format code.
      * @param int $level Current depth.
      *
-     * @return string
      * @throws ReflectionException
      *
+     * @return string
      */
     private function exportInternal($variable, bool $format, int $level): string
     {
@@ -250,7 +251,7 @@ final class VarDumper
                     return $this->exportClosure($variable, $level);
                 }
 
-                $reflectionObject = new \ReflectionObject($variable);
+                $reflectionObject = new ReflectionObject($variable);
                 try {
                     if ($this->serializeObjects || $reflectionObject->isInternal() || $reflectionObject->isAnonymous()) {
                         return "unserialize({$this->exportVariable(serialize($variable))})";
@@ -261,7 +262,7 @@ final class VarDumper
                     // Serialize may fail, for example: if object contains a `\Closure` instance so we use a fallback.
                     if ($this->serializeObjects && !$reflectionObject->isInternal() && !$reflectionObject->isAnonymous()) {
                         try {
-                            return $this->exportObject($variable, $reflectionObject,  $format, $level);
+                            return $this->exportObject($variable, $reflectionObject, $format, $level);
                         } catch (Exception $e) {
                             return $this->exportObjectFallback($variable, $format, $level);
                         }
@@ -294,8 +295,10 @@ final class VarDumper
      * @param object $variable
      * @param bool $format
      * @param int $level
-     * @return string
+     *
      * @throws ReflectionException
+     *
+     * @return string
      */
     private function exportObjectFallback(object $variable, bool $format, int $level): string
     {
@@ -324,7 +327,7 @@ final class VarDumper
         $spaces = str_repeat(' ', $level * 4);
         $objectProperties = $this->getObjectProperties($variable);
         $class = get_class($variable);
-        $use = $this->useVarInClosures === [] ? '' : ' use (' . implode(',', $this->useVarInClosures).  ')';
+        $use = $this->useVarInClosures === [] ? '' : ' use (' . implode(',', $this->useVarInClosures) . ')';
         $lines = ['(static function ()' . $use . ' {',];
         if ($reflectionObject->getConstructor() === null) {
             $lines = array_merge($lines, [
