@@ -1,10 +1,9 @@
 # Yii VarDumper
 
 
-## 1.0.6 under development
+## 1.0.6 April 7, 2021
 
-- no changes in this release.
-
+- Add support of closure export (yiiliveext)
 
 ## 1.0.5 March 17, 2021
 

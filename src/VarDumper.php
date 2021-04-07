@@ -142,9 +142,9 @@ final class VarDumper
      * @param int $depth Maximum depth.
      * @param int $level Current depth.
      *
-     * @return string
      * @throws ReflectionException
      *
+     * @return string
      */
     private function dumpInternal($var, bool $format, int $depth, int $level): string
     {
@@ -322,7 +322,7 @@ final class VarDumper
         return $this->exportVariable(self::create($variable)->asString());
     }
 
-    private function exportObject(object $variable, \ReflectionObject $reflectionObject, bool $format, int $level): string
+    private function exportObject(object $variable, ReflectionObject $reflectionObject, bool $format, int $level): string
     {
         $spaces = str_repeat(' ', $level * 4);
         $objectProperties = $this->getObjectProperties($variable);
@@ -366,9 +366,9 @@ final class VarDumper
      *
      * @param Closure $closure Closure instance.
      *
-     * @return string
      * @throws ReflectionException
      *
+     * @return string
      */
     private function exportClosure(Closure $closure, int $level = 0): string
     {
