@@ -1,7 +1,7 @@
 # Yii VarDumper
 
 
-## 1.1.0 under development
+## 1.1.0 April 08, 2021
 
 - Enh #54: Add support for exporting objects with closures (yiiliveext)
 
