@@ -77,6 +77,10 @@ It is similar to `var_export()` but uses short array syntax, handles closures, a
 
 In the above `export()` will give you nicely formatted code. You can remove formatting by passing `false` as an argument.
 
+## Limitations
+
+Variables that are anonymous classes or contains anonymous classes doesn't supported.    
+
 ### Unit testing
 
 The package is tested with [PHPUnit](https://phpunit.de/). To run tests:

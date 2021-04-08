@@ -12,6 +12,7 @@ use stdClass;
 use Yiisoft\VarDumper as VD;
 use Yiisoft\VarDumper\ClosureExporter;
 use Yiisoft\VarDumper\Tests\TestAsset\DummyArrayableWithClosure;
+use Yiisoft\VarDumper\Tests\TestAsset\DummyClass;
 use Yiisoft\VarDumper\Tests\TestAsset\DummyDebugInfo;
 use Yiisoft\VarDumper\Tests\TestAsset\DummyIteratorAggregateWithClosure;
 use Yiisoft\VarDumper\Tests\TestAsset\DummyJsonSerializableWithClosure;
@@ -483,9 +484,17 @@ final class VarDumperTest extends TestCase
 
     public function exportWithoutObjectSerializationDataProvider(): array
     {
-        $dummyDebugInfo = new DummyDebugInfo();
+        $dummyDebugInfo = new DummyClass();
         $dummyDebugInfo->volume = 10;
         $dummyDebugInfo->unitPrice = 15;
+
+        $params = ['key' => 5];
+        $config = ['value' => 5];
+        $dummyDebugInfoWithClosure = new DummyClass();
+        $dummyDebugInfoWithClosure->volume = 10;
+        $dummyDebugInfoWithClosure->params = fn () => $params;
+        $dummyDebugInfoWithClosure->config = fn () => $config;
+        $dummyDebugInfoWithClosure->unitPrice = 15;
 
         return [
             'custom debug info' => [
@@ -493,26 +502,28 @@ final class VarDumperTest extends TestCase
                 [],
                 <<<S
                 (static function () {
-                    \$object = new Yiisoft\VarDumper\Tests\TestAsset\DummyDebugInfo();
+                    \$object = new Yiisoft\VarDumper\Tests\TestAsset\DummyClass();
                     (function () {
                         \$this->volume = 10;
-                        \$this->totalPrice = 150;
-                    })->bindTo(\$object, 'Yiisoft\VarDumper\Tests\TestAsset\DummyDebugInfo')();
+                        \$this->unitPrice = 15;
+                    })->bindTo(\$object, 'Yiisoft\VarDumper\Tests\TestAsset\DummyClass')();
 
                     return \$object;
                 })()
                 S,
             ],
             'custom debug info with use vars' => [
-                $dummyDebugInfo,
+                $dummyDebugInfoWithClosure,
                 ['$config', '$params'],
                 <<<S
                 (static function () use (\$config, \$params) {
-                    \$object = new Yiisoft\VarDumper\Tests\TestAsset\DummyDebugInfo();
+                    \$object = new Yiisoft\VarDumper\Tests\TestAsset\DummyClass();
                     (function () use (\$config, \$params) {
                         \$this->volume = 10;
-                        \$this->totalPrice = 150;
-                    })->bindTo(\$object, 'Yiisoft\VarDumper\Tests\TestAsset\DummyDebugInfo')();
+                        \$this->unitPrice = 15;
+                        \$this->params = fn () => \$params;
+                        \$this->config = fn () => \$config;
+                    })->bindTo(\$object, 'Yiisoft\VarDumper\Tests\TestAsset\DummyClass')();
 
                     return \$object;
                 })()
