@@ -524,14 +524,15 @@ final class VarDumperTest extends TestCase
     /**
      * @dataProvider exportWithoutObjectSerializationDataProvider
      *
-     * @param object $object
-     * @param string $expectedResult
+     * @param object $object Object to export.
+     * @param array $useVariables Variables to add to closures via use statement.
+     * @param string $expectedResult Expected result.
      *
      * @throws ReflectionException
      */
-    public function testExportWithoutObjectSerialization(object $object, array $useVarInClosures, string $expectedResult): void
+    public function testExportWithoutObjectSerialization(object $object, array $useVariables, string $expectedResult): void
     {
-        $exportResult = VarDumper::create($object)->export(true, $useVarInClosures, false);
+        $exportResult = VarDumper::create($object)->export(true, $useVariables, false);
         $this->assertEqualsWithoutLE($expectedResult, $exportResult);
     }
 
