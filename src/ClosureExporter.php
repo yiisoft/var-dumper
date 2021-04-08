@@ -43,12 +43,13 @@ final class ClosureExporter
      * Export closure as a string containing PHP code.
      *
      * @param Closure $closure Closure to export.
+     * @param int $level Level for padding.
      *
      * @throws ReflectionException
      *
      * @return string String containing PHP code.
      */
-    public function export(Closure $closure): string
+    public function export(Closure $closure, int $level = 0): string
     {
         $reflection = new ReflectionFunction($closure);
 
@@ -123,7 +124,25 @@ final class ClosureExporter
             $closureTokens[] = $readableToken;
         }
 
-        return implode('', $closureTokens);
+        return $this->formatClosure(implode('', $closureTokens), $level);
+    }
+
+    private function formatClosure(string $code, int $level): string
+    {
+        if ($level <= 0) {
+            return $code;
+        }
+        $spaces = str_repeat(' ', ($level -1) * 4);
+        $lines = explode("\n", $code);
+
+        foreach ($lines as $index => $line) {
+            if ($index === 0) {
+                continue;
+            }
+            $lines[$index] = $spaces . $line;
+        }
+
+        return rtrim(implode('', $lines), "\n");
     }
 
     /**

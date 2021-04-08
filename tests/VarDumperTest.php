@@ -12,6 +12,7 @@ use stdClass;
 use Yiisoft\VarDumper as VD;
 use Yiisoft\VarDumper\ClosureExporter;
 use Yiisoft\VarDumper\Tests\TestAsset\DummyArrayableWithClosure;
+use Yiisoft\VarDumper\Tests\TestAsset\DummyClass;
 use Yiisoft\VarDumper\Tests\TestAsset\DummyDebugInfo;
 use Yiisoft\VarDumper\Tests\TestAsset\DummyIteratorAggregateWithClosure;
 use Yiisoft\VarDumper\Tests\TestAsset\DummyJsonSerializableWithClosure;
@@ -23,7 +24,6 @@ use Yiisoft\VarDumper\VarDumper as Dumper;
 use function fopen;
 use function get_class;
 use function highlight_string;
-use function iterator_to_array;
 use function preg_replace;
 use function spl_object_id;
 use function str_replace;
@@ -218,15 +218,6 @@ final class VarDumperTest extends TestCase
                 '🤣',
                 "'🤣'",
             ],
-            'closure in property supported' => [
-                $objectWithClosureInProperty,
-                <<<S
-                'stdClass#{$objectWithClosureInPropertyId}
-                (
-                    [a] => fn () => 1
-                )'
-                S,
-            ],
         ];
     }
 
@@ -377,21 +368,94 @@ final class VarDumperTest extends TestCase
                 $object = new class() {},
                 var_export(VarDumper::create($object)->asString(), true),
             ],
+        ];
+    }
+
+    /**
+     * @dataProvider exportObjectWithClosureDataProvider
+     *
+     * @param object $object
+     * @param string $expectedResult
+     *
+     * @throws ReflectionException
+     */
+    public function testExportObjectWithClosure(object $object, string $expectedResult): void
+    {
+        $exportResult = VarDumper::create($object)->export();
+        $this->assertEqualsWithoutLE($expectedResult, $exportResult);
+    }
+
+    public function exportObjectWithClosureDataProvider(): array
+    {
+        $objectWithClosureInProperty = new stdClass();
+        $objectWithClosureInProperty->a = fn () => 1;
+        $objectWithClosureInPropertyId = spl_object_id($objectWithClosureInProperty);
+
+        return [
+            'closure in stdClass property' => [
+                $objectWithClosureInProperty,
+                <<<S
+                'stdClass#{$objectWithClosureInPropertyId}
+                (
+                    [a] => fn () => 1
+                )'
+                S,
+            ],
             'ArrayableInterface-instance-with-Closure' => [
                 $object = new DummyArrayableWithClosure(),
-                VarDumper::create($object->toArray())->export(),
+                <<<S
+               (static function () {
+                   \$class = new \ReflectionClass('Yiisoft\VarDumper\Tests\TestAsset\DummyArrayableWithClosure');
+                   \$object = \$class->newInstanceWithoutConstructor();
+                   (function () {
+                       \$this->closure = static fn (): string => __CLASS__;
+                   })->bindTo(\$object, 'Yiisoft\VarDumper\Tests\TestAsset\DummyArrayableWithClosure')();
+
+                   return \$object;
+               })()
+               S,
             ],
             'JsonSerializable-instance-with-Closure' => [
                 $object = new DummyJsonSerializableWithClosure(),
-                VarDumper::create($object->jsonSerialize())->export(),
+                <<<S
+                (static function () {
+                    \$class = new \ReflectionClass('Yiisoft\VarDumper\Tests\TestAsset\DummyJsonSerializableWithClosure');
+                    \$object = \$class->newInstanceWithoutConstructor();
+                    (function () {
+                        \$this->closure = static fn (): string => __CLASS__;
+                    })->bindTo(\$object, 'Yiisoft\VarDumper\Tests\TestAsset\DummyJsonSerializableWithClosure')();
+
+                    return \$object;
+                })()
+                S,
             ],
             'IteratorAggregate-instance-with-Closure' => [
                 $object = new DummyIteratorAggregateWithClosure(),
-                VarDumper::create(iterator_to_array($object))->export(),
+                <<<S
+                (static function () {
+                    \$class = new \ReflectionClass('Yiisoft\VarDumper\Tests\TestAsset\DummyIteratorAggregateWithClosure');
+                    \$object = \$class->newInstanceWithoutConstructor();
+                    (function () {
+                        \$this->closure = static fn (): string => __CLASS__;
+                    })->bindTo(\$object, 'Yiisoft\VarDumper\Tests\TestAsset\DummyIteratorAggregateWithClosure')();
+
+                    return \$object;
+                })()
+                S,
             ],
             'Stringable-instance-with-Closure' => [
                 $object = new DummyStringableWithClosure(),
-                VarDumper::create($object->__toString())->export(),
+                <<<S
+                (static function () {
+                    \$class = new \ReflectionClass('Yiisoft\VarDumper\Tests\TestAsset\DummyStringableWithClosure');
+                    \$object = \$class->newInstanceWithoutConstructor();
+                    (function () {
+                        \$this->closure = static fn (): string => __CLASS__;
+                    })->bindTo(\$object, 'Yiisoft\VarDumper\Tests\TestAsset\DummyStringableWithClosure')();
+
+                    return \$object;
+                })()
+                S,
             ],
         ];
     }
@@ -415,6 +479,71 @@ final class VarDumperTest extends TestCase
             ]
         S);
 
+        $this->assertEqualsWithoutLE($expectedResult, $exportResult);
+    }
+
+    public function exportWithoutObjectSerializationDataProvider(): array
+    {
+        $dummyDebugInfo = new DummyClass();
+        $dummyDebugInfo->volume = 10;
+        $dummyDebugInfo->unitPrice = 15;
+
+        $params = ['key' => 5];
+        $config = ['value' => 5];
+        $dummyDebugInfoWithClosure = new DummyClass();
+        $dummyDebugInfoWithClosure->volume = 10;
+        $dummyDebugInfoWithClosure->params = fn () => $params;
+        $dummyDebugInfoWithClosure->config = fn () => $config;
+        $dummyDebugInfoWithClosure->unitPrice = 15;
+
+        return [
+            'custom debug info' => [
+                $dummyDebugInfo,
+                [],
+                <<<S
+                (static function () {
+                    \$object = new Yiisoft\VarDumper\Tests\TestAsset\DummyClass();
+                    (function () {
+                        \$this->volume = 10;
+                        \$this->unitPrice = 15;
+                    })->bindTo(\$object, 'Yiisoft\VarDumper\Tests\TestAsset\DummyClass')();
+
+                    return \$object;
+                })()
+                S,
+            ],
+            'custom debug info with use vars' => [
+                $dummyDebugInfoWithClosure,
+                ['$config', '$params'],
+                <<<S
+                (static function () use (\$config, \$params) {
+                    \$object = new Yiisoft\VarDumper\Tests\TestAsset\DummyClass();
+                    (function () use (\$config, \$params) {
+                        \$this->volume = 10;
+                        \$this->unitPrice = 15;
+                        \$this->params = fn () => \$params;
+                        \$this->config = fn () => \$config;
+                    })->bindTo(\$object, 'Yiisoft\VarDumper\Tests\TestAsset\DummyClass')();
+
+                    return \$object;
+                })()
+                S,
+            ],
+        ];
+    }
+
+    /**
+     * @dataProvider exportWithoutObjectSerializationDataProvider
+     *
+     * @param object $object Object to export.
+     * @param array $useVariables Variables to add to closures via use statement.
+     * @param string $expectedResult Expected result.
+     *
+     * @throws ReflectionException
+     */
+    public function testExportWithoutObjectSerialization(object $object, array $useVariables, string $expectedResult): void
+    {
+        $exportResult = VarDumper::create($object)->export(true, $useVariables, false);
         $this->assertEqualsWithoutLE($expectedResult, $exportResult);
     }
 
