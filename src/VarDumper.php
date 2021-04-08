@@ -94,7 +94,7 @@ final class VarDumper
      *
      * @throws ReflectionException
      *
-     * @return string The string representation of the variable.* @return string The string representation of the variable.
+     * @return string The string representation of the variable.
      */
     public function asString(int $depth = 10, bool $highlight = false): string
     {
