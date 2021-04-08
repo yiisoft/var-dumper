@@ -481,6 +481,60 @@ final class VarDumperTest extends TestCase
         $this->assertEqualsWithoutLE($expectedResult, $exportResult);
     }
 
+    public function exportWithoutObjectSerializationDataProvider(): array
+    {
+        $dummyDebugInfo = new DummyDebugInfo();
+        $dummyDebugInfo->volume = 10;
+        $dummyDebugInfo->unitPrice = 15;
+
+        return [
+            'custom debug info' => [
+                $dummyDebugInfo,
+                [],
+                <<<S
+                (static function () {
+                    \$object = new Yiisoft\VarDumper\Tests\TestAsset\DummyDebugInfo();
+                    (function () {
+                        \$this->volume = 10;
+                        \$this->totalPrice = 150;
+                    })->bindTo(\$object, 'Yiisoft\VarDumper\Tests\TestAsset\DummyDebugInfo')();
+
+                    return \$object;
+                })()
+                S,
+            ],
+            'custom debug info with use vars' => [
+                $dummyDebugInfo,
+                ['$config', '$params'],
+                <<<S
+                (static function () use (\$config, \$params) {
+                    \$object = new Yiisoft\VarDumper\Tests\TestAsset\DummyDebugInfo();
+                    (function () use (\$config, \$params) {
+                        \$this->volume = 10;
+                        \$this->totalPrice = 150;
+                    })->bindTo(\$object, 'Yiisoft\VarDumper\Tests\TestAsset\DummyDebugInfo')();
+
+                    return \$object;
+                })()
+                S,
+            ],
+        ];
+    }
+
+    /**
+     * @dataProvider exportWithoutObjectSerializationDataProvider
+     *
+     * @param object $object
+     * @param string $expectedResult
+     *
+     * @throws ReflectionException
+     */
+    public function testExportWithoutObjectSerialization(object $object, array $useVarInClosures, string $expectedResult): void
+    {
+        $exportResult = VarDumper::create($object)->export(true, $useVarInClosures, false);
+        $this->assertEqualsWithoutLE($expectedResult, $exportResult);
+    }
+
     public function testExportClosureWithAnImmutableInstanceOfClosureExporter(): void
     {
         $varDumper1 = VarDumper::create(fn (): int => 1);

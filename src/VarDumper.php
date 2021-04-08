@@ -125,9 +125,9 @@ final class VarDumper
      * @param bool $serializeObjects If it is true all objects will be serialized except objects with closure(s). If it
      * is false only objects of internal classes will be serialized.
      *
-     * @return string A PHP code representation of the variable.
      * @throws ReflectionException
      *
+     * @return string A PHP code representation of the variable.
      */
     public function export(bool $format = true, array $useVariables = [], bool $serializeObjects = true): string
     {
@@ -290,7 +290,6 @@ final class VarDumper
         return $property;
     }
 
-
     /**
      * @param object $variable
      * @param bool $format
@@ -327,7 +326,7 @@ final class VarDumper
         $spaces = str_repeat(' ', $level * 4);
         $objectProperties = $this->getObjectProperties($variable);
         $class = get_class($variable);
-        $use = $this->useVarInClosures === [] ? '' : ' use (' . implode(',', $this->useVarInClosures) . ')';
+        $use = $this->useVarInClosures === [] ? '' : ' use (' . implode(', ', $this->useVarInClosures) . ')';
         $lines = ['(static function ()' . $use . ' {',];
         if ($reflectionObject->getConstructor() === null) {
             $lines = array_merge($lines, [

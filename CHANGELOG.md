@@ -3,7 +3,10 @@
 
 ## 1.0.6 under development
 
-- Enh #54: Add support of closure export (yiiliveext)
+- Enh #54: Add support for exporting objects with closures (yiiliveext)
+## under development
+
+- Enh #54: Added support for exporting objects with closures (yiiliveext)
 
 ## 1.0.5 March 17, 2021
 
