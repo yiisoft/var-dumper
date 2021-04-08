@@ -75,11 +75,21 @@ $string = \Yiisoft\VarDumper\VarDumper::create($variable)->export();
 
 It is similar to `var_export()` but uses short array syntax, handles closures, and serializes objects.
 
-In the above `export()` will give you nicely formatted code. You can remove formatting by passing `false` as an argument.
+In the above `export()` will give you nicely formatted code. You can remove formatting by passing `false` as the first
+`$format` argument.
+
+`$useVariables` argument allows specifying array of variables that will be in `use` statement for closures.
+That is especially useful if an object contains callbacks that should get info from upper scope.
+
+`$serializeObjects` argument when given `false` allows to force turn off using of serialization for objects so instead
+closures and reflection API are used the same was as for exporting closures. De-serialization performance is better.
+Closures are way more readable.
 
 ## Limitations
 
-Variables that are anonymous classes or contains anonymous classes doesn't supported.    
+Current limitations are:
+
+- Variables or properties that are anonymous classes or contain anonymous classes are not supported.    
 
 ### Unit testing
 
