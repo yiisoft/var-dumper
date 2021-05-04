@@ -37,13 +37,8 @@ if (!function_exists('dd')) {
      */
     function dd(...$variables): void
     {
-        $highlight = PHP_SAPI !== 'cli';
+        d(...$variables);
 
-        foreach ($variables as $variable) {
-            VarDumper::dump($variable, 10, $highlight);
-            echo $highlight ? '<br>' : PHP_EOL;
-        }
-
-        die();
+        die(0);
     }
 }
