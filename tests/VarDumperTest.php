@@ -365,7 +365,7 @@ final class VarDumperTest extends TestCase
     {
         return [
             'Anonymous-instance' => [
-                $object = new class() {},
+                $object = new class () {},
                 var_export(VarDumper::create($object)->asString(), true),
             ],
         ];
