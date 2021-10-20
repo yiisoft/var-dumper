@@ -50,7 +50,7 @@ final class VarDumper
     private $variable;
     private array $useVarInClosures = [];
     private bool $serializeObjects = true;
-    private static ?ClosureExporter $closureExporter;
+    private static ?ClosureExporter $closureExporter = null;
 
     /**
      * @param mixed $variable Variable to dump.
@@ -236,7 +236,7 @@ final class VarDumper
                     if ($format) {
                         $output .= "\n" . $spaces . $this->offset;
                     }
-                    if ($outputKeys ) {
+                    if ($outputKeys) {
                         $output .= $this->exportVariable($key);
                         $output .= ' => ';
                     }
