@@ -3,7 +3,7 @@
 
 ## 1.1.1 under development
 
-- no changes in this release.
+- Enh #59: Add `\Yiisoft\VarDumper\VarDumper::$offset` to use to indicate nesting level (WinterSilence)
 
 
 ## 1.1.0 April 08, 2021
