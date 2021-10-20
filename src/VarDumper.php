@@ -14,14 +14,12 @@ use ReflectionException;
 use Yiisoft\Arrays\ArrayableInterface;
 
 use function array_keys;
-use function count;
 use function get_class;
 use function gettype;
 use function highlight_string;
 use function method_exists;
 use function next;
 use function preg_replace;
-use function range;
 use function spl_object_id;
 use function str_repeat;
 use function strtr;
@@ -128,6 +126,7 @@ final class VarDumper
      * @param array $useVariables Array of variables used in `use` statement (['$params', '$config'])
      * @param bool $serializeObjects If it is true all objects will be serialized except objects with closure(s). If it
      * is false only objects of internal classes will be serialized.
+     *
      * @throws ReflectionException
      *
      * @return string A PHP code representation of the variable.
