@@ -41,12 +41,16 @@ use function var_export;
 final class VarDumper
 {
     /**
+     * @var string The level offset at left
+     */
+    public string $offset = '    ';
+    /**
      * @var mixed Variable to dump.
      */
     private $variable;
     private array $useVarInClosures = [];
     private bool $serializeObjects = true;
-    private static ?ClosureExporter $closureExporter = null;
+    private static ?ClosureExporter $closureExporter;
 
     /**
      * @param mixed $variable Variable to dump.
@@ -124,7 +128,6 @@ final class VarDumper
      * @param array $useVariables Array of variables used in `use` statement (['$params', '$config'])
      * @param bool $serializeObjects If it is true all objects will be serialized except objects with closure(s). If it
      * is false only objects of internal classes will be serialized.
-     *
      * @throws ReflectionException
      *
      * @return string A PHP code representation of the variable.
@@ -165,12 +168,12 @@ final class VarDumper
 
                 $output = '';
                 $keys = array_keys($var);
-                $spaces = str_repeat(' ', $level * 4);
+                $spaces = str_repeat($this->offset, $level);
                 $output .= '[';
 
                 foreach ($keys as $name) {
                     if ($format) {
-                        $output .= "\n" . $spaces . '    ';
+                        $output .= "\n" . $spaces . $this->offset;
                     }
                     $output .= $this->exportVariable($name);
                     $output .= ' => ';
@@ -189,14 +192,14 @@ final class VarDumper
                     return $this->getObjectDescription($var) . ' (...)';
                 }
 
-                $spaces = str_repeat(' ', $level * 4);
+                $spaces = str_repeat($this->offset, $level);
                 $output = $this->getObjectDescription($var) . "\n" . $spaces . '(';
                 $objectProperties = $this->getObjectProperties($var);
 
                 /** @psalm-var mixed $value */
                 foreach ($objectProperties as $name => $value) {
                     $propertyName = strtr(trim((string) $name), "\0", '::');
-                    $output .= "\n" . $spaces . "    [$propertyName] => ";
+                    $output .= "\n" . $spaces . $this->offset . '[' . $propertyName . '] => ';
                     $output .= $this->dumpInternal($value, $format, $depth, $level + 1);
                 }
                 return $output . "\n" . $spaces . ')';
@@ -216,7 +219,7 @@ final class VarDumper
      */
     private function exportInternal($variable, bool $format, int $level): string
     {
-        $spaces = str_repeat(' ', $level * 4);
+        $spaces = str_repeat($this->offset, $level);
         switch (gettype($variable)) {
             case 'NULL':
                 return 'null';
@@ -226,14 +229,14 @@ final class VarDumper
                 }
 
                 $keys = array_keys($variable);
-                $outputKeys = ($keys !== range(0, count($variable) - 1));
+                $outputKeys = $keys !== array_keys($keys);
                 $output = '[';
 
                 foreach ($keys as $key) {
                     if ($format) {
-                        $output .= "\n" . $spaces . '    ';
+                        $output .= "\n" . $spaces . $this->offset;
                     }
-                    if ($outputKeys) {
+                    if ($outputKeys ) {
                         $output .= $this->exportVariable($key);
                         $output .= ' => ';
                     }
@@ -323,27 +326,27 @@ final class VarDumper
 
     private function exportObject(object $variable, ReflectionObject $reflectionObject, bool $format, int $level): string
     {
-        $spaces = str_repeat(' ', $level * 4);
+        $spaces = str_repeat($this->offset, $level);
         $objectProperties = $this->getObjectProperties($variable);
         $class = get_class($variable);
         $use = $this->useVarInClosures === [] ? '' : ' use (' . implode(', ', $this->useVarInClosures) . ')';
         $lines = ['(static function ()' . $use . ' {',];
         if ($reflectionObject->getConstructor() === null) {
             $lines = array_merge($lines, [
-                '    $object = new ' . $class . '();',
-                '    (function ()' . $use . ' {',
+                $this->offset . '$object = new ' . $class . '();',
+                $this->offset . '(function ()' . $use . ' {',
             ]);
         } else {
             $lines = array_merge($lines, [
-                '    $class = new \ReflectionClass(\'' . $class . '\');',
-                '    $object = $class->newInstanceWithoutConstructor();',
-                '    (function ()' . $use . ' {',
+                $this->offset . '$class = new \ReflectionClass(\'' . $class . '\');',
+                $this->offset . '$object = $class->newInstanceWithoutConstructor();',
+                $this->offset . '(function ()' . $use . ' {',
             ]);
         }
         $endLines = [
-            '    })->bindTo($object, \'' . $class . '\')();',
+            $this->offset . '})->bindTo($object, \'' . $class . '\')();',
             '',
-            '    return $object;',
+            $this->offset . 'return $object;',
             '})()',
         ];
 
@@ -353,7 +356,7 @@ final class VarDumper
          */
         foreach ($objectProperties as $name => $value) {
             $propertyName = $this->getPropertyName($name);
-            $lines[] = '        $this->' . $propertyName . ' = ' .
+            $lines[] = $this->offset . $this->offset . '$this->' . $propertyName . ' = ' .
                 $this->exportInternal($value, $format, $level + 2) . ';';
         }
 
