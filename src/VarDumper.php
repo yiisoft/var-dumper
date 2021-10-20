@@ -39,7 +39,7 @@ use function var_export;
 final class VarDumper
 {
     /**
-     * @var string The level offset at left
+     * @var string Offset to use to indicate nesting level.
      */
     public string $offset = '    ';
     /**
