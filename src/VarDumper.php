@@ -44,7 +44,7 @@ final class VarDumper
     private $variable;
     /**
      * @var mixed[] Variables using in closure scope
-     * @psalm-var array<array-key, null|object{__tostring()}|scalar>
+     * @psalm-var array<array-key: string, array-value: mixed>
      */
     private array $useVarInClosures = [];
     private bool $serializeObjects = true;
