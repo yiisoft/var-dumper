@@ -39,15 +39,15 @@ use function var_export;
 final class VarDumper
 {
     /**
-     * @var string Offset to use to indicate nesting level.
-     */
-    public string $offset = '    ';
-    /**
      * @var mixed Variable to dump.
      */
     private $variable;
     private array $useVarInClosures = [];
     private bool $serializeObjects = true;
+    /**
+     * @var string Offset to use to indicate nesting level.
+     */
+    private string $offset = '    ';
     private static ?ClosureExporter $closureExporter = null;
 
     /**
@@ -85,6 +85,20 @@ final class VarDumper
         echo self::create($variable)->asString($depth, $highlight);
     }
 
+    /**
+     * Sets offset to use to indicate nesting level.
+     *
+     * @param string $str The offset string
+     * @return static New instance with given offset
+     */
+    public function setOffset(string $str): self
+    {
+        $clone = clone $this;
+        $clone->offset = $str;
+
+        return $clone;
+    }
+    
     /**
      * Dumps a variable in terms of a string.
      *
