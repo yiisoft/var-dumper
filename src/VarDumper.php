@@ -42,6 +42,9 @@ final class VarDumper
      * @var mixed Variable to dump.
      */
     private $variable;
+    /**
+     * @var mixed[] Variables using in closure scope
+     */
     private array $useVarInClosures = [];
     private bool $serializeObjects = true;
     /**
