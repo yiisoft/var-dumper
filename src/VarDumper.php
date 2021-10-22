@@ -90,18 +90,17 @@ final class VarDumper
     }
 
     /**
-     * Sets offset to use to indicate nesting level.
+     * Sets offset string to use to indicate nesting level.
      *
-     * @param string $str The offset string
+     * @param string $str The offset string.
      *
-     * @return static New instance with given offset
+     * @return static New instance with a given offset.
      */
-    public function setOffset(string $str): self
+    public function withOffset(string $offset): self
     {
-        $clone = clone $this;
-        $clone->offset = $str;
-
-        return $clone;
+        $new= clone $this;
+        $new->offset = $offset;
+        return $new;
     }
 
     /**
