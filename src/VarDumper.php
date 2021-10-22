@@ -43,8 +43,7 @@ final class VarDumper
      */
     private $variable;
     /**
-     * @var mixed[] Variables using in closure scope
-     * @psalm-var <array-key, mixed>
+     * @var string[] Variables using in closure scope.
      */
     private array $useVarInClosures = [];
     private bool $serializeObjects = true;
@@ -141,7 +140,7 @@ final class VarDumper
      * by using the PHP functions {@see serialize()} and {@see unserialize()}.
      *
      * @param bool $format Whatever to format code.
-     * @param array $useVariables Array of variables used in `use` statement (['$params', '$config'])
+     * @param string[] $useVariables Array of variables used in `use` statement (['$params', '$config'])
      * @param bool $serializeObjects If it is true all objects will be serialized except objects with closure(s). If it
      * is false only objects of internal classes will be serialized.
      *
