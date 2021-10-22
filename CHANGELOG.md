@@ -3,7 +3,7 @@
 
 ## 1.1.1 under development
 
-- Enh #59: Add `\Yiisoft\VarDumper\VarDumper::$offset` to use to indicate nesting level (WinterSilence)
+- Enh #59: Add `\Yiisoft\VarDumper\VarDumper::withOffset()` to adjust generated code nesting offset (WinterSilence)
 
 
 ## 1.1.0 April 08, 2021
