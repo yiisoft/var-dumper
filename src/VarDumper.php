@@ -98,7 +98,7 @@ final class VarDumper
      */
     public function withOffset(string $offset): self
     {
-        $new= clone $this;
+        $new = clone $this;
         $new->offset = $offset;
         return $new;
     }
