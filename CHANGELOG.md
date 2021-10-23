@@ -1,10 +1,9 @@
 # Yii VarDumper
 
-
 ## 1.1.1 under development
 
 - Enh #59: Add `\Yiisoft\VarDumper\VarDumper::withOffset()` to adjust generated code nesting offset (WinterSilence)
-
+- Enh #60: Add support for `yiisoft/arrays` version `^2.0` (vjik)
 
 ## 1.1.0 April 08, 2021
 

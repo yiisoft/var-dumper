@@ -20,7 +20,7 @@
     "require": {
         "php": "^7.4|^8.0",
         "ext-json": "*",
-        "yiisoft/arrays": "^1.0"
+        "yiisoft/arrays": "^1.0|^2.0"
     },
     "require-dev": {
         "phpunit/phpunit": "^9.5",
