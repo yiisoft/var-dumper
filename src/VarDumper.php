@@ -91,7 +91,7 @@ final class VarDumper
     /**
      * Sets offset string to use to indicate nesting level.
      *
-     * @param string $str The offset string.
+     * @param string $offset The offset string.
      *
      * @return static New instance with a given offset.
      */
@@ -99,6 +99,7 @@ final class VarDumper
     {
         $new = clone $this;
         $new->offset = $offset;
+
         return $new;
     }
 
