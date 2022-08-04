@@ -144,6 +144,7 @@ final class VarDumper
      */
     public function asJson(bool $format = true, int $depth = 10): string
     {
+        /** @var mixed $output */
         $output = $this->exportJson($this->variable, $format, $depth, 0);
 
         if ($format) {
@@ -320,6 +321,15 @@ final class VarDumper
         }
     }
 
+    /**
+     * @param mixed $var
+     * @param bool $format
+     * @param int $depth
+     * @param int $level
+     * @return mixed
+     * @throws ReflectionException
+     * @psalm-param mixed $var
+     */
     private function exportJson($var, bool $format, int $depth, int $level)
     {
         switch (gettype($var)) {
@@ -331,6 +341,7 @@ final class VarDumper
                     return '[...]';
                 }
 
+                /** @psalm-suppress MissingClosureReturnType */
                 return array_map(function ($value) use ($format, $level, $depth) {
                     return $this->exportJson($value, $format, $depth, $level + 1);
                 }, $var);
