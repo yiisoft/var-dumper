@@ -85,6 +85,19 @@ That is especially useful if an object contains callbacks that should get info f
 closures and reflection API are used the same was as for exporting closures. De-serialization performance is better.
 Closures are way more readable.
 
+### Exporting as JSON string
+
+```php
+$string = \Yiisoft\VarDumper\VarDumper::create($variable)->asJson();
+```
+
+It is similar to `json_encode()` but uses short array syntax, handles closures, and serializes objects.
+
+In the above `asJson()` will give you nicely formatted code. You can remove formatting by passing `false` as the first
+`$format` argument.
+
+`$depth` argument allows you to set maximum recursion depth
+
 ## Limitations
 
 Current limitations are:

@@ -8,6 +8,7 @@ use __PHP_Incomplete_Class;
 use Closure;
 use Exception;
 use IteratorAggregate;
+use JsonException;
 use JsonSerializable;
 use ReflectionObject;
 use ReflectionException;
@@ -126,6 +127,30 @@ final class VarDumper
         }
 
         return $output;
+    }
+
+    /**
+     * Dumps a variable as a JSON string.
+     *
+     * This method provides similar functionality to the {@see json_encode()}
+     * but is more robust when handling complex objects.
+     *
+     * @param bool $format Use whitespaces in returned data to format it
+     * @param int $depth Maximum depth that the dumper should go into the variable. Defaults to 10.
+     *
+     * @throws JsonException
+     *
+     * @return string The json representation of the variable.
+     */
+    public function asJson(bool $format = true, int $depth = 10): string
+    {
+        $output = $this->exportJson($this->variable, $format, $depth, 0);
+
+        if ($format) {
+            return json_encode($output, JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT);
+        }
+
+        return json_encode($output, JSON_THROW_ON_ERROR);
     }
 
     /**
@@ -292,6 +317,27 @@ final class VarDumper
                 }
             default:
                 return $this->exportVariable($variable);
+        }
+    }
+
+    private function exportJson($var, bool $format, int $depth, int $level)
+    {
+        switch (gettype($var)) {
+            case 'resource':
+            case 'resource (closed)':
+                return '{resource}';
+            case 'array':
+                if ($depth <= $level) {
+                    return '[...]';
+                }
+
+                return array_map(function ($value) use ($format, $level, $depth) {
+                    return $this->exportJson($value, $format, $depth, $level + 1);
+                }, $var);
+            case 'object':
+                return $this->dumpInternal($var, $format, $depth, $level);
+            default:
+                return $var;
         }
     }
 
