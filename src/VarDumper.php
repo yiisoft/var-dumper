@@ -326,8 +326,10 @@ final class VarDumper
      * @param bool $format
      * @param int $depth
      * @param int $level
-     * @return mixed
+     *
      * @throws ReflectionException
+     *
+     * @return mixed
      * @psalm-param mixed $var
      */
     private function exportJson($var, bool $format, int $depth, int $level)

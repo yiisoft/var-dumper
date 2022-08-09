@@ -917,7 +917,7 @@ final class VarDumperTest extends TestCase
                 [fn () => new DateTimeZone('')],
                 // @formatter:on
                 [
-                    0 => "fn () => new \DateTimeZone('')"
+                    0 => "fn () => new \DateTimeZone('')",
                 ],
             ],
             'original class name' => [
@@ -959,6 +959,7 @@ final class VarDumperTest extends TestCase
             ],
         ];
     }
+
     public function testDFunction(): void
     {
         d($variable = 'content');
