@@ -766,6 +766,199 @@ final class VarDumperTest extends TestCase
         ];
     }
 
+    /**
+     * @dataProvider asJsonDataProvider
+     *
+     * @param mixed $variable
+     * @param mixed $result
+     *
+     * @psalm-suppress MixedAssignment
+     */
+    public function testAsJson($variable, $result): void
+    {
+        $output = VarDumper::create($variable)->asJson();
+        $decodedResult = json_decode($output, true, 10, JSON_THROW_ON_ERROR);
+        $this->assertEquals($result, $decodedResult);
+    }
+
+    public function asJsonDataProvider(): array
+    {
+        $dummyDebugInfo = new DummyDebugInfo();
+        $dummyDebugInfo->volume = 10;
+        $dummyDebugInfo->unitPrice = 15;
+        $dummyDebugInfoObjectId = spl_object_id($dummyDebugInfo);
+
+        $incompleteObject = unserialize('O:16:"nonExistingClass":0:{}');
+        $incompleteObjectId = spl_object_id($incompleteObject);
+
+        $emptyObject = new stdClass();
+        $emptyObjectId = spl_object_id($emptyObject);
+
+        $objectWithClosureInProperty = new stdClass();
+        // @formatter:off
+        $objectWithClosureInProperty->a = fn () => 1;
+        // @formatter:on
+        $objectWithClosureInPropertyId = spl_object_id($objectWithClosureInProperty);
+
+        return [
+            'custom debug info' => [
+                $dummyDebugInfo,
+                <<<S
+                Yiisoft\VarDumper\Tests\TestAsset\DummyDebugInfo#{$dummyDebugInfoObjectId}
+                (
+                    [volume] => 10
+                    [totalPrice] => 150
+                )
+                S,
+            ],
+            'incomplete object' => [
+                $incompleteObject,
+                <<<S
+                __PHP_Incomplete_Class#{$incompleteObjectId}
+                (
+                    [__PHP_Incomplete_Class_Name] => 'nonExistingClass'
+                )
+                S,
+            ],
+            'empty object' => [
+                $emptyObject,
+                <<<S
+                stdClass#{$emptyObjectId}
+                (
+                )
+                S,
+            ],
+            'short function' => [
+                // @formatter:off
+                fn () => 1,
+                // @formatter:on
+                'fn () => 1',
+            ],
+            'short static function' => [
+                // @formatter:off
+                static fn () => 1,
+                // @formatter:on
+                'static fn () => 1',
+            ],
+            'function' => [
+                function () {
+                    return 1;
+                },
+                'function () {
+                    return 1;
+                }',
+            ],
+            'static function' => [
+                static function () {
+                    return 1;
+                },
+                'static function () {
+                    return 1;
+                }',
+            ],
+            'string' => [
+                'Hello, Yii!',
+                'Hello, Yii!',
+            ],
+            'empty string' => [
+                '',
+                '',
+            ],
+            'null' => [
+                null,
+                null,
+            ],
+            'integer' => [
+                1,
+                1,
+            ],
+            'integer with separator' => [
+                1_23_456,
+                123456,
+            ],
+            'boolean' => [
+                true,
+                true,
+            ],
+            'resource' => [
+                fopen('php://input', 'rb'),
+                '{resource}',
+            ],
+            'empty array' => [
+                [],
+                [],
+            ],
+            'array of 3 elements, automatic keys' => [
+                [
+                    'one',
+                    'two',
+                    'three',
+                ],
+                [
+                    0 => 'one',
+                    1 => 'two',
+                    2 => 'three',
+                ],
+            ],
+            'array of 3 elements, custom keys' => [
+                [
+                    2 => 'one',
+                    'two' => 'two',
+                    0 => 'three',
+                ],
+                [
+                    2 => 'one',
+                    'two' => 'two',
+                    0 => 'three',
+                ],
+            ],
+            'closure in array' => [
+                // @formatter:off
+                [fn () => new DateTimeZone('')],
+                // @formatter:on
+                [
+                    0 => "fn () => new \DateTimeZone('')"
+                ],
+            ],
+            'original class name' => [
+                // @formatter:off
+                static fn (VarDumper $date) => new DateTimeZone(''),
+                // @formatter:on
+                "static fn (\Yiisoft\VarDumper\VarDumper \$date) => new \DateTimeZone('')",
+            ],
+            'class alias' => [
+                // @formatter:off
+                fn (Dumper $date) => new DateTimeZone(''),
+                // @formatter:on
+                "fn (\Yiisoft\VarDumper\VarDumper \$date) => new \DateTimeZone('')",
+            ],
+            'namespace alias' => [
+                // @formatter:off
+                fn (VD\VarDumper $date) => new DateTimeZone(''),
+                // @formatter:on
+                "fn (\Yiisoft\VarDumper\VarDumper \$date) => new \DateTimeZone('')",
+            ],
+            'closure with null-collision operator' => [
+                // @formatter:off
+                fn () => $_ENV['var'] ?? null,
+                // @formatter:on
+                "fn () => \$_ENV['var'] ?? null",
+            ],
+            'utf8 supported' => [
+                '🤣',
+                '🤣',
+            ],
+            'closure in property supported' => [
+                $objectWithClosureInProperty,
+                <<<S
+                stdClass#{$objectWithClosureInPropertyId}
+                (
+                    [a] => fn () => 1
+                )
+                S,
+            ],
+        ];
+    }
     public function testDFunction(): void
     {
         d($variable = 'content');
