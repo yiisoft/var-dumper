@@ -96,7 +96,7 @@ It is similar to `json_encode()` but uses short array syntax, handles closures, 
 In the above `asJson()` will give you nicely formatted code. You can remove formatting by passing `false` as the first
 `$format` argument.
 
-`$depth` argument allows you to set maximum recursion depth
+`$depth` argument allows you to set maximum recursion depth.
 
 ## Limitations
 
