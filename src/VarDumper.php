@@ -389,7 +389,7 @@ final class VarDumper
     {
         $property = str_replace("\0", '::', trim($property));
 
-        if (strpos($property, '*::') === 0) {
+        if (str_starts_with($property, '*::')) {
             return substr($property, 3);
         }
 
