@@ -39,6 +39,9 @@ use function var_export;
  */
 final class VarDumper
 {
+    const OBJECT_ID_PROPERTY = '__id__';
+    const OBJECT_CLASS_PROPERTY = '__class__';
+    const DEPTH_LIMIT_EXCEEDED_PROPERTY = '__depth_limit_exceeded__';
     /**
      * @var mixed Variable to dump.
      */
@@ -340,7 +343,9 @@ final class VarDumper
                 return '{resource}';
             case 'array':
                 if ($depth <= $level) {
-                    return '[...]';
+                    return [
+                        self::DEPTH_LIMIT_EXCEEDED_PROPERTY => true,
+                    ];
                 }
 
                 /** @psalm-suppress MissingClosureReturnType */
@@ -348,7 +353,32 @@ final class VarDumper
                     return $this->exportJson($value, $format, $depth, $level + 1);
                 }, $var);
             case 'object':
-                return $this->dumpInternal($var, $format, $depth, $level);
+                if ($var instanceof Closure) {
+                    return $this->exportClosure($var);
+                }
+
+                $objectClass = $this->getObjectClass($var);
+                $objectId = $this->getObjectId($var);
+                if ($depth <= $level) {
+                    return [
+                        self::OBJECT_ID_PROPERTY => $objectId,
+                        self::OBJECT_CLASS_PROPERTY => $objectClass,
+                        self::DEPTH_LIMIT_EXCEEDED_PROPERTY => true,
+                    ];
+                }
+
+                $objectProperties = $this->getObjectProperties($var);
+
+                $output = [
+                    self::OBJECT_ID_PROPERTY => $objectId,
+                    self::OBJECT_CLASS_PROPERTY => $objectClass,
+                ];
+                /** @psalm-var mixed $value */
+                foreach ($objectProperties as $name => $value) {
+                    $propertyName = strtr(trim((string) $name), "\0", '::');
+                    $output[$propertyName] = $this->exportJson($value, $format, $depth, $level + 1);
+                }
+                return $output ;
             default:
                 return $var;
         }
@@ -469,7 +499,17 @@ final class VarDumper
 
     private function getObjectDescription(object $object): string
     {
-        return get_class($object) . '#' . spl_object_id($object);
+        return $this->getObjectClass($object) . '#' . $this->getObjectId($object);
+    }
+
+    private function getObjectClass(object $object): string
+    {
+        return get_class($object);
+    }
+
+    private function getObjectId(object $object): string
+    {
+        return (string) spl_object_id($object);
     }
 
     private function getObjectProperties(object $var): array
