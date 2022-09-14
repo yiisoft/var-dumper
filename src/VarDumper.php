@@ -375,7 +375,8 @@ final class VarDumper
                 ];
                 /** @psalm-var mixed $value */
                 foreach ($objectProperties as $name => $value) {
-                    $propertyName = strtr(trim((string) $name), "\0", '::');
+                    $propertyNames = explode( "\0", trim((string) $name));
+                    $propertyName = end($propertyNames) ?: $name;
                     $output[$propertyName] = $this->exportJson($value, $format, $depth, $level + 1);
                 }
                 return $output ;
