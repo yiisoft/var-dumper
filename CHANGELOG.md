@@ -4,6 +4,7 @@
 ## 1.2.1 under development
 
 - Enh #64: Add `asJson()` method to `\Yiisoft\VarDumper\VarDumper` (@dood-)
+- Enh #68: Fix json serialization (@xepozz)
 
 ## 1.2.0 October 24, 2021
 
