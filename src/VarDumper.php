@@ -335,7 +335,7 @@ final class VarDumper
      * @return mixed
      * @psalm-param mixed $var
      */
-    private function exportJson($var, bool $format, int $depth, int $level)
+    private function exportJson(mixed $var, bool $format, int $depth, int $level): mixed
     {
         switch (gettype($var)) {
             case 'resource':
@@ -377,6 +377,7 @@ final class VarDumper
                 foreach ($objectProperties as $name => $value) {
                     $propertyNames = explode("\0", trim((string) $name));
                     $propertyName = end($propertyNames) ?: $name;
+                    /** @psalm-suppress MixedAssignment */
                     $output[$propertyName] = $this->exportJson($value, $format, $depth, $level + 1);
                 }
                 return $output ;
