@@ -365,7 +365,8 @@ final class VarDumperTest extends TestCase
     {
         return [
             'Anonymous-instance' => [
-                $object = new class () {},
+                $object = new class () {
+                },
                 var_export(VarDumper::create($object)->asString(), true),
             ],
         ];
@@ -470,14 +471,18 @@ final class VarDumperTest extends TestCase
         ];
 
         $exportResult = preg_replace('/\s/', '', VarDumper::create($var)->export());
-        $expectedResult = preg_replace('/\s/', '', <<<S
+        $expectedResult = preg_replace(
+            '/\s/',
+            '',
+            <<<S
             [
                 'Yiisoft\\\\VarDumper\\\\ClosureExporter' => static fn () => new \Yiisoft\VarDumper\ClosureExporter(),
                 'Yiisoft\\\\VarDumper\\\\UseStatementParser' => static function (\$container) {
                     return \$container->get(\Yiisoft\VarDumper\UseStatementParser::class);
                 },
             ]
-        S);
+        S
+        );
 
         $this->assertEqualsWithoutLE($expectedResult, $exportResult);
     }
@@ -541,8 +546,11 @@ final class VarDumperTest extends TestCase
      *
      * @throws ReflectionException
      */
-    public function testExportWithoutObjectSerialization(object $object, array $useVariables, string $expectedResult): void
-    {
+    public function testExportWithoutObjectSerialization(
+        object $object,
+        array $useVariables,
+        string $expectedResult
+    ): void {
         $exportResult = VarDumper::create($object)->export(true, $useVariables, false);
         $this->assertEqualsWithoutLE($expectedResult, $exportResult);
     }
@@ -803,30 +811,45 @@ final class VarDumperTest extends TestCase
         return [
             'custom debug info' => [
                 $dummyDebugInfo,
-                <<<S
-                Yiisoft\VarDumper\Tests\TestAsset\DummyDebugInfo#{$dummyDebugInfoObjectId}
-                (
-                    [volume] => 10
-                    [totalPrice] => 150
-                )
+                json_decode(
+                    <<<S
+                {
+                    "__id__": "{$dummyDebugInfoObjectId}",
+                    "__class__": "Yiisoft\\\VarDumper\\\Tests\\\TestAsset\\\DummyDebugInfo",
+                    "volume": 10,
+                    "totalPrice": 150
+                }
                 S,
+                    associative: true,
+                    flags: JSON_THROW_ON_ERROR
+                ),
             ],
             'incomplete object' => [
                 $incompleteObject,
-                <<<S
-                __PHP_Incomplete_Class#{$incompleteObjectId}
-                (
-                    [__PHP_Incomplete_Class_Name] => 'nonExistingClass'
-                )
+                json_decode(
+                    <<<S
+                {
+                    "__id__": "{$incompleteObjectId}",
+                    "__class__": "__PHP_Incomplete_Class",
+                    "__PHP_Incomplete_Class_Name": "nonExistingClass"
+                }
                 S,
+                    associative: true,
+                    flags: JSON_THROW_ON_ERROR
+                ),
             ],
             'empty object' => [
                 $emptyObject,
-                <<<S
-                stdClass#{$emptyObjectId}
-                (
-                )
+                json_decode(
+                    <<<S
+                {
+                    "__id__": "{$emptyObjectId}",
+                    "__class__": "stdClass"
+                }
                 S,
+                    associative: true,
+                    flags: JSON_THROW_ON_ERROR
+                ),
             ],
             'short function' => [
                 // @formatter:off
@@ -950,12 +973,17 @@ final class VarDumperTest extends TestCase
             ],
             'closure in property supported' => [
                 $objectWithClosureInProperty,
-                <<<S
-                stdClass#{$objectWithClosureInPropertyId}
-                (
-                    [a] => fn () => 1
-                )
+                json_decode(
+                    <<<S
+                {
+                    "__id__": "{$objectWithClosureInPropertyId}",
+                    "__class__": "stdClass",
+                    "a": "fn () => 1"
+                }
                 S,
+                    associative: true,
+                    flags: JSON_THROW_ON_ERROR
+                ),
             ],
         ];
     }
