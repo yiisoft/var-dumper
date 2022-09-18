@@ -357,7 +357,7 @@ final class VarDumper
                     return $this->exportClosure($var);
                 }
 
-                $objectClass = $this->getObjectClass($var);
+                $objectClass = get_class($var);
                 $objectId = $this->getObjectId($var);
                 if ($depth <= $level) {
                     return [
@@ -501,12 +501,7 @@ final class VarDumper
 
     private function getObjectDescription(object $object): string
     {
-        return $this->getObjectClass($object) . '#' . $this->getObjectId($object);
-    }
-
-    private function getObjectClass(object $object): string
-    {
-        return get_class($object);
+        return get_class($object) . '#' . $this->getObjectId($object);
     }
 
     private function getObjectId(object $object): string
