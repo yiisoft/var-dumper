@@ -39,9 +39,9 @@ use function var_export;
  */
 final class VarDumper
 {
-    public const OBJECT_ID_PROPERTY = '__id__';
-    public const OBJECT_CLASS_PROPERTY = '__class__';
-    public const DEPTH_LIMIT_EXCEEDED_PROPERTY = '__depth_limit_exceeded__';
+    public const OBJECT_ID_PROPERTY = '$__id__$';
+    public const OBJECT_CLASS_PROPERTY = '$__class__$';
+    public const DEPTH_LIMIT_EXCEEDED_PROPERTY = '$__depth_limit_exceeded__$';
     /**
      * @var mixed Variable to dump.
      */

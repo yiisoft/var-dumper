@@ -17,6 +17,7 @@ use Yiisoft\VarDumper\Tests\TestAsset\DummyDebugInfo;
 use Yiisoft\VarDumper\Tests\TestAsset\DummyIteratorAggregateWithClosure;
 use Yiisoft\VarDumper\Tests\TestAsset\DummyJsonSerializableWithClosure;
 use Yiisoft\VarDumper\Tests\TestAsset\DummyStringableWithClosure;
+use Yiisoft\VarDumper\Tests\TestAsset\PrivateProperties;
 use Yiisoft\VarDumper\UseStatementParser;
 use Yiisoft\VarDumper\VarDumper;
 use Yiisoft\VarDumper\VarDumper as Dumper;
@@ -808,14 +809,18 @@ final class VarDumperTest extends TestCase
         // @formatter:on
         $objectWithClosureInPropertyId = spl_object_id($objectWithClosureInProperty);
 
+        $objectWithPrivateProperties = new PrivateProperties();
+        $objectWithPrivatePropertiesId = spl_object_id($objectWithPrivateProperties);
+        $objectWithPrivatePropertiesClass = str_replace('\\', '\\\\', PrivateProperties::class);
+
         return [
             'custom debug info' => [
                 $dummyDebugInfo,
                 json_decode(
                     <<<S
                 {
-                    "__id__": "{$dummyDebugInfoObjectId}",
-                    "__class__": "Yiisoft\\\VarDumper\\\Tests\\\TestAsset\\\DummyDebugInfo",
+                    "\$__id__\$": "{$dummyDebugInfoObjectId}",
+                    "\$__class__\$": "Yiisoft\\\VarDumper\\\Tests\\\TestAsset\\\DummyDebugInfo",
                     "volume": 10,
                     "totalPrice": 150
                 }
@@ -829,8 +834,8 @@ final class VarDumperTest extends TestCase
                 json_decode(
                     <<<S
                 {
-                    "__id__": "{$incompleteObjectId}",
-                    "__class__": "__PHP_Incomplete_Class",
+                    "\$__id__\$": "{$incompleteObjectId}",
+                    "\$__class__\$": "__PHP_Incomplete_Class",
                     "__PHP_Incomplete_Class_Name": "nonExistingClass"
                 }
                 S,
@@ -843,8 +848,8 @@ final class VarDumperTest extends TestCase
                 json_decode(
                     <<<S
                 {
-                    "__id__": "{$emptyObjectId}",
-                    "__class__": "stdClass"
+                    "\$__id__\$": "{$emptyObjectId}",
+                    "\$__class__\$": "stdClass"
                 }
                 S,
                     associative: true,
@@ -976,9 +981,24 @@ final class VarDumperTest extends TestCase
                 json_decode(
                     <<<S
                 {
-                    "__id__": "{$objectWithClosureInPropertyId}",
-                    "__class__": "stdClass",
+                    "\$__id__\$": "{$objectWithClosureInPropertyId}",
+                    "\$__class__\$": "stdClass",
                     "a": "fn () => 1"
+                }
+                S,
+                    associative: true,
+                    flags: JSON_THROW_ON_ERROR
+                ),
+            ],
+            'private properties supported' => [
+                $objectWithPrivateProperties,
+                json_decode(
+                    <<<S
+                {
+                    "\$__id__\$": "{$objectWithPrivatePropertiesId}",
+                    "\$__class__\$": "{$objectWithPrivatePropertiesClass}",
+                    "age": 0,
+                    "names": ["first", "last"]
                 }
                 S,
                     associative: true,
