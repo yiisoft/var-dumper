@@ -1024,10 +1024,10 @@ final class VarDumperTest extends TestCase
                     [
                         [
                             [
-                                []
-                            ]
-                        ]
-                    ]
+                                [],
+                            ],
+                        ],
+                    ],
                 ],
                 <<<JSON
                 [
