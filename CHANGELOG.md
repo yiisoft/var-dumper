@@ -3,8 +3,7 @@
 
 ## 1.2.1 under development
 
-- Enh #64: Add `asJson()` method to `\Yiisoft\VarDumper\VarDumper` (@dood-)
-- Enh #68: Fix json serialization (@xepozz)
+- New #64, #68: Add `VarDumper::asJson()` method that provide exporting value as JSON string (@dood-, @xepozz)
 
 ## 1.2.0 October 24, 2021
 
