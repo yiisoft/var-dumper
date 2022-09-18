@@ -1019,6 +1019,28 @@ final class VarDumperTest extends TestCase
                 }
                 JSON,
             ],
+            'nested array limit' => [
+                [
+                    [
+                        [
+                            [
+                                []
+                            ]
+                        ]
+                    ]
+                ],
+                <<<JSON
+                [
+                    [
+                        [
+                            {
+                                "\$__depth_limit_exceeded__\$": true
+                            }
+                        ]
+                    ]
+                ]
+                JSON,
+            ],
         ];
     }
 
