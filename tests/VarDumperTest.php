@@ -785,9 +785,8 @@ final class VarDumperTest extends TestCase
      */
     public function testAsJson($variable, $result): void
     {
-        $output = VarDumper::create($variable)->asJson();
-        $decodedResult = json_decode($output, true, 10, JSON_THROW_ON_ERROR);
-        $this->assertEquals($result, $decodedResult);
+        $output = VarDumper::create($variable)->asJson(depth: 3);
+        $this->assertEquals($result, $output);
     }
 
     public function asJsonDataProvider(): array
@@ -803,6 +802,10 @@ final class VarDumperTest extends TestCase
         $emptyObject = new stdClass();
         $emptyObjectId = spl_object_id($emptyObject);
 
+        $nestedObject = new stdClass();
+        $nestedObject->nested = $nestedObject;
+        $nestedObjectId = spl_object_id($nestedObject);
+
         $objectWithClosureInProperty = new stdClass();
         // @formatter:off
         $objectWithClosureInProperty->a = fn () => 1;
@@ -816,105 +819,93 @@ final class VarDumperTest extends TestCase
         return [
             'custom debug info' => [
                 $dummyDebugInfo,
-                json_decode(
-                    <<<S
+                <<<JSON
                 {
                     "\$__id__\$": "{$dummyDebugInfoObjectId}",
                     "\$__class__\$": "Yiisoft\\\VarDumper\\\Tests\\\TestAsset\\\DummyDebugInfo",
                     "volume": 10,
                     "totalPrice": 150
                 }
-                S,
-                    associative: true,
-                    flags: JSON_THROW_ON_ERROR
-                ),
+                JSON,
             ],
             'incomplete object' => [
                 $incompleteObject,
-                json_decode(
-                    <<<S
+                <<<JSON
                 {
                     "\$__id__\$": "{$incompleteObjectId}",
                     "\$__class__\$": "__PHP_Incomplete_Class",
                     "__PHP_Incomplete_Class_Name": "nonExistingClass"
                 }
-                S,
-                    associative: true,
-                    flags: JSON_THROW_ON_ERROR
-                ),
+                JSON,
             ],
             'empty object' => [
                 $emptyObject,
-                json_decode(
-                    <<<S
+                <<<JSON
                 {
                     "\$__id__\$": "{$emptyObjectId}",
                     "\$__class__\$": "stdClass"
                 }
-                S,
-                    associative: true,
-                    flags: JSON_THROW_ON_ERROR
-                ),
+                JSON,
             ],
             'short function' => [
                 // @formatter:off
                 fn () => 1,
                 // @formatter:on
-                'fn () => 1',
+                '"fn () => 1"',
             ],
             'short static function' => [
                 // @formatter:off
                 static fn () => 1,
                 // @formatter:on
-                'static fn () => 1',
+                '"static fn () => 1"',
             ],
             'function' => [
                 function () {
                     return 1;
                 },
-                'function () {
-                    return 1;
-                }',
+                <<<JSON
+                "function () {\\n                    return 1;\\n                }"
+                JSON,
             ],
             'static function' => [
                 static function () {
                     return 1;
                 },
-                'static function () {
-                    return 1;
-                }',
+                <<<JSON
+                "static function () {\\n                    return 1;\\n                }"
+                JSON,
             ],
             'string' => [
                 'Hello, Yii!',
-                'Hello, Yii!',
+                '"Hello, Yii!"',
             ],
             'empty string' => [
                 '',
-                '',
+                '""',
             ],
             'null' => [
                 null,
-                null,
+                'null',
             ],
             'integer' => [
                 1,
-                1,
+                '1',
             ],
             'integer with separator' => [
                 1_23_456,
-                123456,
+                '123456',
             ],
             'boolean' => [
                 true,
-                true,
+                'true',
             ],
             'resource' => [
                 fopen('php://input', 'rb'),
-                '{resource}',
+                '"{resource}"',
             ],
             'empty array' => [
                 [],
-                [],
+                '[]',
             ],
             'array of 3 elements, automatic keys' => [
                 [
@@ -922,11 +913,13 @@ final class VarDumperTest extends TestCase
                     'two',
                     'three',
                 ],
+                <<<JSON
                 [
-                    0 => 'one',
-                    1 => 'two',
-                    2 => 'three',
-                ],
+                    "one",
+                    "two",
+                    "three"
+                ]
+                JSON,
             ],
             'array of 3 elements, custom keys' => [
                 [
@@ -934,76 +927,97 @@ final class VarDumperTest extends TestCase
                     'two' => 'two',
                     0 => 'three',
                 ],
-                [
-                    2 => 'one',
-                    'two' => 'two',
-                    0 => 'three',
-                ],
+                <<<JSON
+                {
+                    "2": "one",
+                    "two": "two",
+                    "0": "three"
+                }
+                JSON,
             ],
             'closure in array' => [
                 // @formatter:off
                 [fn () => new DateTimeZone('')],
                 // @formatter:on
+                <<<JSON
                 [
-                    0 => "fn () => new \DateTimeZone('')",
-                ],
+                    "fn () => new \\\\DateTimeZone('')"
+                ]
+                JSON,
             ],
             'original class name' => [
                 // @formatter:off
                 static fn (VarDumper $date) => new DateTimeZone(''),
                 // @formatter:on
-                "static fn (\Yiisoft\VarDumper\VarDumper \$date) => new \DateTimeZone('')",
+                '"static fn (\\\\Yiisoft\\\\VarDumper\\\\VarDumper $date) => new \\\\DateTimeZone(\'\')"',
             ],
             'class alias' => [
                 // @formatter:off
                 fn (Dumper $date) => new DateTimeZone(''),
                 // @formatter:on
-                "fn (\Yiisoft\VarDumper\VarDumper \$date) => new \DateTimeZone('')",
+                '"fn (\\\\Yiisoft\\\\VarDumper\\\\VarDumper $date) => new \\\\DateTimeZone(\'\')"',
             ],
             'namespace alias' => [
                 // @formatter:off
                 fn (VD\VarDumper $date) => new DateTimeZone(''),
                 // @formatter:on
-                "fn (\Yiisoft\VarDumper\VarDumper \$date) => new \DateTimeZone('')",
+                '"fn (\\\\Yiisoft\\\\VarDumper\\\\VarDumper $date) => new \\\\DateTimeZone(\'\')"',
             ],
             'closure with null-collision operator' => [
                 // @formatter:off
                 fn () => $_ENV['var'] ?? null,
                 // @formatter:on
-                "fn () => \$_ENV['var'] ?? null",
+                '"fn () => $_ENV[\'var\'] ?? null"',
             ],
             'utf8 supported' => [
                 '🤣',
-                '🤣',
+                '"\ud83e\udd23"',
             ],
             'closure in property supported' => [
                 $objectWithClosureInProperty,
-                json_decode(
-                    <<<S
+                <<<JSON
                 {
                     "\$__id__\$": "{$objectWithClosureInPropertyId}",
                     "\$__class__\$": "stdClass",
                     "a": "fn () => 1"
                 }
-                S,
-                    associative: true,
-                    flags: JSON_THROW_ON_ERROR
-                ),
+                JSON,
             ],
             'private properties supported' => [
                 $objectWithPrivateProperties,
-                json_decode(
-                    <<<S
+                <<<JSON
                 {
                     "\$__id__\$": "{$objectWithPrivatePropertiesId}",
                     "\$__class__\$": "{$objectWithPrivatePropertiesClass}",
                     "age": 0,
-                    "names": ["first", "last"]
+                    "names": [
+                        "first",
+                        "last"
+                    ]
                 }
-                S,
-                    associative: true,
-                    flags: JSON_THROW_ON_ERROR
-                ),
+                JSON,
+            ],
+            'nested properties limit' => [
+                $nestedObject,
+                <<<JSON
+                {
+                    "\$__id__\$": "{$nestedObjectId}",
+                    "\$__class__\$": "stdClass",
+                    "nested": {
+                        "\$__id__\$": "{$nestedObjectId}",
+                        "\$__class__\$": "stdClass",
+                        "nested": {
+                            "\$__id__\$": "{$nestedObjectId}",
+                            "\$__class__\$": "stdClass",
+                            "nested": {
+                                "\$__id__\$": "{$nestedObjectId}",
+                                "\$__class__\$": "stdClass",
+                                "\$__depth_limit_exceeded__\$": true
+                            }
+                        }
+                    }
+                }
+                JSON,
             ],
         ];
     }
