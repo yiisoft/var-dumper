@@ -373,7 +373,10 @@ final class VarDumper
                     self::OBJECT_ID_PROPERTY => $objectId,
                     self::OBJECT_CLASS_PROPERTY => $objectClass,
                 ];
-                /** @psalm-var mixed $value */
+                /**
+                 * @psalm-var mixed $value
+                 * @psalm-var string $name
+                 */
                 foreach ($objectProperties as $name => $value) {
                     $propertyName = $this->getPropertyName($name);
                     /** @psalm-suppress MixedAssignment */
