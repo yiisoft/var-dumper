@@ -1,7 +1,7 @@
 # Yii VarDumper
 
 
-## 1.2.1 under development
+## 1.3.0 September 22, 2022
 
 - New #64, #68: Add `VarDumper::asJson()` method that provide exporting value as JSON string (@dood-, @xepozz)
 
