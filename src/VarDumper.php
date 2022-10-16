@@ -388,8 +388,11 @@ final class VarDumper
         }
     }
 
-    private function getPropertyName(string $property): string
+    private function getPropertyName(string|int $property): string
     {
+        if (is_integer($property)) {
+            return (string) $property;
+        }
         $property = str_replace("\0", '::', trim($property));
 
         if (str_starts_with($property, '*::')) {
