@@ -2,7 +2,7 @@
 
 ## 1.3.1 under development
 
-- no changes in this release.
+- Enh #74: Add support for integer property names (@xepozz)
 
 
 ## 1.3.0 September 22, 2022
