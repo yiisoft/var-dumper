@@ -799,6 +799,9 @@ final class VarDumperTest extends TestCase
         $incompleteObject = unserialize('O:16:"nonExistingClass":0:{}');
         $incompleteObjectId = spl_object_id($incompleteObject);
 
+        $integerPropertyObject = unserialize('O:8:"stdClass":1:{i:5;i:5;}');
+        $integerPropertyObjectId = spl_object_id($integerPropertyObject);
+
         $emptyObject = new stdClass();
         $emptyObjectId = spl_object_id($emptyObject);
 
@@ -835,6 +838,16 @@ final class VarDumperTest extends TestCase
                     "\$__id__\$": "{$incompleteObjectId}",
                     "\$__class__\$": "__PHP_Incomplete_Class",
                     "__PHP_Incomplete_Class_Name": "nonExistingClass"
+                }
+                JSON,
+            ],
+            'integer property object' => [
+                $integerPropertyObject,
+                <<<JSON
+                {
+                    "\$__id__\$": "{$integerPropertyObjectId}",
+                    "\$__class__\$": "stdClass",
+                    "5": 5
                 }
                 JSON,
             ],
