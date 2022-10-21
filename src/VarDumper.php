@@ -147,6 +147,7 @@ final class VarDumper
      */
     public function asJson(bool $format = true, int $depth = 10): string
     {
+        /** @var mixed $output */
         $output = $this->asPrimitives($depth);
 
         if ($format) {
