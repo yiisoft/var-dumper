@@ -1107,16 +1107,16 @@ final class VarDumperTest extends TestCase
                 [
                     '$__id__$' => $dummyDebugInfoObjectId,
                     '$__class__$' => DummyDebugInfo::class,
-                    "volume" => 10,
-                    "totalPrice" => 150
+                    'volume' => 10,
+                    'totalPrice' => 150,
                 ],
             ],
             'incomplete object' => [
                 $incompleteObject,
                 [
                     '$__id__$' => $incompleteObjectId,
-                    '$__class__$' => "__PHP_Incomplete_Class",
-                    "__PHP_Incomplete_Class_Name" => "nonExistingClass"
+                    '$__class__$' => '__PHP_Incomplete_Class',
+                    '__PHP_Incomplete_Class_Name' => 'nonExistingClass',
                 ],
             ],
             'integer property object' => [
@@ -1124,14 +1124,14 @@ final class VarDumperTest extends TestCase
                 [
                     '$__id__$' => $integerPropertyObjectId,
                     '$__class__$' => stdClass::class,
-                    "5" => 5
+                    '5' => 5,
                 ],
             ],
             'empty object' => [
                 $emptyObject,
                 [
-                    '$__id__$'=> $emptyObjectId,
-                    '$__class__$'=> stdClass::class
+                    '$__id__$' => $emptyObjectId,
+                    '$__class__$' => stdClass::class,
                 ],
             ],
             'short function' => [
@@ -1150,17 +1150,17 @@ final class VarDumperTest extends TestCase
                 function () {
                     return 1;
                 },
-                "function () {
+                'function () {
                     return 1;
-                }",
+                }',
             ],
             'static function' => [
                 static function () {
                     return 1;
                 },
-                "static function () {
+                'static function () {
                     return 1;
-                }",
+                }',
             ],
             'string' => [
                 'Hello, Yii!',
@@ -1256,7 +1256,7 @@ final class VarDumperTest extends TestCase
                 [
                     '$__id__$' => $objectWithClosureInPropertyId,
                     '$__class__$' => stdClass::class,
-                    "a" => "fn () => 1"
+                    'a' => 'fn () => 1',
                 ],
             ],
             'private properties supported' => [
@@ -1264,11 +1264,11 @@ final class VarDumperTest extends TestCase
                 [
                     '$__id__$' => "$objectWithPrivatePropertiesId",
                     '$__class__$' => "$objectWithPrivatePropertiesClass",
-                    "age" => 0,
-                    "names" => [
-                        "first",
-                        "last"
-                    ]
+                    'age' => 0,
+                    'names' => [
+                        'first',
+                        'last',
+                    ],
                 ],
             ],
             'nested properties limit' => [
@@ -1276,13 +1276,13 @@ final class VarDumperTest extends TestCase
                 [
                     '$__id__$' => "$nestedObjectId",
                     '$__class__$' => stdClass::class,
-                    "nested" => [
+                    'nested' => [
                         '$__id__$' => "$nestedObjectId",
                         '$__class__$' => stdClass::class,
-                        "nested" => [
+                        'nested' => [
                             '$__id__$' => "$nestedObjectId",
                             '$__class__$' => stdClass::class,
-                            "nested" => [
+                            'nested' => [
                                 '$__id__$' => "$nestedObjectId",
                                 '$__class__$' => stdClass::class,
                                 '$__depth_limit_exceeded__$' => true,
@@ -1305,10 +1305,10 @@ final class VarDumperTest extends TestCase
                     [
                         [
                             [
-                                '$__depth_limit_exceeded__$'=> true
-                            ]
-                        ]
-                    ]
+                                '$__depth_limit_exceeded__$' => true,
+                            ],
+                        ],
+                    ],
                 ],
             ],
         ];
