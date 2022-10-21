@@ -1084,6 +1084,263 @@ final class VarDumperTest extends TestCase
         ];
     }
 
+    /**
+     * @dataProvider asPrimitivesDataProvider
+     *
+     * @param mixed $variable
+     * @param mixed $result
+     *
+     * @psalm-suppress MixedAssignment
+     */
+    public function testAsPrimitives($variable, $result): void
+    {
+        $output = VarDumper::create($variable)->asPrimitives(depth: 3);
+        $this->assertEquals($result, $output);
+    }
+
+    public function asPrimitivesDataProvider(): array
+    {
+        $dummyDebugInfo = new DummyDebugInfo();
+        $dummyDebugInfo->volume = 10;
+        $dummyDebugInfo->unitPrice = 15;
+        $dummyDebugInfoObjectId = spl_object_id($dummyDebugInfo);
+
+        $incompleteObject = unserialize('O:16:"nonExistingClass":0:{}');
+        $incompleteObjectId = spl_object_id($incompleteObject);
+
+        $integerPropertyObject = unserialize('O:8:"stdClass":1:{i:5;i:5;}');
+        $integerPropertyObjectId = spl_object_id($integerPropertyObject);
+
+        $emptyObject = new stdClass();
+        $emptyObjectId = spl_object_id($emptyObject);
+
+        $nestedObject = new stdClass();
+        $nestedObject->nested = $nestedObject;
+        $nestedObjectId = spl_object_id($nestedObject);
+
+        $objectWithClosureInProperty = new stdClass();
+        // @formatter:off
+        $objectWithClosureInProperty->a = fn () => 1;
+        // @formatter:on
+        $objectWithClosureInPropertyId = spl_object_id($objectWithClosureInProperty);
+
+        $objectWithPrivateProperties = new PrivateProperties();
+        $objectWithPrivatePropertiesId = spl_object_id($objectWithPrivateProperties);
+        $objectWithPrivatePropertiesClass = PrivateProperties::class;
+
+        return [
+            'custom debug info' => [
+                $dummyDebugInfo,
+                [
+                    '$__id__$' => $dummyDebugInfoObjectId,
+                    '$__class__$' => DummyDebugInfo::class,
+                    'volume' => 10,
+                    'totalPrice' => 150,
+                ],
+            ],
+            'incomplete object' => [
+                $incompleteObject,
+                [
+                    '$__id__$' => $incompleteObjectId,
+                    '$__class__$' => '__PHP_Incomplete_Class',
+                    '__PHP_Incomplete_Class_Name' => 'nonExistingClass',
+                ],
+            ],
+            'integer property object' => [
+                $integerPropertyObject,
+                [
+                    '$__id__$' => $integerPropertyObjectId,
+                    '$__class__$' => stdClass::class,
+                    '5' => 5,
+                ],
+            ],
+            'empty object' => [
+                $emptyObject,
+                [
+                    '$__id__$' => $emptyObjectId,
+                    '$__class__$' => stdClass::class,
+                ],
+            ],
+            'short function' => [
+                // @formatter:off
+                fn () => 1,
+                // @formatter:on
+                'fn () => 1',
+            ],
+            'short static function' => [
+                // @formatter:off
+                static fn () => 1,
+                // @formatter:on
+                'static fn () => 1',
+            ],
+            'function' => [
+                function () {
+                    return 1;
+                },
+                'function () {
+                    return 1;
+                }',
+            ],
+            'static function' => [
+                static function () {
+                    return 1;
+                },
+                'static function () {
+                    return 1;
+                }',
+            ],
+            'string' => [
+                'Hello, Yii!',
+                'Hello, Yii!',
+            ],
+            'empty string' => [
+                '',
+                '',
+            ],
+            'null' => [
+                null,
+                null,
+            ],
+            'integer' => [
+                1,
+                1,
+            ],
+            'integer with separator' => [
+                1_23_456,
+                123456,
+            ],
+            'boolean' => [
+                true,
+                true,
+            ],
+            'resource' => [
+                fopen('php://input', 'rb'),
+                '{resource}',
+            ],
+            'empty array' => [
+                [],
+                [],
+            ],
+            'array of 3 elements, automatic keys' => [
+                [
+                    'one',
+                    'two',
+                    'three',
+                ],
+                [
+                    'one',
+                    'two',
+                    'three',
+                ],
+            ],
+            'array of 3 elements, custom keys' => [
+                [
+                    2 => 'one',
+                    'two' => 'two',
+                    0 => 'three',
+                ],
+                [
+                    2 => 'one',
+                    'two' => 'two',
+                    0 => 'three',
+                ],
+            ],
+            'closure in array' => [
+                // @formatter:off
+                [fn () => new DateTimeZone('')],
+                ["fn () => new \DateTimeZone('')"],
+            ],
+            'original class name' => [
+                // @formatter:off
+                static fn (VarDumper $date) => new DateTimeZone(''),
+                // @formatter:on
+                'static fn (\Yiisoft\\VarDumper\VarDumper $date) => new \DateTimeZone(\'\')',
+            ],
+            'class alias' => [
+                // @formatter:off
+                fn (Dumper $date) => new DateTimeZone(''),
+                // @formatter:on
+                'fn (\Yiisoft\VarDumper\VarDumper $date) => new \DateTimeZone(\'\')',
+            ],
+            'namespace alias' => [
+                // @formatter:off
+                fn (VD\VarDumper $date) => new DateTimeZone(''),
+                // @formatter:on
+                'fn (\Yiisoft\VarDumper\VarDumper $date) => new \DateTimeZone(\'\')',
+            ],
+            'closure with null-collision operator' => [
+                // @formatter:off
+                fn () => $_ENV['var'] ?? null,
+                // @formatter:on
+                'fn () => $_ENV[\'var\'] ?? null',
+            ],
+            'utf8 supported' => [
+                '🤣',
+                '🤣',
+            ],
+            'closure in property supported' => [
+                $objectWithClosureInProperty,
+                [
+                    '$__id__$' => $objectWithClosureInPropertyId,
+                    '$__class__$' => stdClass::class,
+                    'a' => 'fn () => 1',
+                ],
+            ],
+            'private properties supported' => [
+                $objectWithPrivateProperties,
+                [
+                    '$__id__$' => "$objectWithPrivatePropertiesId",
+                    '$__class__$' => "$objectWithPrivatePropertiesClass",
+                    'age' => 0,
+                    'names' => [
+                        'first',
+                        'last',
+                    ],
+                ],
+            ],
+            'nested properties limit' => [
+                $nestedObject,
+                [
+                    '$__id__$' => "$nestedObjectId",
+                    '$__class__$' => stdClass::class,
+                    'nested' => [
+                        '$__id__$' => "$nestedObjectId",
+                        '$__class__$' => stdClass::class,
+                        'nested' => [
+                            '$__id__$' => "$nestedObjectId",
+                            '$__class__$' => stdClass::class,
+                            'nested' => [
+                                '$__id__$' => "$nestedObjectId",
+                                '$__class__$' => stdClass::class,
+                                '$__depth_limit_exceeded__$' => true,
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+            'nested array limit' => [
+                [
+                    [
+                        [
+                            [
+                                [],
+                            ],
+                        ],
+                    ],
+                ],
+                [
+                    [
+                        [
+                            [
+                                '$__depth_limit_exceeded__$' => true,
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+        ];
+    }
+
     public function testDFunction(): void
     {
         d($variable = 'content');
