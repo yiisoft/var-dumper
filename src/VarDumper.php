@@ -359,6 +359,7 @@ final class VarDumper
         switch (gettype($var)) {
             case 'resource':
             case 'resource (closed)':
+                /** @var resource $var */
                 $id = get_resource_id($var);
                 $type = get_resource_type($var);
 
