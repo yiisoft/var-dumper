@@ -167,8 +167,9 @@ final class VarDumper
      *
      * @param int $depth Maximum depth that the dumper should go into the variable. Defaults to 10.
      *
-     * @return mixed
      * @throws ReflectionException
+     *
+     * @return mixed
      */
     public function asPrimitives(int $depth = 10): mixed
     {
@@ -362,9 +363,9 @@ final class VarDumper
 
                 return [
                     self::VAR_TYPE_PROPERTY => self::VAR_TYPE_RESOURCE,
-                    "id" => $id,
-                    "type" => $type,
-                    "closed" => !is_resource($var),
+                    'id' => $id,
+                    'type' => $type,
+                    'closed' => !is_resource($var),
                 ];
             case 'array':
                 if ($depth <= $level) {
