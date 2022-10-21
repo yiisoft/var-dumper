@@ -161,8 +161,9 @@ final class VarDumper
      *
      * @param int $depth Maximum depth that the dumper should go into the variable. Defaults to 10.
      *
-     * @return mixed
      * @throws ReflectionException
+     *
+     * @return mixed
      */
     public function asPrimitives(int $depth = 10): mixed
     {
