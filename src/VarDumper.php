@@ -39,9 +39,15 @@ use function var_export;
  */
 final class VarDumper
 {
+    public const VAR_TYPE_PROPERTY = '$__type__$';
     public const OBJECT_ID_PROPERTY = '$__id__$';
     public const OBJECT_CLASS_PROPERTY = '$__class__$';
     public const DEPTH_LIMIT_EXCEEDED_PROPERTY = '$__depth_limit_exceeded__$';
+
+    public const VAR_TYPE_ARRAY = 'array';
+    public const VAR_TYPE_OBJECT = 'object';
+    public const VAR_TYPE_RESOURCE = 'resource';
+
     /**
      * @var mixed Variable to dump.
      */
@@ -351,10 +357,19 @@ final class VarDumper
         switch (gettype($var)) {
             case 'resource':
             case 'resource (closed)':
-                return '{resource}';
+                $id = get_resource_id($var);
+                $type = get_resource_type($var);
+
+                return [
+                    self::VAR_TYPE_PROPERTY => self::VAR_TYPE_RESOURCE,
+                    "id" => $id,
+                    "type" => $type,
+                    "closed" => !is_resource($var),
+                ];
             case 'array':
                 if ($depth <= $level) {
                     return [
+                        self::VAR_TYPE_PROPERTY => self::VAR_TYPE_ARRAY,
                         self::DEPTH_LIMIT_EXCEEDED_PROPERTY => true,
                     ];
                 }
@@ -370,6 +385,7 @@ final class VarDumper
                 $objectId = $this->getObjectId($var);
                 if ($depth <= $level) {
                     return [
+                        self::VAR_TYPE_PROPERTY => self::VAR_TYPE_OBJECT,
                         self::OBJECT_ID_PROPERTY => $objectId,
                         self::OBJECT_CLASS_PROPERTY => $objectClass,
                         self::DEPTH_LIMIT_EXCEEDED_PROPERTY => true,
