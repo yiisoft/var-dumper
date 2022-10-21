@@ -1223,19 +1223,19 @@ final class VarDumperTest extends TestCase
             'opened resource' => [
                 $openedResource,
                 [
-                    '$__type__$' => "resource",
-                    "id" => $openedResourceId,
-                    "type" => "stream",
-                    "closed" => false,
+                    '$__type__$' => 'resource',
+                    'id' => $openedResourceId,
+                    'type' => 'stream',
+                    'closed' => false,
                 ],
             ],
             'closed resource' => [
                 $closedResource,
                 [
-                    '$__type__$' => "resource",
-                    "id" => $closedResourceId,
-                    "type" => "Unknown",
-                    "closed" => true,
+                    '$__type__$' => 'resource',
+                    'id' => $closedResourceId,
+                    'type' => 'Unknown',
+                    'closed' => true,
                 ],
             ],
             'empty array' => [
