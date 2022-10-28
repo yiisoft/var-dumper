@@ -39,9 +39,15 @@ use function var_export;
  */
 final class VarDumper
 {
+    public const VAR_TYPE_PROPERTY = '$__type__$';
     public const OBJECT_ID_PROPERTY = '$__id__$';
     public const OBJECT_CLASS_PROPERTY = '$__class__$';
     public const DEPTH_LIMIT_EXCEEDED_PROPERTY = '$__depth_limit_exceeded__$';
+
+    public const VAR_TYPE_ARRAY = 'array';
+    public const VAR_TYPE_OBJECT = 'object';
+    public const VAR_TYPE_RESOURCE = 'resource';
+
     /**
      * @var mixed Variable to dump.
      */
@@ -148,13 +154,27 @@ final class VarDumper
     public function asJson(bool $format = true, int $depth = 10): string
     {
         /** @var mixed $output */
-        $output = $this->exportJson($this->variable, $format, $depth, 0);
+        $output = $this->asPrimitives($depth);
 
         if ($format) {
             return json_encode($output, JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT);
         }
 
         return json_encode($output, JSON_THROW_ON_ERROR);
+    }
+
+    /**
+     * Dumps the variable as PHP primitives in JSON decoded style.
+     *
+     * @param int $depth Maximum depth that the dumper should go into the variable. Defaults to 10.
+     *
+     * @throws ReflectionException
+     *
+     * @return mixed
+     */
+    public function asPrimitives(int $depth = 10): mixed
+    {
+        return $this->exportPrimitives($this->variable, $depth, 0);
     }
 
     /**
@@ -326,7 +346,6 @@ final class VarDumper
 
     /**
      * @param mixed $var
-     * @param bool $format
      * @param int $depth
      * @param int $level
      *
@@ -335,23 +354,31 @@ final class VarDumper
      * @return mixed
      * @psalm-param mixed $var
      */
-    private function exportJson(mixed $var, bool $format, int $depth, int $level): mixed
+    private function exportPrimitives(mixed $var, int $depth, int $level): mixed
     {
         switch (gettype($var)) {
             case 'resource':
             case 'resource (closed)':
-                return '{resource}';
+                /** @var resource $var */
+                $id = get_resource_id($var);
+                $type = get_resource_type($var);
+
+                return [
+                    self::VAR_TYPE_PROPERTY => self::VAR_TYPE_RESOURCE,
+                    'id' => $id,
+                    'type' => $type,
+                    'closed' => !is_resource($var),
+                ];
             case 'array':
                 if ($depth <= $level) {
                     return [
+                        self::VAR_TYPE_PROPERTY => self::VAR_TYPE_ARRAY,
                         self::DEPTH_LIMIT_EXCEEDED_PROPERTY => true,
                     ];
                 }
 
                 /** @psalm-suppress MissingClosureReturnType */
-                return array_map(function ($value) use ($format, $level, $depth) {
-                    return $this->exportJson($value, $format, $depth, $level + 1);
-                }, $var);
+                return array_map(fn ($value) => $this->exportPrimitives($value, $depth, $level + 1), $var);
             case 'object':
                 if ($var instanceof Closure) {
                     return $this->exportClosure($var);
@@ -361,6 +388,7 @@ final class VarDumper
                 $objectId = $this->getObjectId($var);
                 if ($depth <= $level) {
                     return [
+                        self::VAR_TYPE_PROPERTY => self::VAR_TYPE_OBJECT,
                         self::OBJECT_ID_PROPERTY => $objectId,
                         self::OBJECT_CLASS_PROPERTY => $objectClass,
                         self::DEPTH_LIMIT_EXCEEDED_PROPERTY => true,
@@ -380,16 +408,19 @@ final class VarDumper
                 foreach ($objectProperties as $name => $value) {
                     $propertyName = $this->getPropertyName($name);
                     /** @psalm-suppress MixedAssignment */
-                    $output[$propertyName] = $this->exportJson($value, $format, $depth, $level + 1);
+                    $output[$propertyName] = $this->exportPrimitives($value, $depth, $level + 1);
                 }
-                return $output ;
+                return $output;
             default:
                 return $var;
         }
     }
 
-    private function getPropertyName(string $property): string
+    private function getPropertyName(string|int $property): string
     {
+        if (is_int($property)) {
+            return (string) $property;
+        }
         $property = str_replace("\0", '::', trim($property));
 
         if (str_starts_with($property, '*::')) {
