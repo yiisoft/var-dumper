@@ -1,13 +1,11 @@
 # Yii VarDumper
 
-## 1.4.1 under development
+## 2.0.0 under development
 
-- no changes in this release.
+- Enh #76: Add a variable type to output when it can't be exported more (@xepozz)
 
 ## 1.4.0 October 28, 2022
 
-- Enh #76: Add a variable type to output when it can't be exported more (@xepozz)
-- Enh #75: Add method `asPrimitives` that exports a variable like destructed json (@xepozz)
 - Enh #74: Add support for integer property names (@xepozz)
 - Enh #75: Add method `asPrimitives` that exports a variable like destructed json (@xepozz)
 
