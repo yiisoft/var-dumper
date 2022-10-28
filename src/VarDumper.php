@@ -148,13 +148,27 @@ final class VarDumper
     public function asJson(bool $format = true, int $depth = 10): string
     {
         /** @var mixed $output */
-        $output = $this->exportJson($this->variable, $format, $depth, 0);
+        $output = $this->asPrimitives($depth);
 
         if ($format) {
             return json_encode($output, JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT);
         }
 
         return json_encode($output, JSON_THROW_ON_ERROR);
+    }
+
+    /**
+     * Dumps the variable as PHP primitives in JSON decoded style.
+     *
+     * @param int $depth Maximum depth that the dumper should go into the variable. Defaults to 10.
+     *
+     * @throws ReflectionException
+     *
+     * @return mixed
+     */
+    public function asPrimitives(int $depth = 10): mixed
+    {
+        return $this->exportPrimitives($this->variable, $depth, 0);
     }
 
     /**
@@ -326,7 +340,6 @@ final class VarDumper
 
     /**
      * @param mixed $var
-     * @param bool $format
      * @param int $depth
      * @param int $level
      *
@@ -335,7 +348,7 @@ final class VarDumper
      * @return mixed
      * @psalm-param mixed $var
      */
-    private function exportJson(mixed $var, bool $format, int $depth, int $level): mixed
+    private function exportPrimitives(mixed $var, int $depth, int $level): mixed
     {
         switch (gettype($var)) {
             case 'resource':
@@ -349,9 +362,7 @@ final class VarDumper
                 }
 
                 /** @psalm-suppress MissingClosureReturnType */
-                return array_map(function ($value) use ($format, $level, $depth) {
-                    return $this->exportJson($value, $format, $depth, $level + 1);
-                }, $var);
+                return array_map(fn ($value) => $this->exportPrimitives($value, $depth, $level + 1), $var);
             case 'object':
                 if ($var instanceof Closure) {
                     return $this->exportClosure($var);
@@ -380,9 +391,9 @@ final class VarDumper
                 foreach ($objectProperties as $name => $value) {
                     $propertyName = $this->getPropertyName($name);
                     /** @psalm-suppress MixedAssignment */
-                    $output[$propertyName] = $this->exportJson($value, $format, $depth, $level + 1);
+                    $output[$propertyName] = $this->exportPrimitives($value, $depth, $level + 1);
                 }
-                return $output ;
+                return $output;
             default:
                 return $var;
         }
