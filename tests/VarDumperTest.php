@@ -819,6 +819,13 @@ final class VarDumperTest extends TestCase
         $objectWithPrivatePropertiesId = spl_object_id($objectWithPrivateProperties);
         $objectWithPrivatePropertiesClass = str_replace('\\', '\\\\', PrivateProperties::class);
 
+        $openedResource = fopen('php://input', 'rb');
+        $openedResourceId = get_resource_id($openedResource);
+
+        $closedResource = fopen('php://input', 'rb');
+        $closedResourceId = get_resource_id($closedResource);
+        fclose($closedResource);
+
         return [
             'custom debug info' => [
                 $dummyDebugInfo,
@@ -912,9 +919,27 @@ final class VarDumperTest extends TestCase
                 true,
                 'true',
             ],
-            'resource' => [
-                fopen('php://input', 'rb'),
-                '"{resource}"',
+            'opened resource' => [
+                $openedResource,
+                <<<JSON
+                {
+                    "\$__type__\$": "resource",
+                    "id": {$openedResourceId},
+                    "type": "stream",
+                    "closed": false
+                }
+                JSON,
+            ],
+            'closed resource' => [
+                $closedResource,
+                <<<JSON
+                {
+                    "\$__type__\$": "resource",
+                    "id": {$closedResourceId},
+                    "type": "Unknown",
+                    "closed": true
+                }
+                JSON,
             ],
             'empty array' => [
                 [],
@@ -1023,6 +1048,7 @@ final class VarDumperTest extends TestCase
                             "\$__id__\$": "{$nestedObjectId}",
                             "\$__class__\$": "stdClass",
                             "nested": {
+                                "\$__type__\$": "object",
                                 "\$__id__\$": "{$nestedObjectId}",
                                 "\$__class__\$": "stdClass",
                                 "\$__depth_limit_exceeded__\$": true
@@ -1047,6 +1073,7 @@ final class VarDumperTest extends TestCase
                     [
                         [
                             {
+                                "\$__type__\$": "array",
                                 "\$__depth_limit_exceeded__\$": true
                             }
                         ]
@@ -1100,6 +1127,13 @@ final class VarDumperTest extends TestCase
         $objectWithPrivateProperties = new PrivateProperties();
         $objectWithPrivatePropertiesId = spl_object_id($objectWithPrivateProperties);
         $objectWithPrivatePropertiesClass = PrivateProperties::class;
+
+        $openedResource = fopen('php://input', 'rb');
+        $openedResourceId = get_resource_id($openedResource);
+
+        $closedResource = fopen('php://input', 'rb');
+        $closedResourceId = get_resource_id($closedResource);
+        fclose($closedResource);
 
         return [
             'custom debug info' => [
@@ -1186,9 +1220,23 @@ final class VarDumperTest extends TestCase
                 true,
                 true,
             ],
-            'resource' => [
-                fopen('php://input', 'rb'),
-                '{resource}',
+            'opened resource' => [
+                $openedResource,
+                [
+                    '$__type__$' => 'resource',
+                    'id' => $openedResourceId,
+                    'type' => 'stream',
+                    'closed' => false,
+                ],
+            ],
+            'closed resource' => [
+                $closedResource,
+                [
+                    '$__type__$' => 'resource',
+                    'id' => $closedResourceId,
+                    'type' => 'Unknown',
+                    'closed' => true,
+                ],
             ],
             'empty array' => [
                 [],
@@ -1285,6 +1333,7 @@ final class VarDumperTest extends TestCase
                             'nested' => [
                                 '$__id__$' => "$nestedObjectId",
                                 '$__class__$' => stdClass::class,
+                                '$__type__$' => 'object',
                                 '$__depth_limit_exceeded__$' => true,
                             ],
                         ],
@@ -1305,6 +1354,7 @@ final class VarDumperTest extends TestCase
                     [
                         [
                             [
+                                '$__type__$' => 'array',
                                 '$__depth_limit_exceeded__$' => true,
                             ],
                         ],

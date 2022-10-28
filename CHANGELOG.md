@@ -1,8 +1,8 @@
 # Yii VarDumper
 
-## 1.4.1 under development
+## 2.0.0 under development
 
-- no changes in this release.
+- Enh #76: Add a variable type to output when it can't be exported more (@xepozz)
 
 ## 1.4.0 October 28, 2022
 
