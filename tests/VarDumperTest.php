@@ -560,10 +560,11 @@ final class VarDumperTest extends TestCase
     {
         $varDumper1 = VarDumper::create(fn (): int => 1);
         $reflection1 = new ReflectionClass($varDumper1);
-        $closureExporter1 = $reflection1->getStaticPropertyValue('closureExporter');
 
-        $this->assertInstanceOf(ClosureExporter::class, $closureExporter1);
         $this->assertSame('fn (): int => 1', $varDumper1->export());
+
+        $closureExporter1 = $reflection1->getStaticPropertyValue('closureExporter');
+        $this->assertInstanceOf(ClosureExporter::class, $closureExporter1);
         $this->assertSame(
             $closureExporter1,
             (new ReflectionClass($varDumper1))->getStaticPropertyValue('closureExporter'),
