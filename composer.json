@@ -21,6 +21,8 @@
     "require": {
         "php": "^8.0",
         "ext-json": "*",
+        "ext-mbstring": "*",
+        "ext-tokenizer": "*",
         "yiisoft/arrays": "^1.0|^2.0"
     },
     "require-dev": {
