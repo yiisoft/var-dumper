@@ -23,7 +23,7 @@
         "ext-json": "*",
         "ext-mbstring": "*",
         "ext-tokenizer": "*",
-        "yiisoft/arrays": "^1.0|^2.0"
+        "yiisoft/arrays": "^3.0.0"
     },
     "require-dev": {
         "maglnet/composer-require-checker": "^4.2",
