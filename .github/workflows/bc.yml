@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Configure Git
-        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+        run: git config --global --add safe.directory "*"
 
       - uses: actions/checkout@master
       - name: fetch tags
