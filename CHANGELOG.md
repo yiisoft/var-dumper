@@ -2,8 +2,8 @@
 
 ## 2.0.0 under development
 
-- Enh: Add composer require checker into CI
 - Enh #76: Add a variable type to output when it can't be exported more (@xepozz)
+- Chg #81: Allow using yiisoft/arrays ^3.0 (@samdark)
 
 ## 1.4.0 October 28, 2022
 
