@@ -70,6 +70,7 @@ final class ClosureExporter
         $closureTokens = [];
         $pendingParenthesisCount = 0;
 
+        /** @var int<1, max> $i */
         foreach ($tokens as $i => $token) {
             if (in_array($token[0], [T_FUNCTION, T_FN, T_STATIC], true)) {
                 $closureTokens[] = $token[1];
@@ -113,7 +114,7 @@ final class ClosureExporter
                     if ($pendingParenthesisCount === 0) {
                         break;
                     }
-                    $pendingParenthesisCount--;
+                    --$pendingParenthesisCount;
                 } elseif ($token === ',' || $token === ';') {
                     if ($pendingParenthesisCount === 0) {
                         break;
