@@ -6,7 +6,7 @@ name: backwards compatibility
 
 jobs:
   roave_bc_check:
-    uses: yiisoft/actions/.github/workflows/bc.yml@add-bc-workflow
+    uses: yiisoft/actions/.github/workflows/bc.yml
     with:
       os: >-
         ['ubuntu-latest']
