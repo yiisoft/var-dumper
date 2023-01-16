@@ -11,5 +11,7 @@ jobs:
             - uses: actions/checkout@master
             - name: fetch tags
               run: git fetch --depth=1 origin +refs/tags/*:refs/tags/*
+            - name: add safe directory
+              run: git config --global --add safe.directory /github/workspace
             - name: Roave BC Check
               uses: docker://nyholm/roave-bc-check-ga
