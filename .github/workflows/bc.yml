@@ -8,9 +8,11 @@ jobs:
         name: Roave BC Check
         runs-on: ubuntu-latest
         steps:
-            - name: set safe directory
-              run: git config --global --add safe.directory /github/workspace
             - uses: actions/checkout@master
+            - name: set ownership
+              run: |
+                  # this is to fix GIT not liking owner of the checkout dir
+                  chown -R $(id -u):$(id -g) $PWD
             - name: fetch tags
               run: git fetch --depth=1 origin +refs/tags/*:refs/tags/*
             - name: Roave BC Check
