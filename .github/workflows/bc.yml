@@ -8,8 +8,10 @@ jobs:
         name: Roave BC Check
         runs-on: ubuntu-latest
         steps:
+            - name: set safe directory
+              run: git config --global --add safe.directory /github/workspace
             - uses: actions/checkout@master
             - name: fetch tags
-              run: git config --global --add safe.directory /github/workspace && git fetch --depth=1 origin +refs/tags/*:refs/tags/*
+              run: git fetch --depth=1 origin +refs/tags/*:refs/tags/*
             - name: Roave BC Check
               uses: docker://nyholm/roave-bc-check-ga
