@@ -1,5 +1,9 @@
 # Yii VarDumper
 
+## 1.5.1 under development
+
+- no changes in this release.
+
 ## 1.5.0 January 16, 2023
 
 - Chg #81: Allow using yiisoft/arrays ^3.0 (@samdark)
