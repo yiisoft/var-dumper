@@ -1,9 +1,9 @@
 # Yii VarDumper
 
-## 2.0.0 under development
+## 1.5.0 January 16, 2023
 
-- Enh #76: Add a variable type to output when it can't be exported more (@xepozz)
 - Chg #81: Allow using yiisoft/arrays ^3.0 (@samdark)
+- Enh #76: Add a variable type to output when it can't be exported more (@xepozz)
 
 ## 1.4.0 October 28, 2022
 
