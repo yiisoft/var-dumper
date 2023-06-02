@@ -103,17 +103,21 @@ final class VarDumperTest extends TestCase
                 function () {
                     return 1;
                 },
-                'function () {
+                <<<PHP
+                function () {
                     return 1;
-                }',
+                }
+                PHP,
             ],
             'static function' => [
                 static function () {
                     return 1;
                 },
-                'static function () {
+                <<<PHP
+                static function () {
                     return 1;
-                }',
+                }
+                PHP,
             ],
             'string' => [
                 'Hello, Yii!',
@@ -255,17 +259,21 @@ final class VarDumperTest extends TestCase
                 function () {
                     return 1;
                 },
-                'function () {
+                <<<PHP
+                function () {
                     return 1;
-                }',
+                }
+                PHP,
             ],
             'static function' => [
                 static function () {
                     return 1;
                 },
-                'static function () {
+                <<<PHP
+                static function () {
                     return 1;
-                }',
+                }
+                PHP,
             ],
             'string' => [
                 'Hello, Yii!',
@@ -654,17 +662,21 @@ final class VarDumperTest extends TestCase
                 function () {
                     return 1;
                 },
-                'function () {
+                <<<PHP
+                function () {
                     return 1;
-                }',
+                }
+                PHP,
             ],
             'static function' => [
                 static function () {
                     return 1;
                 },
-                'static function () {
+                <<<PHP
+                static function () {
                     return 1;
-                }',
+                }
+                PHP,
             ],
             'string' => [
                 'Hello, Yii!',
@@ -885,7 +897,7 @@ final class VarDumperTest extends TestCase
                     return 1;
                 },
                 <<<JSON
-                "function () {\\n                    return 1;\\n                }"
+                "function () {\\n    return 1;\\n}"
                 JSON,
             ],
             'static function' => [
@@ -893,7 +905,7 @@ final class VarDumperTest extends TestCase
                     return 1;
                 },
                 <<<JSON
-                "static function () {\\n                    return 1;\\n                }"
+                "static function () {\\n    return 1;\\n}"
                 JSON,
             ],
             'string' => [
@@ -1185,17 +1197,21 @@ final class VarDumperTest extends TestCase
                 function () {
                     return 1;
                 },
-                'function () {
+                <<<PHP
+                function () {
                     return 1;
-                }',
+                }
+                PHP,
             ],
             'static function' => [
                 static function () {
                     return 1;
                 },
-                'static function () {
+                <<<PHP
+                static function () {
                     return 1;
-                }',
+                }
+                PHP,
             ],
             'string' => [
                 'Hello, Yii!',

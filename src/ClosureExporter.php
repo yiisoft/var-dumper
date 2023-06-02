@@ -63,7 +63,7 @@ final class ClosureExporter
 
         --$start;
         $uses = $this->useStatementParser->fromFile($fileName);
-        $tokens = token_get_all('<?php ' . implode('', array_slice($fileContent, $start, $end - $start)));
+        $tokens = token_get_all('<?php ' . PHP_EOL . implode('', array_slice($fileContent, $start, $end - $start)));
         array_shift($tokens);
 
         $bufferUse = '';
@@ -130,20 +130,28 @@ final class ClosureExporter
 
     private function formatClosure(string $code, int $level): string
     {
-        if ($level <= 0) {
-            return $code;
-        }
-        $spaces = str_repeat(' ', ($level -1) * 4);
-        $lines = explode("\n", $code);
-
-        foreach ($lines as $index => $line) {
-            if ($index === 0) {
+        $code = explode("\n", $code);
+        $fistLine = array_shift($code);
+        $minimumIndent = null;
+        for ($i = 1; $i <= count($code) - 1; $i++) {
+            $indent = strspn($code[$i], ' ');
+            if ($indent === mb_strlen($code[$i])) {
                 continue;
             }
-            $lines[$index] = $spaces . $line;
+            if ($minimumIndent === null || $indent < $minimumIndent) {
+                $minimumIndent = $indent;
+            }
+        }
+        if ($minimumIndent > 0) {
+            foreach ($code as $index => $line) {
+                $code[$index] = mb_substr($line, $minimumIndent);
+            }
         }
 
-        return rtrim(implode('', $lines), "\n");
+        $spaces = $level <= 1 ? '' : str_repeat(' ', ($level - 1) * 4);
+        $code = implode("\n" . $spaces, [$fistLine, ...$code]);
+
+        return $code;
     }
 
     /**
