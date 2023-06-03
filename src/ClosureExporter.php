@@ -149,9 +149,7 @@ final class ClosureExporter
         }
 
         $spaces = $level <= 1 ? '' : str_repeat(' ', ($level - 1) * 4);
-        $code = implode("\n" . $spaces, [$fistLine, ...$code]);
-
-        return $code;
+        return implode("\n" . $spaces, [$fistLine, ...$code]);
     }
 
     /**
