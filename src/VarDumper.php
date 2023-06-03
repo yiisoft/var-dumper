@@ -391,6 +391,9 @@ final class VarDumper
                 if ($var instanceof Closure) {
                     return $this->exportClosure($var);
                 }
+                if ($var instanceof DateTimeInterface) {
+                    return $this->exportDateTime($var);
+                }
 
                 $objectClass = get_class($var);
                 $objectId = $this->getObjectId($var);
@@ -563,7 +566,7 @@ final class VarDumper
     private function exportDateTime(DateTimeInterface $variable): string
     {
         return sprintf(
-            "new %s('%s', new DateTimeZone('%s'))",
+            "new \%s('%s', new \DateTimeZone('%s'))",
             $variable::class,
             $variable->format(DateTimeInterface::RFC3339_EXTENDED),
             $variable->getTimezone()->getName()
