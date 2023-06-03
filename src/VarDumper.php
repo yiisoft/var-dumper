@@ -391,9 +391,6 @@ final class VarDumper
                 if ($var instanceof Closure) {
                     return $this->exportClosure($var);
                 }
-                if ($var instanceof DateTimeInterface) {
-                    return $this->exportDateTime($var);
-                }
 
                 $objectClass = get_class($var);
                 $objectId = $this->getObjectId($var);

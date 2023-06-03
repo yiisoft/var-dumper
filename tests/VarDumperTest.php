@@ -36,6 +36,21 @@ use function var_export;
 
 final class VarDumperTest extends TestCase
 {
+    //public function testCreate(): void
+    //{
+    //    $variable = new DateTime('now', new DateTimeZone('America/Adak'));
+    //    dd(
+    //        VarDumper::create($variable)->asString(highlight: false),
+    //        VarDumper::create($variable)->asString(highlight: true),
+    //        VarDumper::create($variable)->asPrimitives(),
+    //        VarDumper::create($variable)->asJson(format: false),
+    //        VarDumper::create($variable)->asJson(format: true),
+    //        VarDumper::create($variable)->export(format: false),
+    //        VarDumper::create($variable)->export(format: true),
+    //    );
+    //}
+    const PHP_FORMAT = 'Y-m-d H:i:s.u';
+
     /**
      * @dataProvider exportDataProvider
      *
@@ -1133,12 +1148,19 @@ final class VarDumperTest extends TestCase
         ];
 
         $dateTime = new DateTime();
-        $dateTimeInterpolation = $dateTime->format(DateTimeInterface::RFC3339_EXTENDED);
+        $dateTimeObjectId = spl_object_id($dateTime);
+        $dateTimeInterpolation = $dateTime->format(self::PHP_FORMAT);
 
         yield 'DateTime object' => [
             $dateTime,
             <<<JSON
-            "new \\\\DateTime('$dateTimeInterpolation', new \\\\DateTimeZone('UTC'))"
+            {
+                "\$__id__\$": "{$dateTimeObjectId}",
+                "\$__class__\$": "DateTime",
+                "date": "{$dateTimeInterpolation}",
+                "timezone_type": 3,
+                "timezone": "UTC"
+            }
             JSON,
         ];
     }
@@ -1228,14 +1250,14 @@ final class VarDumperTest extends TestCase
         ];
         yield 'short function' => [
             // @formatter:off
-                fn () => 1,
-                // @formatter:on
+            fn () => 1,
+            // @formatter:on
             'fn () => 1',
         ];
         yield 'short static function' => [
             // @formatter:off
-                static fn () => 1,
-                // @formatter:on
+            static fn () => 1,
+            // @formatter:on
             'static fn () => 1',
         ];
         yield 'function' => [
@@ -1330,31 +1352,32 @@ final class VarDumperTest extends TestCase
         ];
         yield 'closure in array' => [
             // @formatter:off
-                [fn () => new DateTimeZone('')],
-                ["fn () => new \DateTimeZone('')"],
+            [fn () => new DateTimeZone('')],
+            // @formatter:on
+            ["fn () => new \DateTimeZone('')"],
         ];
-       yield      'original class name' => [
-                // @formatter:off
-                static fn (VarDumper $date) => new DateTimeZone(''),
-                // @formatter:on
-           'static fn (\Yiisoft\\VarDumper\VarDumper $date) => new \DateTimeZone(\'\')',
-       ];
+        yield 'original class name' => [
+            // @formatter:off
+            static fn (VarDumper $date) => new DateTimeZone(''),
+            // @formatter:on
+            'static fn (\Yiisoft\\VarDumper\VarDumper $date) => new \DateTimeZone(\'\')',
+        ];
         yield 'class alias' => [
             // @formatter:off
-                fn (Dumper $date) => new DateTimeZone(''),
-                // @formatter:on
+            fn (Dumper $date) => new DateTimeZone(''),
+            // @formatter:on
             'fn (\Yiisoft\VarDumper\VarDumper $date) => new \DateTimeZone(\'\')',
         ];
         yield 'namespace alias' => [
             // @formatter:off
-                fn (VD\VarDumper $date) => new DateTimeZone(''),
-                // @formatter:on
+            fn (VD\VarDumper $date) => new DateTimeZone(''),
+            // @formatter:on
             'fn (\Yiisoft\VarDumper\VarDumper $date) => new \DateTimeZone(\'\')',
         ];
         yield 'closure with null-collision operator' => [
             // @formatter:off
-                fn () => $_ENV['var'] ?? null,
-                // @formatter:on
+            fn () => $_ENV['var'] ?? null,
+            // @formatter:on
             'fn () => $_ENV[\'var\'] ?? null',
         ];
         yield 'utf8 supported' => [
@@ -1425,13 +1448,18 @@ final class VarDumperTest extends TestCase
         ];
 
         $dateTime = new DateTime();
-        $dateTimeInterpolation = $dateTime->format(DateTimeInterface::RFC3339_EXTENDED);
+        $dateTimeObjectId = spl_object_id($dateTime);
+        $dateTimeInterpolation = $dateTime->format(self::PHP_FORMAT);
 
         yield 'DateTime object' => [
             $dateTime,
-            <<<PHP
-            new \\DateTime('$dateTimeInterpolation', new \\DateTimeZone('UTC'))
-            PHP,
+            [
+                '$__id__$' => $dateTimeObjectId,
+                '$__class__$' => DateTime::class,
+                'date' => $dateTimeInterpolation,
+                'timezone_type' => 3,
+                'timezone' => 'UTC',
+            ],
         ];
     }
 
