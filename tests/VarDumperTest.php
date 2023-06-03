@@ -36,21 +36,6 @@ use function var_export;
 
 final class VarDumperTest extends TestCase
 {
-    //public function testCreate(): void
-    //{
-    //    $variable = new DateTime('now', new DateTimeZone('America/Adak'));
-    //    dd(
-    //        VarDumper::create($variable)->asString(highlight: false),
-    //        VarDumper::create($variable)->asString(highlight: true),
-    //        VarDumper::create($variable)->asPrimitives(),
-    //        VarDumper::create($variable)->asJson(format: false),
-    //        VarDumper::create($variable)->asJson(format: true),
-    //        VarDumper::create($variable)->export(format: false),
-    //        VarDumper::create($variable)->export(format: true),
-    //    );
-    //}
-    const PHP_FORMAT = 'Y-m-d H:i:s.u';
-
     /**
      * @dataProvider exportDataProvider
      *
@@ -748,7 +733,7 @@ final class VarDumperTest extends TestCase
                 'two',
                 'three',
             ],
-        <<<S
+            <<<S
         [
             0 => 'one'
             1 => 'two'
