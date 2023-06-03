@@ -63,7 +63,7 @@ final class ClosureExporter
 
         --$start;
         $uses = $this->useStatementParser->fromFile($fileName);
-        $tokens = token_get_all('<?php ' . PHP_EOL . implode('', array_slice($fileContent, $start, $end - $start)));
+        $tokens = token_get_all('<?php ' . implode('', array_slice($fileContent, $start, $end - $start)));
         array_shift($tokens);
 
         $bufferUse = '';
