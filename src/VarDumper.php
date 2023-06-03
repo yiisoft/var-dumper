@@ -6,12 +6,13 @@ namespace Yiisoft\VarDumper;
 
 use __PHP_Incomplete_Class;
 use Closure;
+use DateTimeInterface;
 use Exception;
 use IteratorAggregate;
 use JsonException;
 use JsonSerializable;
-use ReflectionObject;
 use ReflectionException;
+use ReflectionObject;
 use Yiisoft\Arrays\ArrayableInterface;
 
 use function array_keys;
@@ -253,6 +254,9 @@ final class VarDumper
                 if ($var instanceof Closure) {
                     return $this->exportClosure($var);
                 }
+                if ($var instanceof DateTimeInterface) {
+                    return $this->exportDateTime($var);
+                }
 
                 if ($depth <= $level) {
                     return $this->getObjectDescription($var) . ' (...)';
@@ -319,6 +323,10 @@ final class VarDumper
                 if ($variable instanceof Closure) {
                     return $this->exportClosure($variable, $level);
                 }
+                if ($variable instanceof DateTimeInterface) {
+                    return $this->exportDateTime($variable);
+                }
+
 
                 $reflectionObject = new ReflectionObject($variable);
                 try {
@@ -550,5 +558,15 @@ final class VarDumper
         }
 
         return (array) $var;
+    }
+
+    private function exportDateTime(DateTimeInterface $variable): string
+    {
+        return sprintf(
+            "new %s('%s', new DateTimeZone('%s'))",
+            $variable::class,
+            $variable->format(DateTimeInterface::RFC3339_EXTENDED),
+            $variable->getTimezone()->getName()
+        );
     }
 }
