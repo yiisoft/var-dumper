@@ -19,9 +19,14 @@ final class ClosureExporterTest extends TestCase
             return 42 + $test;
         });
 
-        $this->assertEquals('function (int $test): int {
-            return 42 + $test;
-        }', $output);
+        $this->assertEquals(
+            <<<PHP
+            function (int \$test): int {
+                return 42 + \$test;
+            }
+            PHP,
+            $output
+        );
     }
 
     public function testStatic(): void
@@ -31,9 +36,14 @@ final class ClosureExporterTest extends TestCase
             return 42 + $test;
         });
 
-        $this->assertEquals('static function (int $test): int {
-            return 42 + $test;
-        }', $output);
+        $this->assertEquals(
+            <<<PHP
+            static function (int \$test): int {
+                return 42 + \$test;
+            }
+            PHP,
+            $output
+        );
     }
 
     public function testShort(): void
