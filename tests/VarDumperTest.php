@@ -733,7 +733,7 @@ final class VarDumperTest extends TestCase
                 'two',
                 'three',
             ],
-        <<<S
+            <<<S
         [
             0 => 'one'
             1 => 'two'
@@ -1228,14 +1228,14 @@ final class VarDumperTest extends TestCase
         ];
         yield 'short function' => [
             // @formatter:off
-                fn () => 1,
-                // @formatter:on
+            fn () => 1,
+            // @formatter:on
             'fn () => 1',
         ];
         yield 'short static function' => [
             // @formatter:off
-                static fn () => 1,
-                // @formatter:on
+            static fn () => 1,
+            // @formatter:on
             'static fn () => 1',
         ];
         yield 'function' => [
@@ -1330,31 +1330,31 @@ final class VarDumperTest extends TestCase
         ];
         yield 'closure in array' => [
             // @formatter:off
-                [fn () => new DateTimeZone('')],
-                ["fn () => new \DateTimeZone('')"],
+            [fn () => new DateTimeZone('')],
+            ["fn () => new \DateTimeZone('')"],
         ];
-       yield      'original class name' => [
-                // @formatter:off
-                static fn (VarDumper $date) => new DateTimeZone(''),
-                // @formatter:on
-           'static fn (\Yiisoft\\VarDumper\VarDumper $date) => new \DateTimeZone(\'\')',
-       ];
+        yield      'original class name' => [
+            // @formatter:off
+            static fn (VarDumper $date) => new DateTimeZone(''),
+            // @formatter:on
+            'static fn (\Yiisoft\\VarDumper\VarDumper $date) => new \DateTimeZone(\'\')',
+        ];
         yield 'class alias' => [
             // @formatter:off
-                fn (Dumper $date) => new DateTimeZone(''),
-                // @formatter:on
+            fn (Dumper $date) => new DateTimeZone(''),
+            // @formatter:on
             'fn (\Yiisoft\VarDumper\VarDumper $date) => new \DateTimeZone(\'\')',
         ];
         yield 'namespace alias' => [
             // @formatter:off
-                fn (VD\VarDumper $date) => new DateTimeZone(''),
-                // @formatter:on
+            fn (VD\VarDumper $date) => new DateTimeZone(''),
+            // @formatter:on
             'fn (\Yiisoft\VarDumper\VarDumper $date) => new \DateTimeZone(\'\')',
         ];
         yield 'closure with null-collision operator' => [
             // @formatter:off
-                fn () => $_ENV['var'] ?? null,
-                // @formatter:on
+            fn () => $_ENV['var'] ?? null,
+            // @formatter:on
             'fn () => $_ENV[\'var\'] ?? null',
         ];
         yield 'utf8 supported' => [
