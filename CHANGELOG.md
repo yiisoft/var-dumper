@@ -2,7 +2,7 @@
 
 ## 1.5.1 under development
 
-- no changes in this release.
+- Enh #88: Removed leading spaces in closure dumps (@xepozz)
 
 ## 1.5.0 January 16, 2023
 
