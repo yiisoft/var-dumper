@@ -2,7 +2,8 @@
 
 ## 1.5.1 under development
 
-- Enh #88: Removed leading spaces in closure dumps (@xepozz)
+- Enh #89: Add individual dumps for `DateTime` and `DateTimeImmutable` objects (@xepozz)
+- Enh #88: Remove leading spaces in closure dumps (@xepozz)
 
 ## 1.5.0 January 16, 2023
 
