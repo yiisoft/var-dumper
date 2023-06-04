@@ -36,6 +36,8 @@ use function var_export;
 
 final class VarDumperTest extends TestCase
 {
+    private const PHP_FORMAT = 'Y-m-d H:i:s.u';
+
     /**
      * @dataProvider exportDataProvider
      *
