@@ -1,5 +1,9 @@
 # Yii VarDumper
 
+## 1.6.1 under development
+
+- no changes in this release.
+
 ## 1.6.0 June 30, 2023
 
 - Enh #88: Remove leading spaces in closure dumps (@xepozz)
