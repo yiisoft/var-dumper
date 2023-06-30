@@ -1,9 +1,9 @@
 # Yii VarDumper
 
-## 1.5.1 under development
+## 1.6.0 June 30, 2023
 
-- Enh #89: Add individual dumps for `DateTime` and `DateTimeImmutable` objects (@xepozz)
 - Enh #88: Remove leading spaces in closure dumps (@xepozz)
+- Enh #89: Add individual dumps for `DateTime` and `DateTimeImmutable` objects (@xepozz)
 
 ## 1.5.0 January 16, 2023
 
