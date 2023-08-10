@@ -473,14 +473,14 @@ final class VarDumperTest extends TestCase
         $expectedResult = preg_replace(
             '/\s/',
             '',
-            <<<S_WRAP
-    [
-        'Yiisoft\\\\VarDumper\\\\ClosureExporter' => static fn () => new \\Yiisoft\\VarDumper\\ClosureExporter(),
-        'Yiisoft\\\\VarDumper\\\\UseStatementParser' => static function (\$container) {
-            return \$container->get(\\Yiisoft\\VarDumper\\UseStatementParser::class);
-        },
-    ]
-S_WRAP
+            <<<EOT
+                [
+                    'Yiisoft\\\\VarDumper\\\\ClosureExporter' => static fn () => new \\Yiisoft\\VarDumper\\ClosureExporter(),
+                    'Yiisoft\\\\VarDumper\\\\UseStatementParser' => static function (\$container) {
+                        return \$container->get(\\Yiisoft\\VarDumper\\UseStatementParser::class);
+                    },
+                ]
+            EOT
         );
 
         $this->assertEqualsWithoutLE($expectedResult, $exportResult);
