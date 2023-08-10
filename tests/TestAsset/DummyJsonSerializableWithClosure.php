@@ -13,7 +13,7 @@ final class DummyJsonSerializableWithClosure implements JsonSerializable
 
     public function __construct()
     {
-        $this->closure = static fn (): string => __CLASS__;
+        $this->closure = static fn (): string => self::class;
     }
 
     public function jsonSerialize(): array

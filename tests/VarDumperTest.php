@@ -26,7 +26,6 @@ use Yiisoft\VarDumper\VarDumper;
 use Yiisoft\VarDumper\VarDumper as Dumper;
 
 use function fopen;
-use function get_class;
 use function highlight_string;
 use function preg_replace;
 use function spl_object_id;
@@ -41,12 +40,10 @@ final class VarDumperTest extends TestCase
     /**
      * @dataProvider exportDataProvider
      *
-     * @param mixed $var
-     * @param string $expectedResult
      *
      * @throws ReflectionException
      */
-    public function testExport($var, string $expectedResult): void
+    public function testExport(mixed $var, string $expectedResult): void
     {
         $exportResult = VarDumper::create($var)->export();
         $this->assertEqualsWithoutLE($expectedResult, $exportResult);
@@ -237,12 +234,9 @@ final class VarDumperTest extends TestCase
     /**
      * @dataProvider exportWithoutFormattingDataProvider
      *
-     * @param mixed $var
-     * @param string $expectedResult
-     *
      * @throws ReflectionException
      */
-    public function testExportWithoutFormatting($var, string $expectedResult): void
+    public function testExportWithoutFormatting(mixed $var, string $expectedResult): void
     {
         $exportResult = VarDumper::create($var)->export(false);
         $this->assertEqualsWithoutLE($expectedResult, $exportResult);
@@ -365,9 +359,6 @@ final class VarDumperTest extends TestCase
     /**
      * @dataProvider exportWithObjectSerializationFailDataProvider
      *
-     * @param object $object
-     * @param string $expectedResult
-     *
      * @throws ReflectionException
      */
     public function testExportWithObjectSerializationFail(object $object, string $expectedResult): void
@@ -388,9 +379,6 @@ final class VarDumperTest extends TestCase
     /**
      * @dataProvider exportObjectWithClosureDataProvider
      *
-     * @param object $object
-     * @param string $expectedResult
-     *
      * @throws ReflectionException
      */
     public function testExportObjectWithClosure(object $object, string $expectedResult): void
@@ -408,68 +396,68 @@ final class VarDumperTest extends TestCase
 
         yield 'closure in stdClass property' => [
             $objectWithClosureInProperty,
-            <<<S
+            <<<EOT
             'stdClass#{$objectWithClosureInPropertyId}
             (
                 [a] => fn () => 1
             )'
-            S,
+            EOT,
         ];
         yield 'ArrayableInterface-instance-with-Closure' => [
             new DummyArrayableWithClosure(),
-            <<<S
-           (static function () {
-               \$class = new \ReflectionClass('Yiisoft\VarDumper\Tests\TestAsset\DummyArrayableWithClosure');
-               \$object = \$class->newInstanceWithoutConstructor();
-               (function () {
-                   \$this->closure = static fn (): string => __CLASS__;
-               })->bindTo(\$object, 'Yiisoft\VarDumper\Tests\TestAsset\DummyArrayableWithClosure')();
+            <<<EOT
+            (static function () {
+                \$class = new \\ReflectionClass('Yiisoft\\VarDumper\\Tests\\TestAsset\\DummyArrayableWithClosure');
+                \$object = \$class->newInstanceWithoutConstructor();
+                (function () {
+                    \$this->closure = static fn (): string => self::class;
+                })->bindTo(\$object, 'Yiisoft\\VarDumper\\Tests\\TestAsset\\DummyArrayableWithClosure')();
 
-               return \$object;
-           })()
-           S,
+                return \$object;
+            })()
+            EOT,
         ];
         yield 'JsonSerializable-instance-with-Closure' => [
             new DummyJsonSerializableWithClosure(),
-            <<<S
+            <<<EOT
             (static function () {
-                \$class = new \ReflectionClass('Yiisoft\VarDumper\Tests\TestAsset\DummyJsonSerializableWithClosure');
+                \$class = new \\ReflectionClass('Yiisoft\\VarDumper\\Tests\\TestAsset\\DummyJsonSerializableWithClosure');
                 \$object = \$class->newInstanceWithoutConstructor();
                 (function () {
-                    \$this->closure = static fn (): string => __CLASS__;
-                })->bindTo(\$object, 'Yiisoft\VarDumper\Tests\TestAsset\DummyJsonSerializableWithClosure')();
+                    \$this->closure = static fn (): string => self::class;
+                })->bindTo(\$object, 'Yiisoft\\VarDumper\\Tests\\TestAsset\\DummyJsonSerializableWithClosure')();
 
                 return \$object;
             })()
-            S,
+            EOT,
         ];
         yield 'IteratorAggregate-instance-with-Closure' => [
             new DummyIteratorAggregateWithClosure(),
-            <<<S
+            <<<EOT
             (static function () {
-                \$class = new \ReflectionClass('Yiisoft\VarDumper\Tests\TestAsset\DummyIteratorAggregateWithClosure');
+                \$class = new \\ReflectionClass('Yiisoft\\VarDumper\\Tests\\TestAsset\\DummyIteratorAggregateWithClosure');
                 \$object = \$class->newInstanceWithoutConstructor();
                 (function () {
                     \$this->closure = static fn (): string => __CLASS__;
-                })->bindTo(\$object, 'Yiisoft\VarDumper\Tests\TestAsset\DummyIteratorAggregateWithClosure')();
+                })->bindTo(\$object, 'Yiisoft\\VarDumper\\Tests\\TestAsset\\DummyIteratorAggregateWithClosure')();
 
                 return \$object;
             })()
-            S,
+            EOT,
         ];
         yield 'Stringable-instance-with-Closure' => [
             new DummyStringableWithClosure(),
-            <<<S
+            <<<EOT
             (static function () {
-                \$class = new \ReflectionClass('Yiisoft\VarDumper\Tests\TestAsset\DummyStringableWithClosure');
+                \$class = new \\ReflectionClass('Yiisoft\\VarDumper\\Tests\\TestAsset\\DummyStringableWithClosure');
                 \$object = \$class->newInstanceWithoutConstructor();
                 (function () {
-                    \$this->closure = static fn (): string => __CLASS__;
-                })->bindTo(\$object, 'Yiisoft\VarDumper\Tests\TestAsset\DummyStringableWithClosure')();
+                    \$this->closure = static fn (): string => self::class;
+                })->bindTo(\$object, 'Yiisoft\\VarDumper\\Tests\\TestAsset\\DummyStringableWithClosure')();
 
                 return \$object;
             })()
-            S,
+            EOT,
         ];
     }
 
@@ -486,14 +474,15 @@ final class VarDumperTest extends TestCase
         $expectedResult = preg_replace(
             '/\s/',
             '',
-            <<<S
-            [
-                'Yiisoft\\\\VarDumper\\\\ClosureExporter' => static fn () => new \Yiisoft\VarDumper\ClosureExporter(),
-                'Yiisoft\\\\VarDumper\\\\UseStatementParser' => static function (\$container) {
-                    return \$container->get(\Yiisoft\VarDumper\UseStatementParser::class);
-                },
-            ]
-        S
+            <<<S_WRAP
+    [
+        'Yiisoft\\\\VarDumper\\\\ClosureExporter' => static fn () => new \\Yiisoft\\VarDumper\\ClosureExporter(),
+        'Yiisoft\\\\VarDumper\\\\UseStatementParser' => static function (\$container) {
+            return \$container->get(\\Yiisoft\\VarDumper\\UseStatementParser::class);
+        },
+    ]
+S_WRAP
+
         );
 
         $this->assertEqualsWithoutLE($expectedResult, $exportResult);
@@ -613,11 +602,8 @@ final class VarDumperTest extends TestCase
 
     /**
      * @dataProvider asStringDataProvider
-     *
-     * @param mixed $variable
-     * @param string $result
      */
-    public function testAsString($variable, string $result): void
+    public function testAsString(mixed $variable, string $result): void
     {
         $output = VarDumper::create($variable)->asString();
         $this->assertEqualsWithoutLE($result, $output);
@@ -1155,12 +1141,10 @@ final class VarDumperTest extends TestCase
     /**
      * @dataProvider asPrimitivesDataProvider
      *
-     * @param mixed $variable
-     * @param mixed $result
      *
      * @psalm-suppress MixedAssignment
      */
-    public function testAsPrimitives($variable, $result): void
+    public function testAsPrimitives(mixed $variable, mixed $result): void
     {
         $output = VarDumper::create($variable)->asPrimitives(depth: 3);
         $this->assertEquals($result, $output);
@@ -1488,15 +1472,11 @@ final class VarDumperTest extends TestCase
     {
         $object = new DummyDebugInfo();
         VarDumper::dump($object, 0, false);
-        $this->expectOutputString(get_class($object) . '#' . spl_object_id($object) . ' (...)');
+        $this->expectOutputString($object::class . '#' . spl_object_id($object) . ' (...)');
     }
 
     /**
      * Asserting two strings equality ignoring line endings.
-     *
-     * @param string $expected
-     * @param string $actual
-     * @param string $message
      */
     private function assertEqualsWithoutLE(string $expected, string $actual, string $message = ''): void
     {

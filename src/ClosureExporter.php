@@ -100,7 +100,7 @@ final class ClosureExporter
                     continue;
                 }
                 if (!empty($bufferUse)) {
-                    if ($bufferUse !== $readableToken && strpos($readableToken, $bufferUse) === false) {
+                    if ($bufferUse !== $readableToken && !str_contains($readableToken, $bufferUse)) {
                         $readableToken = $bufferUse . $readableToken;
                     }
                     $bufferUse = '';
@@ -201,7 +201,7 @@ final class ClosureExporter
      */
     private function isUseConsistingOfMultipleParts(string $use): bool
     {
-        return $use !== '\\' && strpos($use, '\\') !== false;
+        return $use !== '\\' && str_contains($use, '\\');
     }
 
     /**

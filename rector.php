@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 use Rector\CodeQuality\Rector\Class_\InlineConstructorDefaultToPropertyRector;
 use Rector\Config\RectorConfig;
+use Rector\Php55\Rector\Class_\ClassConstantToSelfClassRector;
+use Rector\Php55\Rector\String_\StringClassNameToClassConstantRector;
 use Rector\Php56\Rector\FunctionLike\AddDefaultValueForUndefinedVariableRector;
 use Rector\Php73\Rector\FuncCall\JsonThrowOnErrorRector;
 use Rector\Php74\Rector\Closure\ClosureToArrowFunctionRector;
@@ -27,5 +29,11 @@ return static function (RectorConfig $rectorConfig): void {
         ClosureToArrowFunctionRector::class,
         AddDefaultValueForUndefinedVariableRector::class,
         JsonThrowOnErrorRector::class,
+        StringClassNameToClassConstantRector::class => [
+            __DIR__ . '/tests/UseStatementParserTest.php',
+        ],
+        ClassConstantToSelfClassRector::class => [
+            __DIR__ . '/tests/TestAsset/DummyIteratorAggregateWithClosure.php',
+        ],
     ]);
 };

@@ -25,8 +25,6 @@ final class UseStatementParserTest extends TestCase
 
     /**
      * @dataProvider incorrectFileProvider
-     *
-     * @param string $file
      */
     public function testIncorrectFile(string $file): void
     {
@@ -90,9 +88,6 @@ final class UseStatementParserTest extends TestCase
 
     /**
      * @dataProvider usesProvider
-     *
-     * @param string $file
-     * @param array $expectedUses
      */
     public function testFromFile(string $file, array $expectedUses): void
     {

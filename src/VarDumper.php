@@ -48,11 +48,6 @@ final class VarDumper
     public const VAR_TYPE_ARRAY = 'array';
     public const VAR_TYPE_OBJECT = 'object';
     public const VAR_TYPE_RESOURCE = 'resource';
-
-    /**
-     * @var mixed Variable to dump.
-     */
-    private $variable;
     /**
      * @var string[] Variables using in closure scope.
      */
@@ -67,9 +62,8 @@ final class VarDumper
     /**
      * @param mixed $variable Variable to dump.
      */
-    private function __construct($variable)
+    private function __construct(private mixed $variable)
     {
-        $this->variable = $variable;
     }
 
     /**
@@ -77,7 +71,7 @@ final class VarDumper
      *
      * @return static An instance containing variable to dump.
      */
-    public static function create($variable): self
+    public static function create(mixed $variable): self
     {
         return new self($variable);
     }
@@ -94,7 +88,7 @@ final class VarDumper
      *
      * @throws ReflectionException
      */
-    public static function dump($variable, int $depth = 10, bool $highlight = true): void
+    public static function dump(mixed $variable, int $depth = 10, bool $highlight = true): void
     {
         echo self::create($variable)->asString($depth, $highlight);
     }
@@ -216,7 +210,7 @@ final class VarDumper
      *
      * @return string
      */
-    private function dumpInternal($var, bool $format, int $depth, int $level): string
+    private function dumpInternal(mixed $var, bool $format, int $depth, int $level): string
     {
         switch (gettype($var)) {
             case 'resource':
@@ -287,7 +281,7 @@ final class VarDumper
      *
      * @return string
      */
-    private function exportInternal($variable, bool $format, int $level): string
+    private function exportInternal(mixed $variable, bool $format, int $level): string
     {
         $spaces = str_repeat($this->offset, $level);
         switch (gettype($variable)) {
@@ -335,12 +329,12 @@ final class VarDumper
                     }
 
                     return $this->exportObject($variable, $reflectionObject, $format, $level);
-                } catch (Exception $e) {
+                } catch (Exception) {
                     // Serialize may fail, for example: if object contains a `\Closure` instance so we use a fallback.
                     if ($this->serializeObjects && !$reflectionObject->isInternal() && !$reflectionObject->isAnonymous()) {
                         try {
                             return $this->exportObject($variable, $reflectionObject, $format, $level);
-                        } catch (Exception $e) {
+                        } catch (Exception) {
                             return $this->exportObjectFallback($variable, $format, $level);
                         }
                     }
@@ -353,9 +347,6 @@ final class VarDumper
     }
 
     /**
-     * @param mixed $var
-     * @param int $depth
-     * @param int $level
      *
      * @throws ReflectionException
      *
@@ -392,7 +383,7 @@ final class VarDumper
                     return $this->exportClosure($var);
                 }
 
-                $objectClass = get_class($var);
+                $objectClass = $var::class;
                 $objectId = $this->getObjectId($var);
                 if ($depth <= $level) {
                     return [
@@ -443,10 +434,6 @@ final class VarDumper
     }
 
     /**
-     * @param object $variable
-     * @param bool $format
-     * @param int $level
-     *
      * @throws ReflectionException
      *
      * @return string
@@ -466,7 +453,7 @@ final class VarDumper
         }
 
         /** @psalm-suppress RedundantCondition */
-        if ('__PHP_Incomplete_Class' !== get_class($variable) && method_exists($variable, '__toString')) {
+        if ('__PHP_Incomplete_Class' !== $variable::class && method_exists($variable, '__toString')) {
             return $this->exportVariable($variable->__toString());
         }
 
@@ -477,20 +464,13 @@ final class VarDumper
     {
         $spaces = str_repeat($this->offset, $level);
         $objectProperties = $this->getObjectProperties($variable);
-        $class = get_class($variable);
+        $class = $variable::class;
         $use = $this->useVarInClosures === [] ? '' : ' use (' . implode(', ', $this->useVarInClosures) . ')';
         $lines = ['(static function ()' . $use . ' {',];
         if ($reflectionObject->getConstructor() === null) {
-            $lines = array_merge($lines, [
-                $this->offset . '$object = new ' . $class . '();',
-                $this->offset . '(function ()' . $use . ' {',
-            ]);
+            $lines = [...$lines, $this->offset . '$object = new ' . $class . '();', $this->offset . '(function ()' . $use . ' {'];
         } else {
-            $lines = array_merge($lines, [
-                $this->offset . '$class = new \ReflectionClass(\'' . $class . '\');',
-                $this->offset . '$object = $class->newInstanceWithoutConstructor();',
-                $this->offset . '(function ()' . $use . ' {',
-            ]);
+            $lines = [...$lines, $this->offset . '$class = new \ReflectionClass(\'' . $class . '\');', $this->offset . '$object = $class->newInstanceWithoutConstructor();', $this->offset . '(function ()' . $use . ' {'];
         }
         $endLines = [
             $this->offset . '})->bindTo($object, \'' . $class . '\')();',
@@ -531,18 +511,16 @@ final class VarDumper
     }
 
     /**
-     * @param mixed $variable
-     *
      * @return string
      */
-    private function exportVariable($variable): string
+    private function exportVariable(mixed $variable): string
     {
         return var_export($variable, true);
     }
 
     private function getObjectDescription(object $object): string
     {
-        return get_class($object) . '#' . $this->getObjectId($object);
+        return $object::class . '#' . $this->getObjectId($object);
     }
 
     private function getObjectId(object $object): string
