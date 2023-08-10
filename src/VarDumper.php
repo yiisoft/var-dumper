@@ -16,7 +16,6 @@ use ReflectionObject;
 use Yiisoft\Arrays\ArrayableInterface;
 
 use function array_keys;
-use function get_class;
 use function gettype;
 use function highlight_string;
 use function method_exists;
@@ -347,7 +346,6 @@ final class VarDumper
     }
 
     /**
-     *
      * @throws ReflectionException
      *
      * @return mixed

@@ -20,7 +20,6 @@ use function is_array;
 use function is_string;
 use function mb_strlen;
 use function mb_substr;
-use function strpos;
 use function token_get_all;
 use function trim;
 
