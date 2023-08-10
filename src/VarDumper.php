@@ -468,9 +468,18 @@ final class VarDumper
         $use = $this->useVarInClosures === [] ? '' : ' use (' . implode(', ', $this->useVarInClosures) . ')';
         $lines = ['(static function ()' . $use . ' {',];
         if ($reflectionObject->getConstructor() === null) {
-            $lines = [...$lines, $this->offset . '$object = new ' . $class . '();', $this->offset . '(function ()' . $use . ' {'];
+            $lines = [
+                ...$lines,
+                $this->offset . '$object = new ' . $class . '();',
+                $this->offset . '(function ()' . $use . ' {',
+            ];
         } else {
-            $lines = [...$lines, $this->offset . '$class = new \ReflectionClass(\'' . $class . '\');', $this->offset . '$object = $class->newInstanceWithoutConstructor();', $this->offset . '(function ()' . $use . ' {'];
+            $lines = [
+                ...$lines,
+                $this->offset . '$class = new \ReflectionClass(\'' . $class . '\');',
+                $this->offset . '$object = $class->newInstanceWithoutConstructor();',
+                $this->offset . '(function ()' . $use . ' {',
+            ];
         }
         $endLines = [
             $this->offset . '})->bindTo($object, \'' . $class . '\')();',
