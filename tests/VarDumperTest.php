@@ -40,7 +40,6 @@ final class VarDumperTest extends TestCase
     /**
      * @dataProvider exportDataProvider
      *
-     *
      * @throws ReflectionException
      */
     public function testExport(mixed $var, string $expectedResult): void
@@ -482,7 +481,6 @@ final class VarDumperTest extends TestCase
         },
     ]
 S_WRAP
-
         );
 
         $this->assertEqualsWithoutLE($expectedResult, $exportResult);
@@ -1140,7 +1138,6 @@ S_WRAP
 
     /**
      * @dataProvider asPrimitivesDataProvider
-     *
      *
      * @psalm-suppress MixedAssignment
      */
