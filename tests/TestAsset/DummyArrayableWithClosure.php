@@ -13,7 +13,7 @@ final class DummyArrayableWithClosure implements ArrayableInterface
 
     public function __construct()
     {
-        $this->closure = static fn (): string => __CLASS__;
+        $this->closure = static fn (): string => self::class;
     }
 
     public function fields(): array

@@ -14,7 +14,7 @@ if (!function_exists('d')) {
      *
      * @psalm-suppress MixedAssignment
      */
-    function d(...$variables): void
+    function d(mixed ...$variables): void
     {
         $highlight = PHP_SAPI !== 'cli';
 
@@ -35,7 +35,7 @@ if (!function_exists('dd')) {
      *
      * @psalm-suppress MixedAssignment
      */
-    function dd(...$variables): void
+    function dd(mixed ...$variables): void
     {
         d(...$variables);
 
