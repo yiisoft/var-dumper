@@ -14,13 +14,12 @@ use JsonSerializable;
 use ReflectionException;
 use ReflectionObject;
 use Yiisoft\Arrays\ArrayableInterface;
+use Yiisoft\VarDumper\Handler\EchoHandler;
 
 use function array_keys;
 use function gettype;
-use function highlight_string;
 use function method_exists;
 use function next;
-use function preg_replace;
 use function spl_object_id;
 use function str_repeat;
 use function strtr;
@@ -47,6 +46,8 @@ final class VarDumper
     public const VAR_TYPE_ARRAY = 'array';
     public const VAR_TYPE_OBJECT = 'object';
     public const VAR_TYPE_RESOURCE = 'resource';
+    private static HandlerInterface $defaultHandler;
+
     /**
      * @var string[] Variables using in closure scope.
      */
@@ -63,6 +64,16 @@ final class VarDumper
      */
     private function __construct(private mixed $variable)
     {
+    }
+
+    public static function setDefaultHandler(HandlerInterface $handler): void
+    {
+        self::$defaultHandler = $handler;
+    }
+
+    public static function getDefaultHandler(): ?HandlerInterface
+    {
+        return self::$defaultHandler ??= new EchoHandler();
     }
 
     /**
@@ -89,7 +100,7 @@ final class VarDumper
      */
     public static function dump(mixed $variable, int $depth = 10, bool $highlight = true): void
     {
-        echo self::create($variable)->asString($depth, $highlight);
+        self::$defaultHandler->handle($variable, $depth, $highlight);
     }
 
     /**
@@ -120,16 +131,9 @@ final class VarDumper
      *
      * @return string The string representation of the variable.
      */
-    public function asString(int $depth = 10, bool $highlight = false): string
+    public function asString(int $depth = 10): string
     {
-        $output = $this->dumpInternal($this->variable, true, $depth, 0);
-
-        if ($highlight) {
-            $result = highlight_string("<?php\n" . $output, true);
-            $output = preg_replace('/&lt;\\?php<br \\/>/', '', $result, 1);
-        }
-
-        return $output;
+        return $this->dumpInternal($this->variable, true, $depth, 0);
     }
 
     /**
