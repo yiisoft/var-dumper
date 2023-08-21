@@ -100,7 +100,7 @@ final class VarDumper
      */
     public static function dump(mixed $variable, int $depth = 10, bool $highlight = true): void
     {
-        self::$defaultHandler->handle($variable, $depth, $highlight);
+        self::getDefaultHandler()->handle($variable, $depth, $highlight);
     }
 
     /**
