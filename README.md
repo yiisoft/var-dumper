@@ -48,6 +48,8 @@ For convenience, you can use the functions:
 ```php
 // Prints variables:
 d($variable, /* Further variables to dump. */);
+// The same as above
+dump($variable, /* Further variables to dump. */);
 
 // Prints variables and terminate the current script:
 dd($variable, /* Further variables to dump. */);
