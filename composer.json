@@ -46,15 +46,6 @@
             "Yiisoft\\VarDumper\\Tests\\": "tests"
         }
     },
-    "extra": {
-        "config-plugin-options": {
-            "source-directory": "config"
-        },
-        "config-plugin": {
-            "bootstrap": "bootstrap.php",
-            "params": "params.php"
-        }
-    },
     "config": {
         "sort-packages": true,
         "allow-plugins": {
