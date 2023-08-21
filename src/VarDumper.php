@@ -71,7 +71,7 @@ final class VarDumper
         self::$defaultHandler = $handler;
     }
 
-    public static function getDefaultHandler(): ?HandlerInterface
+    public static function getDefaultHandler(): HandlerInterface
     {
         return self::$defaultHandler ??= new EchoHandler();
     }
