@@ -46,7 +46,7 @@ final class VarDumper
     public const VAR_TYPE_ARRAY = 'array';
     public const VAR_TYPE_OBJECT = 'object';
     public const VAR_TYPE_RESOURCE = 'resource';
-    private static HandlerInterface $defaultHandler;
+    private static ?HandlerInterface $defaultHandler = null;
 
     /**
      * @var string[] Variables using in closure scope.
