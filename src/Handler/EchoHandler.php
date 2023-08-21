@@ -7,7 +7,7 @@ namespace Yiisoft\VarDumper\Handler;
 use Yiisoft\VarDumper\HandlerInterface;
 use Yiisoft\VarDumper\VarDumper;
 
-class EchoHandler implements HandlerInterface
+final class EchoHandler implements HandlerInterface
 {
     public function handle(mixed $variable, int $depth, bool $highlight = false): void
     {
