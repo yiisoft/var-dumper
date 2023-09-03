@@ -42,3 +42,19 @@ if (!function_exists('dd')) {
         die(0);
     }
 }
+
+if (!function_exists('dump')) {
+    /**
+     * Prints variables and terminate the current script.
+     *
+     * @param mixed ...$variables Variables to be dumped.
+     *
+     * @see d()
+     *
+     * @psalm-suppress MixedAssignment
+     */
+    function dump(mixed ...$variables): void
+    {
+        d(...$variables);
+    }
+}
