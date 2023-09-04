@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Yiisoft\VarDumper\Handler;
 
+use Exception;
+use RuntimeException;
 use Socket;
 use Yiisoft\VarDumper\HandlerInterface;
 
@@ -16,7 +18,7 @@ final class UdpHandler implements HandlerInterface
         private int $port = 8890,
     ) {
         if (!extension_loaded('sockets')) {
-            throw new \Exception('The "ext-socket" extension is not installed.');
+            throw new Exception('The "ext-socket" extension is not installed.');
         }
     }
 
@@ -28,7 +30,15 @@ final class UdpHandler implements HandlerInterface
         $socket = $this->getSocket();
 
         $data = json_encode($variable);
-        socket_sendto($socket, $data, strlen($data), 0, $this->host, $this->port);
+        if (!socket_sendto($socket, $data, strlen($data), 0, $this->host, $this->port)) {
+            throw new RuntimeException(
+                sprintf(
+                    'Could not send a dump to %s:%d',
+                    $this->host,
+                    $this->port,
+                )
+            );
+        }
     }
 
     /**
@@ -39,7 +49,7 @@ final class UdpHandler implements HandlerInterface
         if ($this->socket === null) {
             $this->socket = socket_create(AF_INET, SOCK_DGRAM, SOL_UDP);
             if (!$this->socket) {
-                throw new \RuntimeException('Cannot create a UDP socket connection.');
+                throw new RuntimeException('Cannot create a UDP socket connection.');
             }
         }
         return $this->socket;
