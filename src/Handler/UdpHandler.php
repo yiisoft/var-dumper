@@ -14,8 +14,8 @@ final class UdpHandler implements HandlerInterface
     private ?Socket $socket = null;
 
     public function __construct(
-        private string $host = '127.0.0.1',
-        private int $port = 8890,
+        private string $host,
+        private int $port,
     ) {
         if (!extension_loaded('sockets')) {
             throw new Exception('The "ext-socket" extension is not installed.');
