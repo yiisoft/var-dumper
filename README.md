@@ -100,6 +100,17 @@ In the above `asJson()` will give you nicely formatted code. You can remove form
 
 `$depth` argument allows you to set maximum recursion depth.
 
+## Output destination
+
+Choose one of existing or create a new one class to control the destination where "dumps" will be sent to:
+- [EchoHandler](./src/Handler/EchoHandler.php) 
+  - Uses `echo` to write to stdout stream.
+  - Uses by default.
+- [UdpHandler](./src/Handler/UdpHandler.php)
+  - Uses `ext-sockets` to sent encoded with `json_encode` dumps to a UDP socket.
+- [CompositeHandler](./src/Handler/CompositeHandler.php)
+  - Helpful class to sent dumps to multiple handlers in a row, for example `EchoHandler` and `UdpHandler`.
+
 ## Limitations
 
 Current limitations are:

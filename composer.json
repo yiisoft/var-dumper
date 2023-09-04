@@ -33,6 +33,9 @@
         "spatie/phpunit-watcher": "^1.23",
         "vimeo/psalm": "^4.30|^5.3"
     },
+    "suggest": {
+        "ext-sockets": "Send dumps to a server through UDP protocol"
+    },
     "autoload": {
         "psr-4": {
             "Yiisoft\\VarDumper\\": "src"
