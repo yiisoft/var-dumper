@@ -22,5 +22,4 @@ final class CompositeHandler implements HandlerInterface
             $handler->handle($variable, $depth, $highlight);
         }
     }
-
 }

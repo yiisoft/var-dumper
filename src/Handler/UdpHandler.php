@@ -41,7 +41,7 @@ final class UdpHandler implements HandlerInterface
             if (!$this->socket) {
                 throw new \RuntimeException('Cannot create a UDP socket connection.');
             }
-        };
+        }
         return $this->socket;
     }
 }
