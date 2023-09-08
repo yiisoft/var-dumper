@@ -106,10 +106,10 @@ Choose one of existing or create a new one class to control the destination wher
 - [EchoHandler](./src/Handler/EchoHandler.php) 
   - Uses `echo` to write to stdout stream.
   - Uses by default.
-- [UdpHandler](./src/Handler/UdpHandler.php)
+- [StreamHandler](./src/Handler/StreamHandler.php)
   - Uses `ext-sockets` to sent encoded with `json_encode` dumps to a UDP socket.
 - [CompositeHandler](./src/Handler/CompositeHandler.php)
-  - Helpful class to sent dumps to multiple handlers in a row, for example `EchoHandler` and `UdpHandler`.
+  - Helpful class to sent dumps to multiple handlers in a row, for example `EchoHandler` and `StreamHandler`.
 
 ## Limitations
 
