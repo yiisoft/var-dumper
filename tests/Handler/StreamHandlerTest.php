@@ -82,4 +82,23 @@ final class StreamHandlerTest extends TestCase
         yield 'object' => [new \stdClass()];
         yield 'null' => [null];
     }
+
+    public function testIncorrectValue(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Argument $uri must be a string or a resource, "array" given.');
+        new StreamHandler([]);
+    }
+
+    public function testIncorrectEncoderReturnType(): void
+    {
+        $stream = fopen('php://memory', 'w+');
+        $handler = new StreamHandler($stream);
+
+        $handler = $handler->withEncoder(fn (mixed $variable): int => strlen($variable));
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Encoder must return a string, integer returned.');
+        $handler->handle('test', 1);
+    }
 }
