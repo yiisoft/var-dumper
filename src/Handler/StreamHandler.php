@@ -22,12 +22,12 @@ final class StreamHandler implements HandlerInterface
      */
     private $encoder = null;
     /**
-     * @var resource|null
+     * @var resource|Socket|null
      */
     private $stream = null;
 
     /**
-     * @var resource|string|null
+     * @var resource|string|Socket|null
      */
     private $uri = null;
 
