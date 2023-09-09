@@ -161,4 +161,13 @@ final class StreamHandlerTest extends TestCase
 
         $this->assertFalse(is_resource($resource));
     }
+
+    public function testImmutability()
+    {
+        $handler1 = new StreamHandler('php://memory');
+        $handler2 = $handler1->withEncoder(fn (mixed $variable): string => (string) strlen($variable));
+
+        $this->assertInstanceOf(StreamHandler::class, $handler2);
+        $this->assertNotSame($handler1, $handler2);
+    }
 }
