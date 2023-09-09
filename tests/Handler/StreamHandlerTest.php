@@ -49,8 +49,6 @@ final class StreamHandlerTest extends TestCase
         $stream = fopen('php://memory', 'w+');
         $handler = new StreamHandler($stream);
 
-        $handler = $handler->withEncoder(fn (mixed $variable): string => (string) strlen($variable));
-
         $handler->handle('test', 1);
 
         fclose($stream);
