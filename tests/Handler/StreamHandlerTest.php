@@ -9,13 +9,18 @@ use Yiisoft\VarDumper\Handler\StreamHandler;
 
 final class StreamHandlerTest extends TestCase
 {
-    public function testUdpSocket()
+    public function testUnixUDPSocket()
     {
-        $handler = new StreamHandler('udp://127.0.0.1:8890');
+        $path = '/tmp/test.sock';
+        @unlink($path);
+        $socket = socket_create(AF_UNIX, SOCK_DGRAM, 0);
+        socket_bind($socket, $path);
+
+        $handler = new StreamHandler('udg://' . $path);
 
         $handler->handle('test', 1);
 
-        $this->expectNotToPerformAssertions();
+        $this->assertEquals('"test"', socket_read($socket, 10));
     }
 
     public function testInMemoryStream()
@@ -45,6 +50,27 @@ final class StreamHandlerTest extends TestCase
     }
 
     public function testReopenStream()
+    {
+        $path = '/tmp/test.sock';
+        @unlink($path);
+        $socket = socket_create(AF_UNIX, SOCK_DGRAM, 0);
+        socket_bind($socket, $path);
+
+        $handler = new StreamHandler('udg://' . $path);
+        $handler->handle('test', 1);
+
+        socket_close($socket);
+
+        $path = '/tmp/test.sock';
+        @unlink($path);
+        $socket = socket_create(AF_UNIX, SOCK_DGRAM, 0);
+        socket_bind($socket, $path);
+        $handler->handle('test', 1);
+
+        $this->assertEquals('"test"', socket_read($socket, 10));
+    }
+
+    public function testFailedToReopenStream()
     {
         $stream = fopen('php://memory', 'w+');
         $handler = new StreamHandler($stream);

@@ -27,9 +27,9 @@ final class StreamHandler implements HandlerInterface
      * @param mixed|resource|string $uri
      */
     public function __construct(
-        $uri = 'udp://127.0.0.1:8890'
+        mixed $uri = 'udp://127.0.0.1:8890'
     ) {
-        if (!is_string($uri) && !is_resource($uri)) {
+        if (!is_string($uri) && !is_resource($uri) && !(is_object($uri) && $uri instanceof \Socket)) {
             throw new \InvalidArgumentException(
                 sprintf(
                     'Argument $uri must be a string or a resource, "%s" given.',
@@ -86,7 +86,7 @@ final class StreamHandler implements HandlerInterface
 
     private function writeToStream(string $data): bool
     {
-        if ($this->stream === null) {
+        if (!is_resource($this->stream)) {
             return false;
         }
         return @fwrite($this->stream, $data) !== false;
