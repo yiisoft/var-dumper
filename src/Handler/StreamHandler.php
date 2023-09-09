@@ -57,7 +57,7 @@ final class StreamHandler implements HandlerInterface
         if (!is_string($data)) {
             throw new RuntimeException(
                 sprintf(
-                    'Encoder must return a string, %s returned.',
+                    'Encoder must return a string, "%s" returned.',
                     get_debug_type($data)
                 )
             );
@@ -82,7 +82,16 @@ final class StreamHandler implements HandlerInterface
     private function initializeStream(): void
     {
         if (is_string($this->uri)) {
-            $this->stream = fsockopen($this->uri);
+            if (
+                str_starts_with($this->uri, 'udp://') ||
+                str_starts_with($this->uri, 'udg://') ||
+                str_starts_with($this->uri, 'tcp://') ||
+                str_starts_with($this->uri, 'unix://')
+            ) {
+                $this->stream = fsockopen($this->uri);
+            } else {
+                $this->stream = fopen($this->uri, 'w+');
+            }
         } else {
             $this->stream = $this->uri;
         }
