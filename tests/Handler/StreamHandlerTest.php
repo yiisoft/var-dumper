@@ -58,7 +58,6 @@ final class StreamHandlerTest extends TestCase
         $this->expectException(\RuntimeException::class);
         $this->expectExceptionMessage('Cannot initialize a stream.');
         $handler->handle('test', 1);
-
     }
 
     /**

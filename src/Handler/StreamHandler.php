@@ -14,7 +14,7 @@ final class StreamHandler implements HandlerInterface
      */
     private $encoder = null;
     /**
-     * @var null|resource
+     * @var resource|null
      */
     private $stream = null;
 
