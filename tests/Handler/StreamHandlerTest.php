@@ -9,6 +9,9 @@ use Yiisoft\VarDumper\Handler\StreamHandler;
 
 final class StreamHandlerTest extends TestCase
 {
+    /**
+     * @requires OS Linux
+     */
     public function testUnixUDPSocket()
     {
         $path = '/tmp/test.sock';
