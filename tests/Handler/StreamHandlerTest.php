@@ -10,7 +10,7 @@ use Yiisoft\VarDumper\Handler\StreamHandler;
 final class StreamHandlerTest extends TestCase
 {
     /**
-     * @requires OS Linux
+     * @requires OS Linux|Darwin
      */
     public function testUnixUDPSocket()
     {
@@ -53,7 +53,7 @@ final class StreamHandlerTest extends TestCase
     }
 
     /**
-     * @requires OS Linux
+     * @requires OS Linux|Darwin
      */
     public function testReopenStream()
     {
@@ -130,7 +130,33 @@ final class StreamHandlerTest extends TestCase
         $handler = $handler->withEncoder(fn (mixed $variable): int => strlen($variable));
 
         $this->expectException(\RuntimeException::class);
-        $this->expectExceptionMessage('Encoder must return a string, int returned.');
+        $this->expectExceptionMessage('Encoder must return a string, "int" returned.');
         $handler->handle('test', 1);
+    }
+
+    public function testDestructStreamResource(): void
+    {
+        $stream = fopen('php://memory', 'w+');
+        $handler = new StreamHandler($stream);
+        $handler->handle('test', 1);
+        unset($handler);
+
+        $this->assertTrue(is_resource($stream));
+    }
+
+    public function testDestructStringResource(): void
+    {
+        $handler = new StreamHandler('php://memory');
+
+        $handler->handle('test', 1);
+
+        $reflection = new \ReflectionObject($handler);
+        $resource = $reflection->getProperty('stream')->getValue($handler);
+
+        $this->assertTrue(is_resource($resource));
+
+        $handler->__destruct();
+
+        $this->assertFalse(is_resource($resource));
     }
 }

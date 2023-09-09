@@ -102,11 +102,9 @@ final class StreamHandler implements HandlerInterface
 
     public function __destruct()
     {
-        if (is_resource($this->stream)) {
-            fclose($this->stream);
+        if (!is_string($this->uri) || !is_resource($this->stream)) {
+            return;
         }
-        if (is_string($this->uri)) {
-            @unlink($this->uri);
-        }
+        fclose($this->stream);
     }
 }
