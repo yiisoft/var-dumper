@@ -151,7 +151,9 @@ final class StreamHandlerTest extends TestCase
         $handler->handle('test', 1);
 
         $reflection = new \ReflectionObject($handler);
-        $resource = $reflection->getProperty('stream')->getValue($handler);
+        $property = $reflection->getProperty('stream');
+        $property->setAccessible(true);
+        $resource = $property->getValue($handler);
 
         $this->assertTrue(is_resource($resource));
 
