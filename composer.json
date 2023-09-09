@@ -34,7 +34,7 @@
         "vimeo/psalm": "^4.30|^5.3"
     },
     "suggest": {
-        "ext-sockets": "Send dumps to a server through UDP protocol"
+        "ext-sockets": "Send dumps to a server through UDP/TCP protocols"
     },
     "autoload": {
         "psr-4": {
