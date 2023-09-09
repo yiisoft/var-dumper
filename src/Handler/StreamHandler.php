@@ -4,8 +4,16 @@ declare(strict_types=1);
 
 namespace Yiisoft\VarDumper\Handler;
 
+use InvalidArgumentException;
 use RuntimeException;
+use Socket;
 use Yiisoft\VarDumper\HandlerInterface;
+
+use function fsockopen;
+use function fwrite;
+use function get_debug_type;
+use function is_resource;
+use function is_string;
 
 final class StreamHandler implements HandlerInterface
 {
@@ -29,11 +37,11 @@ final class StreamHandler implements HandlerInterface
     public function __construct(
         mixed $uri = 'udp://127.0.0.1:8890'
     ) {
-        if (!is_string($uri) && !is_resource($uri) && !(is_object($uri) && $uri instanceof \Socket)) {
-            throw new \InvalidArgumentException(
+        if (!is_string($uri) && !is_resource($uri) && !$uri instanceof Socket) {
+            throw new InvalidArgumentException(
                 sprintf(
                     'Argument $uri must be a string or a resource, "%s" given.',
-                    gettype($uri)
+                    get_debug_type($uri)
                 )
             );
         }
@@ -45,12 +53,12 @@ final class StreamHandler implements HandlerInterface
      */
     public function handle(mixed $variable, int $depth, bool $highlight = false): void
     {
-        $data = ($this->encoder ?? 'json_encode')($variable);
+        $data = ($this->encoder ?? '\json_encode')($variable);
         if (!is_string($data)) {
             throw new RuntimeException(
                 sprintf(
                     'Encoder must return a string, %s returned.',
-                    gettype($data)
+                    get_debug_type($data)
                 )
             );
         }
@@ -90,5 +98,15 @@ final class StreamHandler implements HandlerInterface
             return false;
         }
         return @fwrite($this->stream, $data) !== false;
+    }
+
+    public function __destruct()
+    {
+        if (is_resource($this->stream)) {
+            fclose($this->stream);
+        }
+        if (is_string($this->uri)) {
+            @unlink($this->uri);
+        }
     }
 }

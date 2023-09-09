@@ -124,7 +124,7 @@ final class StreamHandlerTest extends TestCase
         $handler = $handler->withEncoder(fn (mixed $variable): int => strlen($variable));
 
         $this->expectException(\RuntimeException::class);
-        $this->expectExceptionMessage('Encoder must return a string, integer returned.');
+        $this->expectExceptionMessage('Encoder must return a string, int returned.');
         $handler->handle('test', 1);
     }
 }
