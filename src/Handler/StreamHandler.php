@@ -19,12 +19,12 @@ final class StreamHandler implements HandlerInterface
     private $stream = null;
 
     /**
-     * @var string|resource|null
+     * @var resource|string|null
      */
     private $uri = null;
 
     /**
-     * @param resource|string|mixed $uri
+     * @param mixed|resource|string $uri
      */
     public function __construct(
         $uri = 'udp://127.0.0.1:8890'
