@@ -27,7 +27,7 @@ final class StreamHandler implements HandlerInterface
     private $stream = null;
 
     /**
-     * @var resource|string|Socket|null
+     * @var resource|Socket|string|null
      */
     private $uri = null;
 
