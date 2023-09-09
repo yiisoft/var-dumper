@@ -52,6 +52,9 @@ final class StreamHandlerTest extends TestCase
         $this->assertEquals('4', fread($stream, 255));
     }
 
+    /**
+     * @requires OS Linux
+     */
     public function testReopenStream()
     {
         $path = '/tmp/test.sock';
