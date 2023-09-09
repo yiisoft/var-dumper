@@ -10,29 +10,38 @@ use Yiisoft\VarDumper\HandlerInterface;
 final class StreamHandler implements HandlerInterface
 {
     /**
-     * @var callable
+     * @var callable|null
      */
-    private $encoder;
+    private $encoder = null;
     /**
      * @var null|resource
      */
     private $stream = null;
 
+    /**
+     * @var string|resource|null
+     */
+    private $uri = null;
+
+    /**
+     * @param resource|string|mixed $uri
+     */
     public function __construct(
-        private $uri = 'udp://127.0.0.1:8890'
+        $uri = 'udp://127.0.0.1:8890'
     ) {
-        if (!is_string($this->uri) && !is_resource($this->uri)) {
+        if (!is_string($uri) && !is_resource($uri)) {
             throw new \InvalidArgumentException(
                 sprintf(
                     'Argument $uri must be a string or a resource, "%s" given.',
-                    gettype($this->uri)
+                    gettype($uri)
                 )
             );
         }
+        $this->uri = $uri;
     }
 
     /**
-     * Sends encode with {@see \json_encode()} function $variable to a UDP socket.
+     * Encodes with {@see self::$encoder} {@param $variable} and sends the result to the stream.
      */
     public function handle(mixed $variable, int $depth, bool $highlight = false): void
     {
@@ -75,8 +84,11 @@ final class StreamHandler implements HandlerInterface
         }
     }
 
-    private function writeToStream(bool|string $data): bool
+    private function writeToStream(string $data): bool
     {
+        if ($this->stream === null) {
+            return false;
+        }
         return @fwrite($this->stream, $data) !== false;
     }
 }
