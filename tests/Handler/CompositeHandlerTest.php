@@ -10,7 +10,7 @@ use Yiisoft\VarDumper\Tests\Support\InMemoryHandler;
 
 final class CompositeHandlerTest extends TestCase
 {
-    public function testComposite()
+    public function testComposite(): void
     {
         $compositeHandler = new CompositeHandler([
             $inMemoryHandler1 = new InMemoryHandler(),

@@ -49,7 +49,7 @@ final class StreamHandler implements HandlerInterface
     }
 
     /**
-     * Encodes with {@see self::$encoder} {@param $variable} and sends the result to the stream.
+     * Encodes {@param $variable} with {@see self::$encoder} and sends the result to the stream.
      */
     public function handle(mixed $variable, int $depth, bool $highlight = false): void
     {

@@ -2,7 +2,6 @@
 
 ## 1.7.0 under development
 
-- New #95: Add support for PHP 8.2 in GitHub actions (@xepozz)
 - New #95: Add `StreamHandler` and `CompositeHandler` (@xepozz)
 - Enh #94: Add a middleware handler to control dumps' output destination (@xepozz)
 - New #94: Add `dump` function (@xepozz)
