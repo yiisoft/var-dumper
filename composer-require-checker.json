@@ -1,5 +1,6 @@
 {
     "symbol-whitelist": [
-        "Socket"
+        "Socket",
+        "socket_write"
     ]
 }
