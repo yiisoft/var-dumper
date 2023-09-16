@@ -17,7 +17,7 @@ final class CompositeHandler implements HandlerInterface
      * @param HandlerInterface[] $handlers
      */
     public function __construct(
-        private readonly array $handlers
+        private array $handlers
     ) {
     }
 
