@@ -4,7 +4,12 @@ declare(strict_types=1);
 
 namespace Yiisoft\VarDumper\Tests\Handler;
 
+use Generator;
+use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
+use ReflectionObject;
+use RuntimeException;
+use stdClass;
 use Yiisoft\VarDumper\Handler\StreamHandler;
 
 final class StreamHandlerTest extends TestCase
@@ -12,24 +17,24 @@ final class StreamHandlerTest extends TestCase
     /**
      * @requires OS Linux|Darwin
      */
-    public function testUnixUDPSocket()
+    public function testUnixUDPSocket(): void
     {
         $path = '/tmp/test.sock';
         @unlink($path);
         $socket = socket_create(AF_UNIX, SOCK_DGRAM, 0);
         socket_bind($socket, $path);
 
-        $handler = new StreamHandler('udg://' . $path);
+        $handler = $this->createStreamHandler('udg://' . $path);
 
         $handler->handle('test', 1);
 
         $this->assertEquals('"test"', socket_read($socket, 10));
     }
 
-    public function testInMemoryStream()
+    public function testInMemoryStream(): void
     {
-        $stream = fopen('php://memory', 'w+');
-        $handler = new StreamHandler($stream);
+        $stream = fopen('php://memory', 'wb+');
+        $handler = $this->createStreamHandler($stream);
 
         $handler->handle('test', 1);
 
@@ -38,10 +43,10 @@ final class StreamHandlerTest extends TestCase
         $this->assertEquals('"test"', fread($stream, 255));
     }
 
-    public function testDifferentEncoder()
+    public function testDifferentEncoder(): void
     {
-        $stream = fopen('php://memory', 'w+');
-        $handler = new StreamHandler($stream);
+        $stream = fopen('php://memory', 'wb+');
+        $handler = $this->createStreamHandler($stream);
 
         $handler = $handler->withEncoder(fn (mixed $variable): string => (string) strlen($variable));
 
@@ -55,14 +60,14 @@ final class StreamHandlerTest extends TestCase
     /**
      * @requires OS Linux|Darwin
      */
-    public function testReopenStream()
+    public function testReopenStream(): void
     {
         $path = '/tmp/test.sock';
         @unlink($path);
         $socket = socket_create(AF_UNIX, SOCK_DGRAM, 0);
         socket_bind($socket, $path);
 
-        $handler = new StreamHandler('udg://' . $path);
+        $handler = $this->createStreamHandler('udg://' . $path);
         $handler->handle('test', 1);
 
         socket_close($socket);
@@ -76,16 +81,16 @@ final class StreamHandlerTest extends TestCase
         $this->assertEquals('"test"', socket_read($socket, 10));
     }
 
-    public function testFailedToReopenStream()
+    public function testFailedToReopenStream(): void
     {
-        $stream = fopen('php://memory', 'w+');
-        $handler = new StreamHandler($stream);
+        $stream = fopen('php://memory', 'wb+');
+        $handler = $this->createStreamHandler($stream);
 
         $handler->handle('test', 1);
 
         fclose($stream);
 
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('Cannot initialize a stream.');
         $handler->handle('test', 1);
     }
@@ -93,10 +98,10 @@ final class StreamHandlerTest extends TestCase
     /**
      * @dataProvider differentVariablesProvider
      */
-    public function testDifferentVariables(mixed $variable)
+    public function testDifferentVariables(mixed $variable): void
     {
-        $stream = fopen('php://memory', 'w+');
-        $handler = new StreamHandler($stream);
+        $stream = fopen('php://memory', 'wb+');
+        $handler = $this->createStreamHandler($stream);
 
         $handler->handle($variable, 1);
 
@@ -105,39 +110,39 @@ final class StreamHandlerTest extends TestCase
         $this->assertEquals(json_encode($variable), fread($stream, 255));
     }
 
-    public static function differentVariablesProvider(): \Generator
+    public static function differentVariablesProvider(): Generator
     {
         yield 'string' => ['test'];
         yield 'integer' => [1];
         yield 'float' => [1.1];
         yield 'array' => [['test']];
-        yield 'object' => [new \stdClass()];
+        yield 'object' => [new stdClass()];
         yield 'null' => [null];
     }
 
     public function testIncorrectValue(): void
     {
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Argument $uri must be a string or a resource, "array" given.');
-        new StreamHandler([]);
+        $this->createStreamHandler([]);
     }
 
     public function testIncorrectEncoderReturnType(): void
     {
-        $stream = fopen('php://memory', 'w+');
-        $handler = new StreamHandler($stream);
+        $stream = fopen('php://memory', 'wb+');
+        $handler = $this->createStreamHandler($stream);
 
         $handler = $handler->withEncoder(fn (mixed $variable): int => strlen($variable));
 
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('Encoder must return a string, "int" returned.');
         $handler->handle('test', 1);
     }
 
     public function testDestructStreamResource(): void
     {
-        $stream = fopen('php://memory', 'w+');
-        $handler = new StreamHandler($stream);
+        $stream = fopen('php://memory', 'wb+');
+        $handler = $this->createStreamHandler($stream);
         $handler->handle('test', 1);
         unset($handler);
 
@@ -146,11 +151,11 @@ final class StreamHandlerTest extends TestCase
 
     public function testDestructStringResource(): void
     {
-        $handler = new StreamHandler('php://memory');
+        $handler = $this->createStreamHandler('php://memory');
 
         $handler->handle('test', 1);
 
-        $reflection = new \ReflectionObject($handler);
+        $reflection = new ReflectionObject($handler);
         $property = $reflection->getProperty('stream');
         $property->setAccessible(true);
         $resource = $property->getValue($handler);
@@ -162,12 +167,20 @@ final class StreamHandlerTest extends TestCase
         $this->assertFalse(is_resource($resource));
     }
 
-    public function testImmutability()
+    public function testImmutability(): void
     {
-        $handler1 = new StreamHandler('php://memory');
+        $handler1 = $this->createStreamHandler('php://memory');
         $handler2 = $handler1->withEncoder(fn (mixed $variable): string => (string) strlen($variable));
 
         $this->assertInstanceOf(StreamHandler::class, $handler2);
         $this->assertNotSame($handler1, $handler2);
+    }
+
+    /**
+     * @param mixed|resource|string $stream
+     */
+    private function createStreamHandler(mixed $stream): StreamHandler
+    {
+        return new StreamHandler($stream);
     }
 }

@@ -9,7 +9,7 @@ use Yiisoft\VarDumper\Handler\EchoHandler;
 
 final class EchoHandlerTest extends TestCase
 {
-    public function testEcho()
+    public function testEcho(): void
     {
         $handler = new EchoHandler();
 
@@ -18,7 +18,7 @@ final class EchoHandlerTest extends TestCase
         $this->expectOutputString("'test'");
     }
 
-    public function testHighlight()
+    public function testHighlight(): void
     {
         $handler = new EchoHandler();
 

@@ -63,12 +63,17 @@ final class StreamHandler implements HandlerInterface
             );
         }
 
-        $this->initializeStream();
 
-        if (!$this->writeToStream($data)) {
+        if (!is_resource($this->stream)) {
+            $this->initializeStream();
+        }
+
+        if (@fwrite($this->stream, $data) === false) {
             $this->initializeStream();
 
-            $this->writeToStream($data);
+            if (@fwrite($this->stream, $data) === false) {
+                throw new RuntimeException('Cannot write a stream.');
+            }
         }
     }
 
@@ -90,7 +95,7 @@ final class StreamHandler implements HandlerInterface
             ) {
                 $this->stream = fsockopen($this->uri);
             } else {
-                $this->stream = fopen($this->uri, 'w+');
+                $this->stream = fopen($this->uri, 'wb+');
             }
         } else {
             $this->stream = $this->uri;
@@ -99,14 +104,6 @@ final class StreamHandler implements HandlerInterface
         if (!is_resource($this->stream)) {
             throw new RuntimeException('Cannot initialize a stream.');
         }
-    }
-
-    private function writeToStream(string $data): bool
-    {
-        if (!is_resource($this->stream)) {
-            return false;
-        }
-        return @fwrite($this->stream, $data) !== false;
     }
 
     public function __destruct()
