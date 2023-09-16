@@ -72,6 +72,7 @@ final class StreamHandler implements HandlerInterface
             return;
         }
 
+        /** @psalm-suppress PossiblyNullArgument */
         if (@fwrite($this->stream, $data) === false) {
             $this->initializeStream();
 
@@ -80,6 +81,7 @@ final class StreamHandler implements HandlerInterface
                 return;
             }
 
+            /** @psalm-suppress PossiblyNullArgument */
             if (@fwrite($this->stream, $data) === false) {
                 throw new RuntimeException('Cannot write a stream.');
             }
