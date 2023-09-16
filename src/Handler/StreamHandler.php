@@ -63,13 +63,22 @@ final class StreamHandler implements HandlerInterface
             );
         }
 
-
-        if (!is_resource($this->stream)) {
+        if (!is_resource($this->stream) && !$this->stream instanceof Socket) {
             $this->initializeStream();
+        }
+
+        if ($this->stream instanceof Socket) {
+            socket_write($this->stream, $data, strlen($data));
+            return;
         }
 
         if (@fwrite($this->stream, $data) === false) {
             $this->initializeStream();
+
+            if ($this->stream instanceof Socket) {
+                socket_write($this->stream, $data, strlen($data));
+                return;
+            }
 
             if (@fwrite($this->stream, $data) === false) {
                 throw new RuntimeException('Cannot write a stream.');
@@ -101,7 +110,7 @@ final class StreamHandler implements HandlerInterface
             $this->stream = $this->uri;
         }
 
-        if (!is_resource($this->stream)) {
+        if (!is_resource($this->stream) && !$this->stream instanceof Socket) {
             throw new RuntimeException('Cannot initialize a stream.');
         }
     }

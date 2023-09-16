@@ -17,7 +17,7 @@ final class StreamHandlerTest extends TestCase
     /**
      * @requires OS Linux|Darwin
      */
-    public function testUnixUDPSocket(): void
+    public function testUnixDomainSocketPath(): void
     {
         $path = '/tmp/test.sock';
         @unlink($path);
@@ -25,6 +25,24 @@ final class StreamHandlerTest extends TestCase
         socket_bind($socket, $path);
 
         $handler = $this->createStreamHandler('udg://' . $path);
+
+        $handler->handle('test', 1);
+
+        $this->assertEquals('"test"', socket_read($socket, 10));
+    }
+
+    /**
+     * @requires OS Linux|Darwin
+     */
+    public function testUnixDomainSocket(): void
+    {
+        $path = '/tmp/test.sock';
+        @unlink($path);
+        $socket = socket_create(AF_UNIX, SOCK_DGRAM, 0);
+        socket_bind($socket, $path);
+        socket_connect($socket, $path);
+
+        $handler = $this->createStreamHandler($socket);
 
         $handler->handle('test', 1);
 
