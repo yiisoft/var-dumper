@@ -24,17 +24,17 @@ final class StreamHandler implements HandlerInterface
     /**
      * @var callable|null
      */
-    private $encoder = null;
+    private mixed $encoder = null;
     /**
-     * @var resource|Socket
+     * @var resource|Socket|null
      * @psalm-suppress PropertyNotSetInConstructor
      */
-    private $stream;
+    private mixed $stream = null;
 
     /**
      * @var resource|Socket|string
      */
-    private $uri;
+    private mixed $uri;
 
     private const SOCKET_PROTOCOLS = ['udp', 'udg', 'tcp', 'unix'];
 
@@ -55,6 +55,14 @@ final class StreamHandler implements HandlerInterface
         $this->uri = $uri;
     }
 
+    public function __destruct()
+    {
+        if (!is_string($this->uri) || !is_resource($this->stream)) {
+            return;
+        }
+        fclose($this->stream);
+    }
+
     /**
      * Encodes {@param $variable} with {@see self::$encoder} and sends the result to the stream.
      */
@@ -70,24 +78,14 @@ final class StreamHandler implements HandlerInterface
             );
         }
 
-        if (!is_resource($this->stream)) {
+        if (!is_resource($this->stream) && !$this->stream instanceof Socket) {
             $this->initializeStream();
         }
 
-        if ($this->stream instanceof Socket) {
-            socket_write($this->stream, $data, strlen($data));
-            return;
-        }
-
-        if (@fwrite($this->stream, $data) === false) {
+        if (!$this->writeToStream($data)) {
             $this->initializeStream();
 
-            if ($this->stream instanceof Socket) {
-                socket_write($this->stream, $data, strlen($data));
-                return;
-            }
-
-            if (@fwrite($this->stream, $data) === false) {
+            if (!$this->writeToStream($data)) {
                 throw new RuntimeException('Cannot write a stream.');
             }
         }
@@ -124,11 +122,18 @@ final class StreamHandler implements HandlerInterface
         $this->stream = $stream;
     }
 
-    public function __destruct()
+    private function writeToStream(string $data): bool
     {
-        if (!is_string($this->uri) || !is_resource($this->stream)) {
-            return;
+        if ($this->stream === null) {
+            return false;
         }
-        fclose($this->stream);
+
+        if ($this->stream instanceof Socket) {
+            socket_write($this->stream, $data, strlen($data));
+
+            return true;
+        }
+
+        return @fwrite($this->stream, $data) !== false;
     }
 }
