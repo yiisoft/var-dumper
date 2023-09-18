@@ -36,7 +36,7 @@ final class StreamHandler implements HandlerInterface
      */
     private $uri;
 
-    private const ALLOWED_PROTOCOLS = ['udp', 'udg', 'tcp', 'unix'];
+    private const SOCKET_PROTOCOLS = ['udp', 'udg', 'tcp', 'unix'];
 
     /**
      * @param mixed|resource|string $uri
@@ -101,21 +101,25 @@ final class StreamHandler implements HandlerInterface
     private function initializeStream(): void
     {
         if (!is_string($this->uri)) {
-            $this->stream = $this->uri;
+            $stream = $this->uri;
         } else {
-            $isProtocolAllowed = false;
-            foreach (self::ALLOWED_PROTOCOLS as $protocol) {
+            $hasSocketProtocol = false;
+            foreach (self::SOCKET_PROTOCOLS as $protocol) {
                 if (str_starts_with($this->uri, "$protocol://")) {
-                    $isProtocolAllowed = true;
+                    $hasSocketProtocol = true;
+
+                    break;
                 }
             }
 
-            $this->stream = $isProtocolAllowed ? fsockopen($this->uri) : fopen($this->uri, 'wb+');
+            $stream = $hasSocketProtocol ? fsockopen($this->uri) : fopen($this->uri, 'wb+');
         }
 
-        if (!is_resource($this->stream) && !$this->stream instanceof Socket) {
+        if (!is_resource($stream) && !$stream instanceof Socket) {
             throw new RuntimeException('Cannot initialize a stream.');
         }
+
+        $this->stream = $stream;
     }
 
     public function __destruct()
