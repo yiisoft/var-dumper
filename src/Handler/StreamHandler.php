@@ -23,13 +23,14 @@ final class StreamHandler implements HandlerInterface
     private $encoder = null;
     /**
      * @var resource|Socket
+     * @psalm-suppress PropertyNotSetInConstructor
      */
     private $stream;
 
     /**
-     * @var resource|Socket|string|null
+     * @var resource|Socket|string
      */
-    private $uri = null;
+    private $uri;
 
     /**
      * @param mixed|resource|string $uri
@@ -78,7 +79,6 @@ final class StreamHandler implements HandlerInterface
                 return;
             }
 
-            /** @psalm-suppress PossiblyNullArgument */
             if (@fwrite($this->stream, $data) === false) {
                 throw new RuntimeException('Cannot write a stream.');
             }
