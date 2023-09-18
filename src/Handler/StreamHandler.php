@@ -70,7 +70,9 @@ final class StreamHandler implements HandlerInterface
             );
         }
 
-        $this->initializeStream();
+        if (!is_resource($this->stream)) {
+            $this->initializeStream();
+        }
 
         if ($this->stream instanceof Socket) {
             socket_write($this->stream, $data, strlen($data));
