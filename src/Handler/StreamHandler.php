@@ -15,6 +15,10 @@ use function get_debug_type;
 use function is_resource;
 use function is_string;
 
+/**
+ * Uses stream ({@link https://www.php.net/manual/en/intro.stream.php} for writing variable's data. Requires "sockets"
+ * PHP extension.
+ */
 final class StreamHandler implements HandlerInterface
 {
     /**
@@ -31,6 +35,8 @@ final class StreamHandler implements HandlerInterface
      * @var resource|Socket|string
      */
     private $uri;
+
+    private const ALLOWED_PROTOCOLS = ['udp', 'udg', 'tcp', 'unix'];
 
     /**
      * @param mixed|resource|string $uri
@@ -94,19 +100,17 @@ final class StreamHandler implements HandlerInterface
 
     private function initializeStream(): void
     {
-        if (is_string($this->uri)) {
-            if (
-                str_starts_with($this->uri, 'udp://') ||
-                str_starts_with($this->uri, 'udg://') ||
-                str_starts_with($this->uri, 'tcp://') ||
-                str_starts_with($this->uri, 'unix://')
-            ) {
-                $this->stream = fsockopen($this->uri);
-            } else {
-                $this->stream = fopen($this->uri, 'wb+');
-            }
-        } else {
+        if (!is_string($this->uri)) {
             $this->stream = $this->uri;
+        } else {
+            $isProtocolAllowed = false;
+            foreach (self::ALLOWED_PROTOCOLS as $protocol) {
+                if (str_starts_with($this->uri, "$protocol://")) {
+                    $isProtocolAllowed = true;
+                }
+            }
+
+            $this->stream = $isProtocolAllowed ? fsockopen($this->uri) : fopen($this->uri, 'wb+');
         }
 
         if (!is_resource($this->stream) && !$this->stream instanceof Socket) {
