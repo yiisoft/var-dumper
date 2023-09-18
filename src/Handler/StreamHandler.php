@@ -22,9 +22,9 @@ final class StreamHandler implements HandlerInterface
      */
     private $encoder = null;
     /**
-     * @var resource|Socket|null
+     * @var resource|Socket
      */
-    private $stream = null;
+    private $stream;
 
     /**
      * @var resource|Socket|string|null
@@ -63,16 +63,13 @@ final class StreamHandler implements HandlerInterface
             );
         }
 
-        if (!is_resource($this->stream) && !$this->stream instanceof Socket) {
-            $this->initializeStream();
-        }
+        $this->initializeStream();
 
         if ($this->stream instanceof Socket) {
             socket_write($this->stream, $data, strlen($data));
             return;
         }
 
-        /** @psalm-suppress PossiblyNullArgument */
         if (@fwrite($this->stream, $data) === false) {
             $this->initializeStream();
 
