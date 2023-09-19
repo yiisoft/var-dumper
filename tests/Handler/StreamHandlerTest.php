@@ -141,7 +141,8 @@ final class StreamHandlerTest extends TestCase
     public function testIncorrectValue(): void
     {
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Argument $uri must be a string or a resource, "array" given.');
+        $message = 'Argument $uri must be either a string, a resource or a Socket instance, "array" given.';
+        $this->expectExceptionMessage($message);
         $this->createStreamHandler([]);
     }
 

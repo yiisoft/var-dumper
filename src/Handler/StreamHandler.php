@@ -17,7 +17,7 @@ use function is_string;
 
 /**
  * Uses stream ({@link https://www.php.net/manual/en/intro.stream.php} for writing variable's data. Requires "sockets"
- * PHP extension.
+ * PHP extension when {@see StreamHandler::$uri} is a {@see Socket} instance.
  */
 final class StreamHandler implements HandlerInterface
 {
@@ -45,7 +45,7 @@ final class StreamHandler implements HandlerInterface
         if (!is_string($uri) && !is_resource($uri) && !$uri instanceof Socket) {
             throw new InvalidArgumentException(
                 sprintf(
-                    'Argument $uri must be a string or a resource, "%s" given.',
+                    'Argument $uri must be either a string, a resource or a Socket instance, "%s" given.',
                     get_debug_type($uri)
                 )
             );
