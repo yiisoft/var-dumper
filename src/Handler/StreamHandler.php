@@ -99,25 +99,14 @@ final class StreamHandler implements HandlerInterface
     private function initializeStream(): void
     {
         if (!is_string($this->uri)) {
-            $stream = $this->uri;
+            $this->stream = $this->uri;
         } else {
-            $hasSocketProtocol = false;
-            foreach (stream_get_transports() as $protocol) {
-                if (str_starts_with($this->uri, "$protocol://")) {
-                    $hasSocketProtocol = true;
-
-                    break;
-                }
-            }
-
-            $stream = $hasSocketProtocol ? fsockopen($this->uri) : fopen($this->uri, 'wb+');
+            $this->stream = $this->uriHasSocketProtocol() ? fsockopen($this->uri) : fopen($this->uri, 'wb+');
         }
 
-        if (!is_resource($stream) && !$stream instanceof Socket) {
+        if (!is_resource($this->stream) && !$this->stream instanceof Socket) {
             throw new RuntimeException('Cannot initialize a stream.');
         }
-
-        $this->stream = $stream;
     }
 
     private function writeToStream(string $data): bool
@@ -133,5 +122,16 @@ final class StreamHandler implements HandlerInterface
         }
 
         return @fwrite($this->stream, $data) !== false;
+    }
+
+    private function uriHasSocketProtocol(): bool
+    {
+        foreach (stream_get_transports() as $protocol) {
+            if (str_starts_with($this->uri, "$protocol://")) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
