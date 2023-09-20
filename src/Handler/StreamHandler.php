@@ -36,6 +36,8 @@ final class StreamHandler implements HandlerInterface
      */
     private mixed $uri;
 
+    private const SOCKET_PROTOCOLS = ['udp', 'udg', 'tcp', 'unix'];
+
     /**
      * @param mixed|resource|string $uri
      */
@@ -126,7 +128,7 @@ final class StreamHandler implements HandlerInterface
 
     private function uriHasSocketProtocol(): bool
     {
-        foreach (stream_get_transports() as $protocol) {
+        foreach (self::SOCKET_PROTOCOLS as $protocol) {
             if (str_starts_with($this->uri, "$protocol://")) {
                 return true;
             }
