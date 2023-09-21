@@ -103,7 +103,15 @@ final class StreamHandler implements HandlerInterface
         if (!is_string($this->uri)) {
             $this->stream = $this->uri;
         } else {
-            $this->stream = $this->uriHasSocketProtocol() ? fsockopen($this->uri) : fopen($this->uri, 'wb+');
+            $uriHasSocketProtocol = false;
+            foreach (self::SOCKET_PROTOCOLS as $protocol) {
+                if (str_starts_with($this->uri, "$protocol://")) {
+                    $uriHasSocketProtocol = true;
+                    break;
+                }
+            }
+
+            $this->stream = $uriHasSocketProtocol ? fsockopen($this->uri) : fopen($this->uri, 'wb+');
         }
 
         if (!is_resource($this->stream) && !$this->stream instanceof Socket) {
@@ -124,16 +132,5 @@ final class StreamHandler implements HandlerInterface
         }
 
         return @fwrite($this->stream, $data) !== false;
-    }
-
-    private function uriHasSocketProtocol(): bool
-    {
-        foreach (self::SOCKET_PROTOCOLS as $protocol) {
-            if (str_starts_with($this->uri, "$protocol://")) {
-                return true;
-            }
-        }
-
-        return false;
     }
 }
