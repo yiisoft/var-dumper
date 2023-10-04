@@ -16,7 +16,7 @@ use function is_resource;
 use function is_string;
 
 /**
- * Uses stream ({@link https://www.php.net/manual/en/intro.stream.php} for writing variable's data. Requires "sockets"
+ * Uses stream ({@link https://www.php.net/manual/en/intro.stream.php}) for writing variable's data. Requires "sockets"
  * PHP extension when {@see StreamHandler::$uri} is a {@see Socket} instance.
  */
 final class StreamHandler implements HandlerInterface
@@ -27,7 +27,6 @@ final class StreamHandler implements HandlerInterface
     private mixed $encoder = null;
     /**
      * @var resource|Socket|null
-     * @psalm-suppress PropertyNotSetInConstructor
      */
     private mixed $stream = null;
 

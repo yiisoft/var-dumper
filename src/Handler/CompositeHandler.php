@@ -7,9 +7,9 @@ namespace Yiisoft\VarDumper\Handler;
 use Yiisoft\VarDumper\HandlerInterface;
 
 /**
- * CompositeHandler allows to use multiple handlers at once.
+ * `CompositeHandler` allows to use multiple handlers at once.
  * It iterates over all handlers and calls their {@see HandlerInterface::handle()} method.
- * For example, you may use it to output data to both {@see StreamHandler} and {@see HtmlHandler} at once.
+ * For example, you may use it to output data to both {@see StreamHandler} and {@see EchoHandler} at once.
  */
 final class CompositeHandler implements HandlerInterface
 {
