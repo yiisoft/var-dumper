@@ -111,6 +111,8 @@ Choose one of existing classes or create a new one to control the destination wh
 - [CompositeHandler](./src/Handler/CompositeHandler.php)
   - Helpful class to sent dumps to multiple handlers in a row, for example `EchoHandler` and `StreamHandler`.
 
+Output handlers are set via `VarDumper::setDefaultHandler()` method.
+
 ## Limitations
 
 Current limitations are:
