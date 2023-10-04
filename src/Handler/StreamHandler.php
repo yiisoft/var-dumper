@@ -90,7 +90,10 @@ final class StreamHandler implements HandlerInterface
         }
     }
 
-    public function withEncoder(callable $encoder): HandlerInterface
+    /**
+     * @param callable(mixed $variable): string $encoder Encoder that will be used to encode variable before sending it to the stream.
+     */
+    public function withEncoder(callable $encoder): static
     {
         $new = clone $this;
         $new->encoder = $encoder;
