@@ -1,8 +1,9 @@
 # Yii VarDumper
 
-## 1.6.1 under development
+## 1.7.0 under development
 
-- no changes in this release.
+- Enh #94: Add a middleware handler to control dumps' output destination (@xepozz)
+- New #94: Add `dump` function (@xepozz)
 
 ## 1.6.0 June 30, 2023
 
