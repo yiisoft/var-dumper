@@ -1,5 +1,9 @@
 # Yii VarDumper
 
+## 1.7.1 under development
+
+- no changes in this release.
+
 ## 1.7.0 October 08, 2023
 
 - New #94: Add `dump` function (@xepozz)
