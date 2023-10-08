@@ -1,10 +1,10 @@
 # Yii VarDumper
 
-## 1.7.0 under development
+## 1.7.0 October 08, 2023
 
+- New #94: Add `dump` function (@xepozz)
 - New #95: Add `StreamHandler` and `CompositeHandler` (@xepozz)
 - Enh #94: Add a middleware handler to control dumps' output destination (@xepozz)
-- New #94: Add `dump` function (@xepozz)
 
 ## 1.6.0 June 30, 2023
 
