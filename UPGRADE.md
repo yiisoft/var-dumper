@@ -1,4 +1,3 @@
-Upgrading Instructions
-======================
+# Yii VarDumper Upgrading Instructions
 
-Changes summary:
+## Changes summary
