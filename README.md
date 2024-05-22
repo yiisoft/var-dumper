@@ -1,6 +1,6 @@
 <p align="center">
     <a href="https://github.com/yiisoft" target="_blank">
-         <img src="https://yiisoft.github.io/docs/images/yii_logo.svg" height="100px">
+        <img src="https://yiisoft.github.io/docs/images/yii_logo.svg" height="100px" alt="Yii">
     </a>
     <h1 align="center">Yii VarDumper</h1>
     <br>
@@ -27,7 +27,7 @@ may highlight syntax and export closures.
 The package could be installed with composer:
 
 ```shell
-composer require yiisoft/var-dumper --prefer-dist
+composer require yiisoft/var-dumper
 ```
 
 ## General usage
@@ -103,7 +103,8 @@ In the above `asJson()` will give you nicely formatted code. You can remove form
 ## Output destination
 
 Choose one of existing classes or create a new one to control the destination where "dumps" will be sent to:
-- [EchoHandler](./src/Handler/EchoHandler.php) 
+
+- [EchoHandler](./src/Handler/EchoHandler.php)
   - Uses `echo` to write to stdout stream.
   - Used by default.
 - [StreamHandler](./src/Handler/StreamHandler.php)
@@ -117,7 +118,7 @@ Output handlers are set via `VarDumper::setDefaultHandler()` method.
 
 Current limitations are:
 
-- Variables or properties that are anonymous classes or contain anonymous classes are not supported.    
+- Variables or properties that are anonymous classes or contain anonymous classes are not supported.
 
 ### Unit testing
 
