@@ -1,4 +1,4 @@
-# Yii VarDumper
+# Yii VarDumper Change Log
 
 ## 1.7.1 under development
 
