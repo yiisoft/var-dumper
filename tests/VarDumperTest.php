@@ -26,7 +26,6 @@ use Yiisoft\VarDumper\VarDumper;
 use Yiisoft\VarDumper\VarDumper as Dumper;
 
 use function fopen;
-use function highlight_string;
 use function preg_replace;
 use function spl_object_id;
 use function str_replace;
