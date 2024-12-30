@@ -2,7 +2,7 @@
 
 ## 1.7.1 under development
 
-- no changes in this release.
+- Enh #112: Improve resulting HTML of syntax highlighting in `EchoHandler` (@vjik)
 
 ## 1.7.0 October 08, 2023
 

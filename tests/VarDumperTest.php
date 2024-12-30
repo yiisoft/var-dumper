@@ -26,7 +26,6 @@ use Yiisoft\VarDumper\VarDumper;
 use Yiisoft\VarDumper\VarDumper as Dumper;
 
 use function fopen;
-use function highlight_string;
 use function preg_replace;
 use function spl_object_id;
 use function str_replace;
@@ -1445,11 +1444,8 @@ final class VarDumperTest extends TestCase
 
     public function testDumpWithHighlight(): void
     {
-        $var = 'content';
-        $result = highlight_string("<?php\n'{$var}'", true);
-        $output = preg_replace('/&lt;\\?php<br \\/>/', '', $result, 1);
-        VarDumper::dump($var);
-        $this->expectOutputString($output);
+        VarDumper::dump('content');
+        $this->expectOutputRegex('~<span style="color: #DD0000">\'content\'</span>~');
     }
 
     public function testDumpWithOutHighlight(): void
