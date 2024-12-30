@@ -6,9 +6,9 @@
     <br>
 </p>
 
-[![Latest Stable Version](https://poser.pugx.org/yiisoft/var-dumper/v/stable.png)](https://packagist.org/packages/yiisoft/var-dumper)
-[![Total Downloads](https://poser.pugx.org/yiisoft/var-dumper/downloads.png)](https://packagist.org/packages/yiisoft/var-dumper)
-[![Build Status](https://github.com/yiisoft/var-dumper/workflows/build/badge.svg)](https://github.com/yiisoft/var-dumper/actions)
+[![Latest Stable Version](https://poser.pugx.org/yiisoft/var-dumper/v)](https://packagist.org/packages/yiisoft/var-dumper)
+[![Total Downloads](https://poser.pugx.org/yiisoft/var-dumper/downloads)](https://packagist.org/packages/yiisoft/var-dumper)
+[![Build status](https://github.com/yiisoft/var-dumper/actions/workflows/build.yml/badge.svg)](https://github.com/yiisoft/var-dumper/actions/workflows/build.yml)
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/yiisoft/var-dumper/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/yiisoft/var-dumper/?branch=master)
 [![Code Coverage](https://scrutinizer-ci.com/g/yiisoft/var-dumper/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/yiisoft/var-dumper/?branch=master)
 [![Mutation testing badge](https://img.shields.io/endpoint?style=flat&url=https%3A%2F%2Fbadge-api.stryker-mutator.io%2Fgithub.com%2Fyiisoft%2Fvar-dumper%2Fmaster)](https://dashboard.stryker-mutator.io/reports/github.com/yiisoft/var-dumper/master)
