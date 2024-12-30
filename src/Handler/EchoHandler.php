@@ -16,7 +16,7 @@ final class EchoHandler implements HandlerInterface
 
         if ($highlight) {
             $result = highlight_string("<?php\n" . $output, true);
-            $output = preg_replace('/&lt;\\?php<br \\/>/', '', $result, 1);
+            $output = preg_replace('~<span style="color: #0000BB">&lt;\\?php(<br \\/>|\n)</span>~', '', $result, 1);
         }
 
         echo $output;

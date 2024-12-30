@@ -24,10 +24,16 @@ final class EchoHandlerTest extends TestCase
 
         $handler->handle('test', 1, true);
 
-        $this->expectOutputString(
-            <<<HTML
-<code><span style="color: #000000">\n<span style="color: #0000BB"></span><span style="color: #DD0000">'test'</span>\n</span>\n</code>
-HTML
-        );
+        if (PHP_VERSION_ID >= 80300) {
+            $expected = <<<HTML
+                <pre><code style="color: #000000"><span style="color: #DD0000">'test'</span></code></pre>
+                HTML;
+        } else {
+            $expected = <<<HTML
+                <code><span style="color: #000000">\n<span style="color: #DD0000">'test'</span>\n</span>\n</code>
+                HTML;
+        }
+
+        $this->expectOutputString($expected);
     }
 }
