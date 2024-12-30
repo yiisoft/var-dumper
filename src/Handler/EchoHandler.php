@@ -14,11 +14,19 @@ final class EchoHandler implements HandlerInterface
         $varDumper = VarDumper::create($variable);
         $output = $varDumper->asString($depth);
 
-        if ($highlight) {
-            $result = highlight_string("<?php\n" . $output, true);
-            $output = preg_replace('~<span style="color: #0000BB">&lt;\\?php(<br \\/>|\n)</span>~', '', $result, 1);
-        }
+        echo $highlight
+            ? $this->highlight($output)
+            : $output;
+    }
 
-        echo $output;
+    private function highlight(string $string): string
+    {
+        $result = highlight_string("<?php\n" . $string, true);
+
+        $pattern = PHP_VERSION_ID >= 80300
+            ? '~<span style="color: #0000BB">&lt;\\?php\n</span>~'
+            : '~<span style="color: #0000BB">&lt;\\?php<br \\/></span>~';
+
+        return preg_replace($pattern, '', $result, 1);
     }
 }
