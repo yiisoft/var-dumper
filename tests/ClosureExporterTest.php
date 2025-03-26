@@ -95,7 +95,7 @@ final class ClosureExporterTest extends TestCase
     public function testLongWithExistingImport(): void
     {
         $exporter = new ClosureExporter();
-        $output = $exporter->export(fn (\Yiisoft\VarDumper\ClosureExporter $date) => new DateTimeZone(''));
+        $output = $exporter->export(fn (ClosureExporter $date) => new DateTimeZone(''));
         $this->assertSame("fn (\Yiisoft\VarDumper\ClosureExporter \$date) => new \DateTimeZone('')", $output);
     }
 

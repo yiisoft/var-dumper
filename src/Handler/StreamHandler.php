@@ -113,6 +113,10 @@ final class StreamHandler implements HandlerInterface
                 }
             }
 
+            /**
+             * @var resource We assume that `$this->uri` is correct, so `fsockopen()`/`fopen()` always returns
+             * a resource.
+             */
             $this->stream = $uriHasSocketProtocol ? fsockopen($this->uri) : fopen($this->uri, 'wb+');
         }
 

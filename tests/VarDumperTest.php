@@ -12,7 +12,6 @@ use PHPUnit\Framework\TestCase;
 use ReflectionClass;
 use ReflectionException;
 use stdClass;
-use Yiisoft\VarDumper as VD;
 use Yiisoft\VarDumper\ClosureExporter;
 use Yiisoft\VarDumper\Tests\TestAsset\DummyArrayableWithClosure;
 use Yiisoft\VarDumper\Tests\TestAsset\DummyClass;
@@ -201,7 +200,7 @@ final class VarDumperTest extends TestCase
         ];
         yield 'namespace alias' => [
             // @formatter:off
-            fn (VD\VarDumper $date) => new DateTimeZone(''),
+            fn (Dumper $date) => new DateTimeZone(''),
             // @formatter:on
             "fn (\Yiisoft\VarDumper\VarDumper \$date) => new \DateTimeZone('')",
         ];
@@ -342,7 +341,7 @@ final class VarDumperTest extends TestCase
         ];
         yield 'namespace alias' => [
             // @formatter:off
-            fn (VD\VarDumper $date) => new DateTimeZone(''),
+            fn (Dumper $date) => new DateTimeZone(''),
             // @formatter:on
             "fn (\Yiisoft\VarDumper\VarDumper \$date) => new \DateTimeZone('')",
         ];
@@ -764,7 +763,7 @@ final class VarDumperTest extends TestCase
         ];
         yield 'namespace alias' => [
             // @formatter:off
-            fn (VD\VarDumper $date) => new DateTimeZone(''),
+            fn (Dumper $date) => new DateTimeZone(''),
             // @formatter:on
             "fn (\Yiisoft\VarDumper\VarDumper \$date) => new \DateTimeZone('')",
         ];
@@ -1016,7 +1015,7 @@ final class VarDumperTest extends TestCase
         ];
         yield 'namespace alias' => [
             // @formatter:off
-            fn (VD\VarDumper $date) => new DateTimeZone(''),
+            fn (Dumper $date) => new DateTimeZone(''),
             // @formatter:on
             '"fn (\\\\Yiisoft\\\\VarDumper\\\\VarDumper $date) => new \\\\DateTimeZone(\'\')"',
         ];
@@ -1337,7 +1336,7 @@ final class VarDumperTest extends TestCase
         ];
         yield 'namespace alias' => [
             // @formatter:off
-            fn (VD\VarDumper $date) => new DateTimeZone(''),
+            fn (Dumper $date) => new DateTimeZone(''),
             // @formatter:on
             'fn (\Yiisoft\VarDumper\VarDumper $date) => new \DateTimeZone(\'\')',
         ];

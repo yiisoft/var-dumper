@@ -27,6 +27,9 @@ final class EchoHandler implements HandlerInterface
             ? '~<span style="color: #0000BB">&lt;\\?php\n</span>~'
             : '~<span style="color: #0000BB">&lt;\\?php<br \\/></span>~';
 
+        /**
+         * @var string We use correct pattern, so `preg_replace()` always returns a string.
+         */
         return preg_replace($pattern, '', $result, 1);
     }
 }
