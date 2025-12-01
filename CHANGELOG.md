@@ -2,8 +2,8 @@
 
 ## 1.7.1 under development
 
-- Enh #112, #114: Improve resulting HTML of syntax highlighting in `EchoHandler` (@vjik)
-- Chg #113: Change PHP constraint in `composer.json` to `8.0 - 8.5` (@vjik)
+- Enh #112: Improve resulting HTML of syntax highlighting in `EchoHandler` (@vjik)
+- Chg #113, #114: Change PHP constraint in `composer.json` to `8.0 - 8.5` (@vjik)
 
 ## 1.7.0 October 08, 2023
 
