@@ -1,5 +1,9 @@
 # Yii VarDumper Change Log
 
+## 1.7.2 under development
+
+- no changes in this release.
+
 ## 1.7.1 December 01, 2025
 
 - Chg #113, #114: Change PHP constraint in `composer.json` to `8.0 - 8.5` (@vjik)
