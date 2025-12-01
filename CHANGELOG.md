@@ -1,9 +1,9 @@
 # Yii VarDumper Change Log
 
-## 1.7.1 under development
+## 1.7.1 December 01, 2025
 
-- Enh #112: Improve resulting HTML of syntax highlighting in `EchoHandler` (@vjik)
 - Chg #113, #114: Change PHP constraint in `composer.json` to `8.0 - 8.5` (@vjik)
+- Enh #112: Improve resulting HTML of syntax highlighting in `EchoHandler` (@vjik)
 
 ## 1.7.0 October 08, 2023
 
