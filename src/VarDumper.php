@@ -18,16 +18,16 @@ use Yiisoft\VarDumper\Handler\EchoHandler;
 
 use function array_keys;
 use function gettype;
+use function is_int;
+use function is_resource;
 use function method_exists;
 use function next;
 use function spl_object_id;
+use function sprintf;
 use function str_repeat;
 use function strtr;
 use function trim;
 use function var_export;
-use function is_int;
-use function is_resource;
-use function sprintf;
 
 use const JSON_PRETTY_PRINT;
 use const JSON_THROW_ON_ERROR;
@@ -68,7 +68,9 @@ final class VarDumper
     /**
      * @param mixed $variable Variable to dump.
      */
-    private function __construct(private mixed $variable) {}
+    private function __construct(private mixed $variable)
+    {
+    }
 
     public static function setDefaultHandler(HandlerInterface $handler): void
     {
@@ -96,9 +98,9 @@ final class VarDumper
      * This method achieves the similar functionality as {@see var_dump()} and {@see print_r()}
      * but is more robust when handling complex objects.
      *
-     * @param mixed $variable Variable to be dumped.
-     * @param int $depth Maximum depth that the dumper should go into the variable. Defaults to 10.
-     * @param bool $highlight Whether the result should be syntax-highlighted.
+     * @param mixed $variable  Variable to be dumped.
+     * @param int   $depth     Maximum depth that the dumper should go into the variable. Defaults to 10.
+     * @param bool  $highlight Whether the result should be syntax-highlighted.
      *
      * @throws ReflectionException
      */
@@ -128,7 +130,7 @@ final class VarDumper
      * This method achieves the similar functionality as {@see var_dump()} and {@see print_r()}
      * but is more robust when handling complex objects.
      *
-     * @param int $depth Maximum depth that the dumper should go into the variable. Defaults to 10.
+     * @param int  $depth     Maximum depth that the dumper should go into the variable. Defaults to 10.
      * @param bool $highlight Whether the result should be syntax-highlighted.
      *
      * @throws ReflectionException
@@ -147,7 +149,7 @@ final class VarDumper
      * but is more robust when handling complex objects.
      *
      * @param bool $format Use whitespaces in returned data to format it
-     * @param int $depth Maximum depth that the dumper should go into the variable. Defaults to 10.
+     * @param int  $depth  Maximum depth that the dumper should go into the variable. Defaults to 10.
      *
      * @throws JsonException
      *
@@ -191,10 +193,10 @@ final class VarDumper
      * It also handles closures with {@see ClosureExporter} and objects
      * by using the PHP functions {@see serialize()} and {@see unserialize()}.
      *
-     * @param bool $format Whatever to format code.
-     * @param string[] $useVariables Array of variables used in `use` statement (['$params', '$config'])
-     * @param bool $serializeObjects If it is true all objects will be serialized except objects with closure(s). If it
-     * is false only objects of internal classes will be serialized.
+     * @param bool     $format           Whatever to format code.
+     * @param string[] $useVariables     Array of variables used in `use` statement (['$params', '$config'])
+     * @param bool     $serializeObjects If it is true all objects will be serialized except objects with closure(s). If it
+     *                                   is false only objects of internal classes will be serialized.
      *
      * @throws ReflectionException
      *
@@ -204,14 +206,15 @@ final class VarDumper
     {
         $this->useVarInClosures = $useVariables;
         $this->serializeObjects = $serializeObjects;
+
         return $this->exportInternal($this->variable, $format, 0);
     }
 
     /**
-     * @param mixed $var Variable to be dumped.
-     * @param bool $format Whatever to format code.
-     * @param int $depth Maximum depth.
-     * @param int $level Current depth.
+     * @param mixed $var    Variable to be dumped.
+     * @param bool  $format Whatever to format code.
+     * @param int   $depth  Maximum depth.
+     * @param int   $level  Current depth.
      *
      * @throws ReflectionException
      *
@@ -241,7 +244,7 @@ final class VarDumper
 
                 foreach ($keys as $name) {
                     if ($format) {
-                        $output .= "\n" . $spaces . $this->offset;
+                        $output .= "\n".$spaces.$this->offset;
                     }
                     $output .= $this->exportVariable($name);
                     $output .= ' => ';
@@ -249,8 +252,8 @@ final class VarDumper
                 }
 
                 return $format
-                    ? $output . "\n" . $spaces . ']'
-                    : $output . ']';
+                    ? $output."\n".$spaces.']'
+                    : $output.']';
             case 'object':
                 if ($var instanceof Closure) {
                     return $this->exportClosure($var);
@@ -260,20 +263,21 @@ final class VarDumper
                 }
 
                 if ($depth <= $level) {
-                    return $this->getObjectDescription($var) . ' (...)';
+                    return $this->getObjectDescription($var).' (...)';
                 }
 
                 $spaces = str_repeat($this->offset, $level);
-                $output = $this->getObjectDescription($var) . "\n" . $spaces . '(';
+                $output = $this->getObjectDescription($var)."\n".$spaces.'(';
                 $objectProperties = $this->getObjectProperties($var);
 
                 /** @psalm-var mixed $value */
                 foreach ($objectProperties as $name => $value) {
                     $propertyName = strtr(trim((string) $name), "\0", '::');
-                    $output .= "\n" . $spaces . $this->offset . '[' . $propertyName . '] => ';
+                    $output .= "\n".$spaces.$this->offset.'['.$propertyName.'] => ';
                     $output .= $this->dumpInternal($value, $format, $depth, $level + 1);
                 }
-                return $output . "\n" . $spaces . ')';
+
+                return $output."\n".$spaces.')';
             default:
                 return $this->exportVariable($var);
         }
@@ -281,8 +285,8 @@ final class VarDumper
 
     /**
      * @param mixed $variable Variable to be exported.
-     * @param bool $format Whatever to format code.
-     * @param int $level Current depth.
+     * @param bool  $format   Whatever to format code.
+     * @param int   $level    Current depth.
      *
      * @throws ReflectionException
      *
@@ -305,7 +309,7 @@ final class VarDumper
 
                 foreach ($keys as $key) {
                     if ($format) {
-                        $output .= "\n" . $spaces . $this->offset;
+                        $output .= "\n".$spaces.$this->offset;
                     }
                     if ($outputKeys) {
                         $output .= $this->exportVariable($key);
@@ -318,8 +322,8 @@ final class VarDumper
                 }
 
                 return $format
-                    ? $output . "\n" . $spaces . ']'
-                    : $output . ']';
+                    ? $output."\n".$spaces.']'
+                    : $output.']';
             case 'object':
                 if ($variable instanceof Closure) {
                     return $this->exportClosure($variable, $level);
@@ -329,6 +333,7 @@ final class VarDumper
                 }
 
                 $reflectionObject = new ReflectionObject($variable);
+
                 try {
                     if ($this->serializeObjects || $reflectionObject->isInternal() || $reflectionObject->isAnonymous()) {
                         return "unserialize({$this->exportVariable(serialize($variable))})";
@@ -356,6 +361,7 @@ final class VarDumper
      * @throws ReflectionException
      *
      * @return mixed
+     *
      * @psalm-param mixed $var
      */
     private function exportPrimitives(mixed $var, int $depth, int $level): mixed
@@ -369,20 +375,20 @@ final class VarDumper
 
                 return [
                     self::VAR_TYPE_PROPERTY => self::VAR_TYPE_RESOURCE,
-                    'id' => $id,
-                    'type' => $type,
-                    'closed' => !is_resource($var),
+                    'id'                    => $id,
+                    'type'                  => $type,
+                    'closed'                => !is_resource($var),
                 ];
             case 'array':
                 if ($depth <= $level) {
                     return [
-                        self::VAR_TYPE_PROPERTY => self::VAR_TYPE_ARRAY,
+                        self::VAR_TYPE_PROPERTY             => self::VAR_TYPE_ARRAY,
                         self::DEPTH_LIMIT_EXCEEDED_PROPERTY => true,
                     ];
                 }
 
                 /** @psalm-suppress MissingClosureReturnType */
-                return array_map(fn($value) => $this->exportPrimitives($value, $depth, $level + 1), $var);
+                return array_map(fn ($value) => $this->exportPrimitives($value, $depth, $level + 1), $var);
             case 'object':
                 if ($var instanceof Closure) {
                     return $this->exportClosure($var);
@@ -392,9 +398,9 @@ final class VarDumper
                 $objectId = $this->getObjectId($var);
                 if ($depth <= $level) {
                     return [
-                        self::VAR_TYPE_PROPERTY => self::VAR_TYPE_OBJECT,
-                        self::OBJECT_ID_PROPERTY => $objectId,
-                        self::OBJECT_CLASS_PROPERTY => $objectClass,
+                        self::VAR_TYPE_PROPERTY             => self::VAR_TYPE_OBJECT,
+                        self::OBJECT_ID_PROPERTY            => $objectId,
+                        self::OBJECT_CLASS_PROPERTY         => $objectClass,
                         self::DEPTH_LIMIT_EXCEEDED_PROPERTY => true,
                     ];
                 }
@@ -402,7 +408,7 @@ final class VarDumper
                 $objectProperties = $this->getObjectProperties($var);
 
                 $output = [
-                    self::OBJECT_ID_PROPERTY => $objectId,
+                    self::OBJECT_ID_PROPERTY    => $objectId,
                     self::OBJECT_CLASS_PROPERTY => $objectClass,
                 ];
                 /**
@@ -414,6 +420,7 @@ final class VarDumper
                     /** @psalm-suppress MixedAssignment */
                     $output[$propertyName] = $this->exportPrimitives($value, $depth, $level + 1);
                 }
+
                 return $output;
             default:
                 return $var;
@@ -470,26 +477,26 @@ final class VarDumper
         $spaces = str_repeat($this->offset, $level);
         $objectProperties = $this->getObjectProperties($variable);
         $class = $variable::class;
-        $use = $this->useVarInClosures === [] ? '' : ' use (' . implode(', ', $this->useVarInClosures) . ')';
-        $lines = ['(static function ()' . $use . ' {',];
+        $use = $this->useVarInClosures === [] ? '' : ' use ('.implode(', ', $this->useVarInClosures).')';
+        $lines = ['(static function ()'.$use.' {'];
         if ($reflectionObject->getConstructor() === null) {
             $lines = [
                 ...$lines,
-                $this->offset . '$object = new ' . $class . '();',
-                $this->offset . '(function ()' . $use . ' {',
+                $this->offset.'$object = new '.$class.'();',
+                $this->offset.'(function ()'.$use.' {',
             ];
         } else {
             $lines = [
                 ...$lines,
-                $this->offset . '$class = new \ReflectionClass(\'' . $class . '\');',
-                $this->offset . '$object = $class->newInstanceWithoutConstructor();',
-                $this->offset . '(function ()' . $use . ' {',
+                $this->offset.'$class = new \ReflectionClass(\''.$class.'\');',
+                $this->offset.'$object = $class->newInstanceWithoutConstructor();',
+                $this->offset.'(function ()'.$use.' {',
             ];
         }
         $endLines = [
-            $this->offset . '})->bindTo($object, \'' . $class . '\')();',
+            $this->offset.'})->bindTo($object, \''.$class.'\')();',
             '',
-            $this->offset . 'return $object;',
+            $this->offset.'return $object;',
             '})()',
         ];
 
@@ -499,11 +506,11 @@ final class VarDumper
          */
         foreach ($objectProperties as $name => $value) {
             $propertyName = $this->getPropertyName($name);
-            $lines[] = $this->offset . $this->offset . '$this->' . $propertyName . ' = '
-                . $this->exportInternal($value, $format, $level + 2) . ';';
+            $lines[] = $this->offset.$this->offset.'$this->'.$propertyName.' = '
+                .$this->exportInternal($value, $format, $level + 2).';';
         }
 
-        return implode("\n" . ($format ? $spaces : ''), array_merge($lines, $endLines));
+        return implode("\n".($format ? $spaces : ''), array_merge($lines, $endLines));
     }
 
     /**
@@ -534,7 +541,7 @@ final class VarDumper
 
     private function getObjectDescription(object $object): string
     {
-        return $object::class . '#' . $this->getObjectId($object);
+        return $object::class.'#'.$this->getObjectId($object);
     }
 
     private function getObjectId(object $object): string

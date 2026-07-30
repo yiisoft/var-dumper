@@ -24,7 +24,7 @@ final class DummyDebugInfo
     public function __debugInfo(): array
     {
         return [
-            'volume' => $this->volume,
+            'volume'     => $this->volume,
             'totalPrice' => $this->volume * $this->unitPrice,
         ];
     }

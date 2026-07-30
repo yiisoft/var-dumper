@@ -39,7 +39,7 @@ if (!\function_exists('dd')) {
     {
         d(...$variables);
 
-        die(0);
+        exit(0);
     }
 }
 

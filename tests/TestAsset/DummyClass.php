@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Yiisoft\VarDumper\Tests\TestAsset;
 
-use Yiisoft\VarDumper\Tests\VarDumperTest;
 use Closure;
+use Yiisoft\VarDumper\Tests\VarDumperTest;
 
 /**
  * CustomDebugInfo serves for the testing of `__debugInfo()` PHP magic method.
