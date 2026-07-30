@@ -4,34 +4,34 @@ declare(strict_types=1);
 
 use Yiisoft\VarDumper\VarDumper;
 
-if (!function_exists('d')) {
+if (!\function_exists('d')) {
     /**
      * Prints variables.
      *
      * @param mixed ...$variables Variables to be dumped.
      *
-     * @see \Yiisoft\VarDumper\VarDumper::dump()
+     * @see VarDumper::dump()
      *
      * @psalm-suppress MixedAssignment
      */
     function d(mixed ...$variables): void
     {
-        $highlight = PHP_SAPI !== 'cli';
+        $highlight = \PHP_SAPI !== 'cli';
 
         foreach ($variables as $variable) {
             VarDumper::dump($variable, 10, $highlight);
-            echo $highlight ? '<br>' : PHP_EOL;
+            echo $highlight ? '<br>' : \PHP_EOL;
         }
     }
 }
 
-if (!function_exists('dd')) {
+if (!\function_exists('dd')) {
     /**
      * Prints variables and terminate the current script.
      *
      * @param mixed ...$variables Variables to be dumped.
      *
-     * @see \Yiisoft\VarDumper\VarDumper::dump()
+     * @see VarDumper::dump()
      *
      * @psalm-suppress MixedAssignment
      */
@@ -43,7 +43,7 @@ if (!function_exists('dd')) {
     }
 }
 
-if (!function_exists('dump')) {
+if (!\function_exists('dump')) {
     /**
      * Prints variables and terminate the current script.
      *

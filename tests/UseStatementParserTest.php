@@ -13,6 +13,8 @@ use function fwrite;
 use function stream_get_meta_data;
 use function tmpfile;
 
+use const DIRECTORY_SEPARATOR;
+
 final class UseStatementParserTest extends TestCase
 {
     public function incorrectFileProvider(): array

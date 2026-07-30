@@ -17,6 +17,14 @@ use function strpos;
 use function strrchr;
 use function substr;
 
+use const T_AS;
+use const T_NAME_FULLY_QUALIFIED;
+use const T_NAME_QUALIFIED;
+use const T_NAME_RELATIVE;
+use const T_NS_SEPARATOR;
+use const T_STRING;
+use const T_USE;
+
 /**
  * UseStatementParser given a PHP file, returns a set of `use` statements from the code.
  */

@@ -7,6 +7,8 @@ namespace Yiisoft\VarDumper\Tests\Handler;
 use PHPUnit\Framework\TestCase;
 use Yiisoft\VarDumper\Handler\EchoHandler;
 
+use const PHP_VERSION_ID;
+
 final class EchoHandlerTest extends TestCase
 {
     public function testEcho(): void
