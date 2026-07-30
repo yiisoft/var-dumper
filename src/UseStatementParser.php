@@ -113,7 +113,7 @@ final class UseStatementParser
             }
             if ($token === ',' || $token === ';') {
                 if ($current !== '') {
-                    $uses[] = $commonNamespace . $current;
+                    $uses[] = $commonNamespace.$current;
                     $current = '';
                 }
             }

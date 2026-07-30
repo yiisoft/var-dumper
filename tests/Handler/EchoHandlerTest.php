@@ -27,7 +27,7 @@ final class EchoHandlerTest extends TestCase
         $handler->handle('test', 1, true);
 
         if (PHP_VERSION_ID >= 80300) {
-            $expected = <<<HTML
+            $expected = <<<'HTML'
                 <pre><code style="color: #000000"><span style="color: #DD0000">'test'</span></code></pre>
                 HTML;
         } else {

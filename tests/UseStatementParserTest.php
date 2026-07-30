@@ -21,7 +21,7 @@ final class UseStatementParserTest extends TestCase
     {
         return [
             'non-exists-file' => ['non-exists-file'],
-            'directory' => [__DIR__],
+            'directory'       => [__DIR__],
         ];
     }
 
@@ -81,7 +81,7 @@ final class UseStatementParserTest extends TestCase
             [
                 'use Yiisoft\{Arrays\ArrayHelper, Arrays\ArrayableTrait};',
                 [
-                    'ArrayHelper' => '\Yiisoft\Arrays\ArrayHelper',
+                    'ArrayHelper'    => '\Yiisoft\Arrays\ArrayHelper',
                     'ArrayableTrait' => '\Yiisoft\Arrays\ArrayableTrait',
                 ],
             ],
@@ -108,7 +108,7 @@ final class UseStatementParserTest extends TestCase
         foreach ($examples as &$example) {
             $tmpFile = tmpfile();
             $handles[] = $tmpFile;
-            fwrite($tmpFile, '<?php ' . $example[0]);
+            fwrite($tmpFile, '<?php '.$example[0]);
 
             $example[0] = stream_get_meta_data($tmpFile)['uri'];
         }
