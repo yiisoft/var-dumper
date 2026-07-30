@@ -11,7 +11,6 @@ use PHPUnit\Framework\TestCase;
 use Yiisoft\VarDumper\ClosureExporter;
 use Yiisoft\VarDumper as V;
 use Yiisoft\Yii\Debug as D;
-use E\F\G\H\I\J\K\L\M\N;
 
 final class ClosureExporterTest extends TestCase
 {
@@ -91,7 +90,7 @@ final class ClosureExporterTest extends TestCase
         $output = $exporter->export(fn(D\A\B\C $date) => new DateTimeZone(''));
         $this->assertSame("fn(\Yiisoft\Yii\Debug\A\B\C \$date) => new \DateTimeZone('')", $output);
 
-        $output = $exporter->export(fn(N $date) => new DateTimeZone(''));
+        $output = $exporter->export(fn(\E\F\G\H\I\J\K\L\M\N $date) => new DateTimeZone(''));
         $this->assertSame("fn(\E\F\G\H\I\J\K\L\M\N \$date) => new \DateTimeZone('')", $output);
     }
 
