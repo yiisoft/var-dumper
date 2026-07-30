@@ -25,6 +25,12 @@ use function str_repeat;
 use function strtr;
 use function trim;
 use function var_export;
+use function is_int;
+use function is_resource;
+use function sprintf;
+
+use const JSON_PRETTY_PRINT;
+use const JSON_THROW_ON_ERROR;
 
 /**
  * VarDumper provides enhanced versions of the PHP functions {@see var_dump()} and {@see var_export()}.
@@ -62,9 +68,7 @@ final class VarDumper
     /**
      * @param mixed $variable Variable to dump.
      */
-    private function __construct(private mixed $variable)
-    {
-    }
+    private function __construct(private mixed $variable) {}
 
     public static function setDefaultHandler(HandlerInterface $handler): void
     {
@@ -324,7 +328,6 @@ final class VarDumper
                     return $this->exportDateTime($variable);
                 }
 
-
                 $reflectionObject = new ReflectionObject($variable);
                 try {
                     if ($this->serializeObjects || $reflectionObject->isInternal() || $reflectionObject->isAnonymous()) {
@@ -379,7 +382,7 @@ final class VarDumper
                 }
 
                 /** @psalm-suppress MissingClosureReturnType */
-                return array_map(fn ($value) => $this->exportPrimitives($value, $depth, $level + 1), $var);
+                return array_map(fn($value) => $this->exportPrimitives($value, $depth, $level + 1), $var);
             case 'object':
                 if ($var instanceof Closure) {
                     return $this->exportClosure($var);
@@ -496,15 +499,15 @@ final class VarDumper
          */
         foreach ($objectProperties as $name => $value) {
             $propertyName = $this->getPropertyName($name);
-            $lines[] = $this->offset . $this->offset . '$this->' . $propertyName . ' = ' .
-                $this->exportInternal($value, $format, $level + 2) . ';';
+            $lines[] = $this->offset . $this->offset . '$this->' . $propertyName . ' = '
+                . $this->exportInternal($value, $format, $level + 2) . ';';
         }
 
         return implode("\n" . ($format ? $spaces : ''), array_merge($lines, $endLines));
     }
 
     /**
-     * Exports a {@see \Closure} instance.
+     * Exports a {@see Closure} instance.
      *
      * @param Closure $closure Closure instance.
      *
@@ -555,7 +558,7 @@ final class VarDumper
             "new \%s('%s', new \DateTimeZone('%s'))",
             $variable::class,
             $variable->format(DateTimeInterface::RFC3339_EXTENDED),
-            $variable->getTimezone()->getName()
+            $variable->getTimezone()->getName(),
         );
     }
 }

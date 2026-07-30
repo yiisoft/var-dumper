@@ -12,6 +12,12 @@ use RuntimeException;
 use stdClass;
 use Yiisoft\VarDumper\Handler\StreamHandler;
 
+use function is_resource;
+use function strlen;
+
+use const AF_UNIX;
+use const SOCK_DGRAM;
+
 final class StreamHandlerTest extends TestCase
 {
     /**
@@ -66,7 +72,7 @@ final class StreamHandlerTest extends TestCase
         $stream = fopen('php://memory', 'wb+');
         $handler = $this->createStreamHandler($stream);
 
-        $handler = $handler->withEncoder(fn (mixed $variable): string => (string) strlen($variable));
+        $handler = $handler->withEncoder(fn(mixed $variable): string => (string) strlen($variable));
 
         $handler->handle('test', 1);
 
@@ -151,7 +157,7 @@ final class StreamHandlerTest extends TestCase
         $stream = fopen('php://memory', 'wb+');
         $handler = $this->createStreamHandler($stream);
 
-        $handler = $handler->withEncoder(fn (mixed $variable): int => strlen($variable));
+        $handler = $handler->withEncoder(fn(mixed $variable): int => strlen($variable));
 
         $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('Encoder must return a string, "int" returned.');
@@ -189,7 +195,7 @@ final class StreamHandlerTest extends TestCase
     public function testImmutability(): void
     {
         $handler1 = $this->createStreamHandler('php://memory');
-        $handler2 = $handler1->withEncoder(fn (mixed $variable): string => (string) strlen($variable));
+        $handler2 = $handler1->withEncoder(fn(mixed $variable): string => (string) strlen($variable));
 
         $this->assertInstanceOf(StreamHandler::class, $handler2);
         $this->assertNotSame($handler1, $handler2);

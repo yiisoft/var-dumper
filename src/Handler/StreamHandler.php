@@ -14,6 +14,8 @@ use function fwrite;
 use function get_debug_type;
 use function is_resource;
 use function is_string;
+use function sprintf;
+use function strlen;
 
 /**
  * Uses stream ({@link https://www.php.net/manual/en/intro.stream.php}) for writing variable's data. Requires "sockets"
@@ -21,6 +23,7 @@ use function is_string;
  */
 final class StreamHandler implements HandlerInterface
 {
+    private const SOCKET_PROTOCOLS = ['udp', 'udg', 'tcp', 'unix'];
     /**
      * @var callable|null
      */
@@ -35,20 +38,18 @@ final class StreamHandler implements HandlerInterface
      */
     private mixed $uri;
 
-    private const SOCKET_PROTOCOLS = ['udp', 'udg', 'tcp', 'unix'];
-
     /**
      * @param mixed|resource|string $uri
      */
     public function __construct(
-        mixed $uri = 'udp://127.0.0.1:8890'
+        mixed $uri = 'udp://127.0.0.1:8890',
     ) {
         if (!is_string($uri) && !is_resource($uri) && !$uri instanceof Socket) {
             throw new InvalidArgumentException(
                 sprintf(
                     'Argument $uri must be either a string, a resource or a Socket instance, "%s" given.',
-                    get_debug_type($uri)
-                )
+                    get_debug_type($uri),
+                ),
             );
         }
         $this->uri = $uri;
@@ -72,8 +73,8 @@ final class StreamHandler implements HandlerInterface
             throw new RuntimeException(
                 sprintf(
                     'Encoder must return a string, "%s" returned.',
-                    get_debug_type($data)
-                )
+                    get_debug_type($data),
+                ),
             );
         }
 
