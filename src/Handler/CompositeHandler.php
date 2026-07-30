@@ -18,8 +18,7 @@ final class CompositeHandler implements HandlerInterface
      */
     public function __construct(
         private array $handlers,
-    ) {
-    }
+    ) {}
 
     public function handle(mixed $variable, int $depth, bool $highlight = false): void
     {

@@ -23,7 +23,7 @@ final class EchoHandler implements HandlerInterface
 
     private function highlight(string $string): string
     {
-        $result = highlight_string("<?php\n".$string, true);
+        $result = highlight_string("<?php\n" . $string, true);
 
         $pattern = PHP_VERSION_ID >= 80300
             ? '~<span style="color: #0000BB">&lt;\\?php\n</span>~'

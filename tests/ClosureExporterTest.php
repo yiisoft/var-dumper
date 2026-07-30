@@ -50,7 +50,7 @@ final class ClosureExporterTest extends TestCase
     public function testShort(): void
     {
         $exporter = new ClosureExporter();
-        $output = $exporter->export(fn (int $test): int => 42 + $test);
+        $output = $exporter->export(fn(int $test): int => 42 + $test);
 
         $this->assertEquals('fn(int $test): int => 42 + $test', $output);
     }
@@ -58,7 +58,7 @@ final class ClosureExporterTest extends TestCase
     public function testShortReference(): void
     {
         $exporter = new ClosureExporter();
-        $fn = fn (int $test): int => 42 + $test;
+        $fn = fn(int $test): int => 42 + $test;
         $output = $exporter->export($fn);
 
         $this->assertEquals('fn(int $test): int => 42 + $test', $output);
@@ -67,7 +67,7 @@ final class ClosureExporterTest extends TestCase
     public function testShortStatic(): void
     {
         $exporter = new ClosureExporter();
-        $output = $exporter->export(static fn (int $test): int => 42 + $test);
+        $output = $exporter->export(static fn(int $test): int => 42 + $test);
 
         $this->assertEquals('static fn(int $test): int => 42 + $test', $output);
     }
@@ -75,7 +75,7 @@ final class ClosureExporterTest extends TestCase
     public function testShortWithImport(): void
     {
         $exporter = new ClosureExporter();
-        $output = $exporter->export(fn (V\VarDumper $date) => new DateTimeZone(''));
+        $output = $exporter->export(fn(V\VarDumper $date) => new DateTimeZone(''));
         $this->assertSame("fn(\Yiisoft\VarDumper\VarDumper \$date) => new \DateTimeZone('')", $output);
     }
 
@@ -83,27 +83,27 @@ final class ClosureExporterTest extends TestCase
     {
         $exporter = new ClosureExporter();
 
-        $output = $exporter->export(static fn (D\Dumper $date) => new DateTimeZone(''));
+        $output = $exporter->export(static fn(D\Dumper $date) => new DateTimeZone(''));
         $this->assertSame("static fn(\Yiisoft\Yii\Debug\Dumper \$date) => new \DateTimeZone('')", $output);
 
-        $output = $exporter->export(fn (D\A\B\C $date) => new DateTimeZone(''));
+        $output = $exporter->export(fn(D\A\B\C $date) => new DateTimeZone(''));
         $this->assertSame("fn(\Yiisoft\Yii\Debug\A\B\C \$date) => new \DateTimeZone('')", $output);
 
-        $output = $exporter->export(fn (N $date) => new DateTimeZone(''));
+        $output = $exporter->export(fn(N $date) => new DateTimeZone(''));
         $this->assertSame("fn(\E\F\G\H\I\J\K\L\M\N \$date) => new \DateTimeZone('')", $output);
     }
 
     public function testLongWithExistingImport(): void
     {
         $exporter = new ClosureExporter();
-        $output = $exporter->export(fn (ClosureExporter $date) => new DateTimeZone(''));
+        $output = $exporter->export(fn(ClosureExporter $date) => new DateTimeZone(''));
         $this->assertSame("fn(\Yiisoft\VarDumper\ClosureExporter \$date) => new \DateTimeZone('')", $output);
     }
 
     public function testStaticMethodCallImport(): void
     {
         $exporter = new ClosureExporter();
-        $output = $exporter->export(fn (DateTimeZone $date) => DateTimeZone::listAbbreviations());
+        $output = $exporter->export(fn(DateTimeZone $date) => DateTimeZone::listAbbreviations());
         $this->assertSame("fn(\DateTimeZone \$date) => \DateTimeZone::listAbbreviations()", $output);
     }
 }
