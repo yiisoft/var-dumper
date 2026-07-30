@@ -12,7 +12,6 @@ use function array_filter;
 use function array_pop;
 use function array_shift;
 use function array_slice;
-use function count;
 use function explode;
 use function file;
 use function implode;
@@ -24,12 +23,8 @@ use function mb_substr;
 use function token_get_all;
 use function trim;
 
-use const T_FN;
-use const T_FUNCTION;
-use const T_STATIC;
-
 /**
- * ClosureExporter exports PHP {@see Closure} as a string containing PHP code.
+ * ClosureExporter exports PHP {@see \Closure} as a string containing PHP code.
  *
  * The string is a valid PHP expression that can be evaluated by PHP parser
  * and the evaluation result will give back the closure instance.
@@ -47,7 +42,7 @@ final class ClosureExporter
      * Export closure as a string containing PHP code.
      *
      * @param Closure $closure Closure to export.
-     * @param int     $level   Level for padding.
+     * @param int $level Level for padding.
      *
      * @throws ReflectionException
      *
@@ -65,7 +60,7 @@ final class ClosureExporter
             return 'function () {/* Error: unable to determine Closure source */}';
         }
 
-        $start--;
+        --$start;
         $uses = $this->useStatementParser->fromFile($fileName);
         $tokens = token_get_all('<?php ' . implode('', array_slice($fileContent, $start, $end - $start)));
         array_shift($tokens);
@@ -118,7 +113,7 @@ final class ClosureExporter
                     if ($pendingParenthesisCount === 0) {
                         break;
                     }
-                    $pendingParenthesisCount--;
+                    --$pendingParenthesisCount;
                 } elseif ($token === ',' || $token === ';') {
                     if ($pendingParenthesisCount === 0) {
                         break;
@@ -153,7 +148,6 @@ final class ClosureExporter
         }
 
         $spaces = $level <= 1 ? '' : str_repeat(' ', ($level - 1) * 4);
-
         return implode("\n" . $spaces, [$fistLine, ...$code]);
     }
 
@@ -167,17 +161,16 @@ final class ClosureExporter
     private function getUseLastPart(string $use): string
     {
         $parts = array_filter(explode('\\', $use));
-
         return (string) array_pop($parts);
     }
 
     /**
      * Processes and returns the full use statement data.
      *
-     * @param string                $use  The use statement data to process.
+     * @param string $use The use statement data to process.
      * @param array<string, string> $uses The use statement data.
      *
-     * @return string The processed full use statement.
+         * @return string The processed full use statement.
      */
     private function processFullUse(string $use, array $uses): string
     {

@@ -13,15 +13,13 @@ use function fwrite;
 use function stream_get_meta_data;
 use function tmpfile;
 
-use const DIRECTORY_SEPARATOR;
-
 final class UseStatementParserTest extends TestCase
 {
     public function incorrectFileProvider(): array
     {
         return [
             'non-exists-file' => ['non-exists-file'],
-            'directory'       => [__DIR__],
+            'directory' => [__DIR__],
         ];
     }
 
@@ -81,7 +79,7 @@ final class UseStatementParserTest extends TestCase
             [
                 'use Yiisoft\{Arrays\ArrayHelper, Arrays\ArrayableTrait};',
                 [
-                    'ArrayHelper'    => '\Yiisoft\Arrays\ArrayHelper',
+                    'ArrayHelper' => '\Yiisoft\Arrays\ArrayHelper',
                     'ArrayableTrait' => '\Yiisoft\Arrays\ArrayableTrait',
                 ],
             ],

@@ -31,8 +31,6 @@ use function str_replace;
 use function unserialize;
 use function var_export;
 
-use const PHP_EOL;
-
 final class VarDumperTest extends TestCase
 {
     private const PHP_FORMAT = 'Y-m-d H:i:s.u';
@@ -73,7 +71,7 @@ final class VarDumperTest extends TestCase
 
         yield 'incomplete object' => [
             $incompleteObject,
-            <<<'S'
+            <<<S
                 unserialize('O:16:"nonExistingClass":0:{}')
                 S,
         ];
@@ -82,27 +80,27 @@ final class VarDumperTest extends TestCase
 
         yield 'empty object' => [
             $emptyObject,
-            <<<'S'
+            <<<S
                 unserialize('O:8:"stdClass":0:{}')
                 S,
         ];
         yield 'short function' => [
             // @formatter:off
-            fn() => 1,
+            fn () => 1,
             // @formatter:on
-            'fn() => 1',
+            'fn () => 1',
         ];
         yield 'short static function' => [
             // @formatter:off
-            static fn() => 1,
+            static fn () => 1,
             // @formatter:on
-            'static fn() => 1',
+            'static fn () => 1',
         ];
         yield 'function' => [
             function () {
                 return 1;
             },
-            <<<'PHP'
+            <<<PHP
             function () {
                 return 1;
             }
@@ -112,7 +110,7 @@ final class VarDumperTest extends TestCase
             static function () {
                 return 1;
             },
-            <<<'PHP'
+            <<<PHP
             static function () {
                 return 1;
             }
@@ -156,7 +154,7 @@ final class VarDumperTest extends TestCase
                 'two',
                 'three',
             ],
-            <<<'S'
+            <<<S
             [
                 'one',
                 'two',
@@ -166,11 +164,11 @@ final class VarDumperTest extends TestCase
         ];
         yield 'array of 3 elements, custom keys' => [
             [
-                2     => 'one',
+                2 => 'one',
                 'two' => 'two',
-                0     => 'three',
+                0 => 'three',
             ],
-            <<<'S'
+            <<<S
             [
                 2 => 'one',
                 'two' => 'two',
@@ -180,37 +178,37 @@ final class VarDumperTest extends TestCase
         ];
         yield 'closure in array' => [
             // @formatter:off
-            [fn() => new DateTimeZone('')],
+            [fn () => new DateTimeZone('')],
             // @formatter:on
             <<<S
             [
-                fn() => new \DateTimeZone(''),
+                fn () => new \DateTimeZone(''),
             ]
             S,
         ];
         yield 'original class name' => [
             // @formatter:off
-            static fn(VarDumper $date) => new DateTimeZone(''),
+            static fn (VarDumper $date) => new DateTimeZone(''),
             // @formatter:on
-            "static fn(\Yiisoft\VarDumper\VarDumper \$date) => new \DateTimeZone('')",
+            "static fn (\Yiisoft\VarDumper\VarDumper \$date) => new \DateTimeZone('')",
         ];
         yield 'class alias' => [
             // @formatter:off
-            fn(Dumper $date) => new DateTimeZone(''),
+            fn (Dumper $date) => new DateTimeZone(''),
             // @formatter:on
-            "fn(\Yiisoft\VarDumper\VarDumper \$date) => new \DateTimeZone('')",
+            "fn (\Yiisoft\VarDumper\VarDumper \$date) => new \DateTimeZone('')",
         ];
         yield 'namespace alias' => [
             // @formatter:off
-            fn(Dumper $date) => new DateTimeZone(''),
+            fn (Dumper $date) => new DateTimeZone(''),
             // @formatter:on
-            "fn(\Yiisoft\VarDumper\VarDumper \$date) => new \DateTimeZone('')",
+            "fn (\Yiisoft\VarDumper\VarDumper \$date) => new \DateTimeZone('')",
         ];
         yield 'closure with null-collision operator' => [
             // @formatter:off
-            fn() => $_ENV['var'] ?? null,
+            fn () => $_ENV['var'] ?? null,
             // @formatter:on
-            "fn() => \$_ENV['var'] ?? null",
+            "fn () => \$_ENV['var'] ?? null",
         ];
 
         $objectWithReferences1 = new stdClass();
@@ -220,7 +218,7 @@ final class VarDumperTest extends TestCase
 
         yield 'object with references' => [
             $objectWithReferences1,
-            <<<'S'
+            <<<S
             unserialize('O:8:"stdClass":1:{s:6:"object";O:8:"stdClass":1:{s:6:"object";r:1;}}')
             S,
         ];
@@ -245,21 +243,21 @@ final class VarDumperTest extends TestCase
     {
         yield 'short function' => [
             // @formatter:off
-            fn() => 1,
+            fn () => 1,
             // @formatter:on
-            'fn() => 1',
+            'fn () => 1',
         ];
         yield 'short static function' => [
             // @formatter:off
-            static fn() => 1,
+            static fn () => 1,
             // @formatter:on
-            'static fn() => 1',
+            'static fn () => 1',
         ];
         yield 'function' => [
             function () {
                 return 1;
             },
-            <<<'PHP'
+            <<<PHP
             function () {
                 return 1;
             }
@@ -269,7 +267,7 @@ final class VarDumperTest extends TestCase
             static function () {
                 return 1;
             },
-            <<<'PHP'
+            <<<PHP
             static function () {
                 return 1;
             }
@@ -317,41 +315,41 @@ final class VarDumperTest extends TestCase
         ];
         yield 'array of 3 elements, custom keys' => [
             [
-                2     => 'one',
+                2 => 'one',
                 'two' => 'two',
-                0     => 'three',
+                0 => 'three',
             ],
             "[2 => 'one','two' => 'two',0 => 'three']",
         ];
         yield 'closure in array' => [
             // @formatter:off
-            [fn() => new DateTimeZone('')],
+            [fn () => new DateTimeZone('')],
             // @formatter:on
-            "[fn() => new \DateTimeZone('')]",
+            "[fn () => new \DateTimeZone('')]",
         ];
         yield 'original class name' => [
             // @formatter:off
-            fn(VarDumper $date) => new DateTimeZone(''),
+            fn (VarDumper $date) => new DateTimeZone(''),
             // @formatter:on
-            "fn(\Yiisoft\VarDumper\VarDumper \$date) => new \DateTimeZone('')",
+            "fn (\Yiisoft\VarDumper\VarDumper \$date) => new \DateTimeZone('')",
         ];
         yield 'class alias' => [
             // @formatter:off
-            fn(Dumper $date) => new DateTimeZone(''),
+            fn (Dumper $date) => new DateTimeZone(''),
             // @formatter:on
-            "fn(\Yiisoft\VarDumper\VarDumper \$date) => new \DateTimeZone('')",
+            "fn (\Yiisoft\VarDumper\VarDumper \$date) => new \DateTimeZone('')",
         ];
         yield 'namespace alias' => [
             // @formatter:off
-            fn(Dumper $date) => new DateTimeZone(''),
+            fn (Dumper $date) => new DateTimeZone(''),
             // @formatter:on
-            "fn(\Yiisoft\VarDumper\VarDumper \$date) => new \DateTimeZone('')",
+            "fn (\Yiisoft\VarDumper\VarDumper \$date) => new \DateTimeZone('')",
         ];
         yield 'closure with null-collision operator' => [
             // @formatter:off
-            fn() => $_ENV['var'] ?? null,
+            fn () => $_ENV['var'] ?? null,
             // @formatter:on
-            "fn() => \$_ENV['var'] ?? null",
+            "fn () => \$_ENV['var'] ?? null",
         ];
     }
 
@@ -369,7 +367,8 @@ final class VarDumperTest extends TestCase
     public static function exportWithObjectSerializationFailDataProvider(): iterable
     {
         yield 'Anonymous-instance' => [
-            $object = new class {},
+            $object = new class () {
+            },
             var_export(VarDumper::create($object)->asString(), true),
         ];
     }
@@ -388,71 +387,72 @@ final class VarDumperTest extends TestCase
     public static function exportObjectWithClosureDataProvider(): iterable
     {
         $objectWithClosureInProperty = new stdClass();
-        $objectWithClosureInProperty->a = fn() => 1;
+        $objectWithClosureInProperty->a = fn () => 1;
         $objectWithClosureInPropertyId = spl_object_id($objectWithClosureInProperty);
+
 
         yield 'closure in stdClass property' => [
             $objectWithClosureInProperty,
             <<<EOT
             'stdClass#{$objectWithClosureInPropertyId}
             (
-                [a] => fn() => 1
+                [a] => fn () => 1
             )'
             EOT,
         ];
         yield 'ArrayableInterface-instance-with-Closure' => [
             new DummyArrayableWithClosure(),
-            <<<'EOT'
+            <<<EOT
             (static function () {
-                $class = new \ReflectionClass('Yiisoft\VarDumper\Tests\TestAsset\DummyArrayableWithClosure');
-                $object = $class->newInstanceWithoutConstructor();
+                \$class = new \\ReflectionClass('Yiisoft\\VarDumper\\Tests\\TestAsset\\DummyArrayableWithClosure');
+                \$object = \$class->newInstanceWithoutConstructor();
                 (function () {
-                    $this->closure = static fn(): string => self::class;
-                })->bindTo($object, 'Yiisoft\VarDumper\Tests\TestAsset\DummyArrayableWithClosure')();
+                    \$this->closure = static fn (): string => self::class;
+                })->bindTo(\$object, 'Yiisoft\\VarDumper\\Tests\\TestAsset\\DummyArrayableWithClosure')();
 
-                return $object;
+                return \$object;
             })()
             EOT,
         ];
         yield 'JsonSerializable-instance-with-Closure' => [
             new DummyJsonSerializableWithClosure(),
-            <<<'EOT'
+            <<<EOT
             (static function () {
-                $class = new \ReflectionClass('Yiisoft\VarDumper\Tests\TestAsset\DummyJsonSerializableWithClosure');
-                $object = $class->newInstanceWithoutConstructor();
+                \$class = new \\ReflectionClass('Yiisoft\\VarDumper\\Tests\\TestAsset\\DummyJsonSerializableWithClosure');
+                \$object = \$class->newInstanceWithoutConstructor();
                 (function () {
-                    $this->closure = static fn(): string => self::class;
-                })->bindTo($object, 'Yiisoft\VarDumper\Tests\TestAsset\DummyJsonSerializableWithClosure')();
+                    \$this->closure = static fn (): string => self::class;
+                })->bindTo(\$object, 'Yiisoft\\VarDumper\\Tests\\TestAsset\\DummyJsonSerializableWithClosure')();
 
-                return $object;
+                return \$object;
             })()
             EOT,
         ];
         yield 'IteratorAggregate-instance-with-Closure' => [
             new DummyIteratorAggregateWithClosure(),
-            <<<'EOT'
+            <<<EOT
             (static function () {
-                $class = new \ReflectionClass('Yiisoft\VarDumper\Tests\TestAsset\DummyIteratorAggregateWithClosure');
-                $object = $class->newInstanceWithoutConstructor();
+                \$class = new \\ReflectionClass('Yiisoft\\VarDumper\\Tests\\TestAsset\\DummyIteratorAggregateWithClosure');
+                \$object = \$class->newInstanceWithoutConstructor();
                 (function () {
-                    $this->closure = static fn(): string => __CLASS__;
-                })->bindTo($object, 'Yiisoft\VarDumper\Tests\TestAsset\DummyIteratorAggregateWithClosure')();
+                    \$this->closure = static fn (): string => __CLASS__;
+                })->bindTo(\$object, 'Yiisoft\\VarDumper\\Tests\\TestAsset\\DummyIteratorAggregateWithClosure')();
 
-                return $object;
+                return \$object;
             })()
             EOT,
         ];
         yield 'Stringable-instance-with-Closure' => [
             new DummyStringableWithClosure(),
-            <<<'EOT'
+            <<<EOT
             (static function () {
-                $class = new \ReflectionClass('Yiisoft\VarDumper\Tests\TestAsset\DummyStringableWithClosure');
-                $object = $class->newInstanceWithoutConstructor();
+                \$class = new \\ReflectionClass('Yiisoft\\VarDumper\\Tests\\TestAsset\\DummyStringableWithClosure');
+                \$object = \$class->newInstanceWithoutConstructor();
                 (function () {
-                    $this->closure = static fn(): string => self::class;
-                })->bindTo($object, 'Yiisoft\VarDumper\Tests\TestAsset\DummyStringableWithClosure')();
+                    \$this->closure = static fn (): string => self::class;
+                })->bindTo(\$object, 'Yiisoft\\VarDumper\\Tests\\TestAsset\\DummyStringableWithClosure')();
 
-                return $object;
+                return \$object;
             })()
             EOT,
         ];
@@ -461,7 +461,7 @@ final class VarDumperTest extends TestCase
     public function testExportWithClosureArray(): void
     {
         $var = [
-            ClosureExporter::class    => static fn() => new ClosureExporter(),
+            ClosureExporter::class => static fn () => new ClosureExporter(),
             UseStatementParser::class => static function ($container) {
                 return $container->get(UseStatementParser::class);
             },
@@ -471,14 +471,14 @@ final class VarDumperTest extends TestCase
         $expectedResult = preg_replace(
             '/\s/',
             '',
-            <<<'EOT'
+            <<<EOT
                 [
-                    'Yiisoft\\VarDumper\\ClosureExporter' => static fn() => new \Yiisoft\VarDumper\ClosureExporter(),
-                    'Yiisoft\\VarDumper\\UseStatementParser' => static function ($container) {
-                        return $container->get(\Yiisoft\VarDumper\UseStatementParser::class);
+                    'Yiisoft\\\\VarDumper\\\\ClosureExporter' => static fn () => new \\Yiisoft\\VarDumper\\ClosureExporter(),
+                    'Yiisoft\\\\VarDumper\\\\UseStatementParser' => static function (\$container) {
+                        return \$container->get(\\Yiisoft\\VarDumper\\UseStatementParser::class);
                     },
                 ]
-            EOT,
+            EOT
         );
 
         $this->assertEqualsWithoutLE($expectedResult, $exportResult);
@@ -510,8 +510,8 @@ final class VarDumperTest extends TestCase
         $config = ['value' => 5];
         $dummyDebugInfoWithClosure = new DummyClass();
         $dummyDebugInfoWithClosure->volume = 10;
-        $dummyDebugInfoWithClosure->params = fn() => $params;
-        $dummyDebugInfoWithClosure->config = fn() => $config;
+        $dummyDebugInfoWithClosure->params = fn () => $params;
+        $dummyDebugInfoWithClosure->config = fn () => $config;
         $dummyDebugInfoWithClosure->unitPrice = 15;
 
         yield 'custom debug info with use vars' => [
@@ -523,8 +523,8 @@ final class VarDumperTest extends TestCase
                     (function () use (\$config, \$params) {
                         \$this->volume = 10;
                         \$this->unitPrice = 15;
-                        \$this->params = fn() => \$params;
-                        \$this->config = fn() => \$config;
+                        \$this->params = fn () => \$params;
+                        \$this->config = fn () => \$config;
                     })->bindTo(\$object, 'Yiisoft\VarDumper\Tests\TestAsset\DummyClass')();
 
                     return \$object;
@@ -558,8 +558,8 @@ final class VarDumperTest extends TestCase
     /**
      * @dataProvider exportWithoutObjectSerializationDataProvider
      *
-     * @param object $object         Object to export.
-     * @param array  $useVariables   Variables to add to closures via use statement.
+     * @param object $object Object to export.
+     * @param array $useVariables Variables to add to closures via use statement.
      * @param string $expectedResult Expected result.
      *
      * @throws ReflectionException
@@ -567,7 +567,7 @@ final class VarDumperTest extends TestCase
     public function testExportWithoutObjectSerialization(
         object $object,
         array $useVariables,
-        string $expectedResult,
+        string $expectedResult
     ): void {
         $exportResult = VarDumper::create($object)->export(true, $useVariables, false);
         $this->assertEqualsWithoutLE($expectedResult, $exportResult);
@@ -575,10 +575,10 @@ final class VarDumperTest extends TestCase
 
     public function testExportClosureWithAnImmutableInstanceOfClosureExporter(): void
     {
-        $varDumper1 = VarDumper::create(fn(): int => 1);
+        $varDumper1 = VarDumper::create(fn (): int => 1);
         $reflection1 = new ReflectionClass($varDumper1);
 
-        $this->assertSame('fn(): int => 1', $varDumper1->export());
+        $this->assertSame('fn (): int => 1', $varDumper1->export());
 
         $closureExporter1 = $reflection1->getStaticPropertyValue('closureExporter');
         $this->assertInstanceOf(ClosureExporter::class, $closureExporter1);
@@ -587,12 +587,12 @@ final class VarDumperTest extends TestCase
             (new ReflectionClass($varDumper1))->getStaticPropertyValue('closureExporter'),
         );
 
-        $varDumper2 = VarDumper::create(fn(): int => 2);
+        $varDumper2 = VarDumper::create(fn (): int => 2);
         $reflection2 = new ReflectionClass($varDumper2);
         $closureExporter2 = $reflection2->getStaticPropertyValue('closureExporter');
 
         $this->assertInstanceOf(ClosureExporter::class, $closureExporter2);
-        $this->assertSame('fn(): int => 2', $varDumper2->export());
+        $this->assertSame('fn (): int => 2', $varDumper2->export());
         $this->assertSame($closureExporter1, $closureExporter2);
     }
 
@@ -649,21 +649,21 @@ final class VarDumperTest extends TestCase
         ];
         yield 'short function' => [
             // @formatter:off
-            fn() => 1,
+            fn () => 1,
             // @formatter:on
-            'fn() => 1',
+            'fn () => 1',
         ];
         yield 'short static function' => [
             // @formatter:off
-            static fn() => 1,
+            static fn () => 1,
             // @formatter:on
-            'static fn() => 1',
+            'static fn () => 1',
         ];
         yield 'function' => [
             function () {
                 return 1;
             },
-            <<<'PHP'
+            <<<PHP
             function () {
                 return 1;
             }
@@ -673,7 +673,7 @@ final class VarDumperTest extends TestCase
             static function () {
                 return 1;
             },
-            <<<'PHP'
+            <<<PHP
             static function () {
                 return 1;
             }
@@ -717,7 +717,7 @@ final class VarDumperTest extends TestCase
                 'two',
                 'three',
             ],
-            <<<'S'
+            <<<S
         [
             0 => 'one'
             1 => 'two'
@@ -727,11 +727,11 @@ final class VarDumperTest extends TestCase
         ];
         yield 'array of 3 elements, custom keys' => [
             [
-                2     => 'one',
+                2 => 'one',
                 'two' => 'two',
-                0     => 'three',
+                0 => 'three',
             ],
-            <<<'S'
+            <<<S
             [
                 2 => 'one'
                 'two' => 'two'
@@ -741,37 +741,37 @@ final class VarDumperTest extends TestCase
         ];
         yield 'closure in array' => [
             // @formatter:off
-            [fn() => new DateTimeZone('')],
+            [fn () => new DateTimeZone('')],
             // @formatter:on
             <<<S
             [
-                0 => fn() => new \DateTimeZone('')
+                0 => fn () => new \DateTimeZone('')
             ]
             S,
         ];
         yield 'original class name' => [
             // @formatter:off
-            static fn(VarDumper $date) => new DateTimeZone(''),
+            static fn (VarDumper $date) => new DateTimeZone(''),
             // @formatter:on
-            "static fn(\Yiisoft\VarDumper\VarDumper \$date) => new \DateTimeZone('')",
+            "static fn (\Yiisoft\VarDumper\VarDumper \$date) => new \DateTimeZone('')",
         ];
         yield 'class alias' => [
             // @formatter:off
-            fn(Dumper $date) => new DateTimeZone(''),
+            fn (Dumper $date) => new DateTimeZone(''),
             // @formatter:on
-            "fn(\Yiisoft\VarDumper\VarDumper \$date) => new \DateTimeZone('')",
+            "fn (\Yiisoft\VarDumper\VarDumper \$date) => new \DateTimeZone('')",
         ];
         yield 'namespace alias' => [
             // @formatter:off
-            fn(Dumper $date) => new DateTimeZone(''),
+            fn (Dumper $date) => new DateTimeZone(''),
             // @formatter:on
-            "fn(\Yiisoft\VarDumper\VarDumper \$date) => new \DateTimeZone('')",
+            "fn (\Yiisoft\VarDumper\VarDumper \$date) => new \DateTimeZone('')",
         ];
         yield 'closure with null-collision operator' => [
             // @formatter:off
-            fn() => $_ENV['var'] ?? null,
+            fn () => $_ENV['var'] ?? null,
             // @formatter:on
-            "fn() => \$_ENV['var'] ?? null",
+            "fn () => \$_ENV['var'] ?? null",
         ];
         yield 'utf8 supported' => [
             '🤣',
@@ -780,16 +780,17 @@ final class VarDumperTest extends TestCase
 
         $objectWithClosureInProperty = new stdClass();
         // @formatter:off
-        $objectWithClosureInProperty->a = fn() => 1;
+        $objectWithClosureInProperty->a = fn () => 1;
         // @formatter:on
         $objectWithClosureInPropertyId = spl_object_id($objectWithClosureInProperty);
+
 
         yield 'closure in property supported' => [
             $objectWithClosureInProperty,
             <<<S
             stdClass#{$objectWithClosureInPropertyId}
             (
-                [a] => fn() => 1
+                [a] => fn () => 1
             )
             S,
         ];
@@ -877,30 +878,30 @@ final class VarDumperTest extends TestCase
         ];
         yield 'short function' => [
             // @formatter:off
-            fn() => 1,
+            fn () => 1,
             // @formatter:on
-            '"fn() => 1"',
+            '"fn () => 1"',
         ];
         yield 'short static function' => [
             // @formatter:off
-            static fn() => 1,
+            static fn () => 1,
             // @formatter:on
-            '"static fn() => 1"',
+            '"static fn () => 1"',
         ];
         yield 'function' => [
             function () {
                 return 1;
             },
-            <<<'JSON'
-            "function () {\n    return 1;\n}"
+            <<<JSON
+            "function () {\\n    return 1;\\n}"
             JSON,
         ];
         yield 'static function' => [
             static function () {
                 return 1;
             },
-            <<<'JSON'
-            "static function () {\n    return 1;\n}"
+            <<<JSON
+            "static function () {\\n    return 1;\\n}"
             JSON,
         ];
         yield 'string' => [
@@ -968,7 +969,7 @@ final class VarDumperTest extends TestCase
                 'two',
                 'three',
             ],
-            <<<'JSON'
+            <<<JSON
             [
                 "one",
                 "two",
@@ -978,11 +979,11 @@ final class VarDumperTest extends TestCase
         ];
         yield 'array of 3 elements, custom keys' => [
             [
-                2     => 'one',
+                2 => 'one',
                 'two' => 'two',
-                0     => 'three',
+                0 => 'three',
             ],
-            <<<'JSON'
+            <<<JSON
             {
                 "2": "one",
                 "two": "two",
@@ -992,37 +993,37 @@ final class VarDumperTest extends TestCase
         ];
         yield 'closure in array' => [
             // @formatter:off
-            [fn() => new DateTimeZone('')],
+            [fn () => new DateTimeZone('')],
             // @formatter:on
-            <<<'JSON'
+            <<<JSON
             [
-                "fn() => new \\DateTimeZone('')"
+                "fn () => new \\\\DateTimeZone('')"
             ]
             JSON,
         ];
         yield 'original class name' => [
             // @formatter:off
-            static fn(VarDumper $date) => new DateTimeZone(''),
+            static fn (VarDumper $date) => new DateTimeZone(''),
             // @formatter:on
-            '"static fn(\\\\Yiisoft\\\\VarDumper\\\\VarDumper $date) => new \\\\DateTimeZone(\'\')"',
+            '"static fn (\\\\Yiisoft\\\\VarDumper\\\\VarDumper $date) => new \\\\DateTimeZone(\'\')"',
         ];
         yield 'class alias' => [
             // @formatter:off
-            fn(Dumper $date) => new DateTimeZone(''),
+            fn (Dumper $date) => new DateTimeZone(''),
             // @formatter:on
-            '"fn(\\\\Yiisoft\\\\VarDumper\\\\VarDumper $date) => new \\\\DateTimeZone(\'\')"',
+            '"fn (\\\\Yiisoft\\\\VarDumper\\\\VarDumper $date) => new \\\\DateTimeZone(\'\')"',
         ];
         yield 'namespace alias' => [
             // @formatter:off
-            fn(Dumper $date) => new DateTimeZone(''),
+            fn (Dumper $date) => new DateTimeZone(''),
             // @formatter:on
-            '"fn(\\\\Yiisoft\\\\VarDumper\\\\VarDumper $date) => new \\\\DateTimeZone(\'\')"',
+            '"fn (\\\\Yiisoft\\\\VarDumper\\\\VarDumper $date) => new \\\\DateTimeZone(\'\')"',
         ];
         yield 'closure with null-collision operator' => [
             // @formatter:off
-            fn() => $_ENV['var'] ?? null,
+            fn () => $_ENV['var'] ?? null,
             // @formatter:on
-            '"fn() => $_ENV[\'var\'] ?? null"',
+            '"fn () => $_ENV[\'var\'] ?? null"',
         ];
         yield 'utf8 supported' => [
             '🤣',
@@ -1030,7 +1031,7 @@ final class VarDumperTest extends TestCase
         ];
         $objectWithClosureInProperty = new stdClass();
         // @formatter:off
-        $objectWithClosureInProperty->a = fn() => 1;
+        $objectWithClosureInProperty->a = fn () => 1;
         // @formatter:on
         $objectWithClosureInPropertyId = spl_object_id($objectWithClosureInProperty);
 
@@ -1040,7 +1041,7 @@ final class VarDumperTest extends TestCase
             {
                 "\$__id__\$": "{$objectWithClosureInPropertyId}",
                 "\$__class__\$": "stdClass",
-                "a": "fn() => 1"
+                "a": "fn () => 1"
             }
             JSON,
         ];
@@ -1101,13 +1102,13 @@ final class VarDumperTest extends TestCase
                     ],
                 ],
             ],
-            <<<'JSON'
+            <<<JSON
             [
                 [
                     [
                         {
-                            "$__type__$": "array",
-                            "$__depth_limit_exceeded__$": true
+                            "\$__type__\$": "array",
+                            "\$__depth_limit_exceeded__\$": true
                         }
                     ]
                 ]
@@ -1166,7 +1167,7 @@ final class VarDumperTest extends TestCase
 
         $objectWithClosureInProperty = new stdClass();
         // @formatter:off
-        $objectWithClosureInProperty->a = fn() => 1;
+        $objectWithClosureInProperty->a = fn () => 1;
         // @formatter:on
         $objectWithClosureInPropertyId = spl_object_id($objectWithClosureInProperty);
 
@@ -1184,52 +1185,52 @@ final class VarDumperTest extends TestCase
         yield 'custom debug info' => [
             $dummyDebugInfo,
             [
-                '$__id__$'    => $dummyDebugInfoObjectId,
+                '$__id__$' => $dummyDebugInfoObjectId,
                 '$__class__$' => DummyDebugInfo::class,
-                'volume'      => 10,
-                'totalPrice'  => 150,
+                'volume' => 10,
+                'totalPrice' => 150,
             ],
         ];
         yield 'incomplete object' => [
             $incompleteObject,
             [
-                '$__id__$'                    => $incompleteObjectId,
-                '$__class__$'                 => '__PHP_Incomplete_Class',
+                '$__id__$' => $incompleteObjectId,
+                '$__class__$' => '__PHP_Incomplete_Class',
                 '__PHP_Incomplete_Class_Name' => 'nonExistingClass',
             ],
         ];
         yield 'integer property object' => [
             $integerPropertyObject,
             [
-                '$__id__$'    => $integerPropertyObjectId,
+                '$__id__$' => $integerPropertyObjectId,
                 '$__class__$' => stdClass::class,
-                '5'           => 5,
+                '5' => 5,
             ],
         ];
         yield 'empty object' => [
             $emptyObject,
             [
-                '$__id__$'    => $emptyObjectId,
+                '$__id__$' => $emptyObjectId,
                 '$__class__$' => stdClass::class,
             ],
         ];
         yield 'short function' => [
             // @formatter:off
-            fn() => 1,
+            fn () => 1,
             // @formatter:on
-            'fn() => 1',
+            'fn () => 1',
         ];
         yield 'short static function' => [
             // @formatter:off
-            static fn() => 1,
+            static fn () => 1,
             // @formatter:on
-            'static fn() => 1',
+            'static fn () => 1',
         ];
         yield 'function' => [
             function () {
                 return 1;
             },
-            <<<'PHP'
+            <<<PHP
             function () {
                 return 1;
             }
@@ -1239,7 +1240,7 @@ final class VarDumperTest extends TestCase
             static function () {
                 return 1;
             },
-            <<<'PHP'
+            <<<PHP
             static function () {
                 return 1;
             }
@@ -1273,18 +1274,18 @@ final class VarDumperTest extends TestCase
             $openedResource,
             [
                 '$__type__$' => 'resource',
-                'id'         => $openedResourceId,
-                'type'       => 'stream',
-                'closed'     => false,
+                'id' => $openedResourceId,
+                'type' => 'stream',
+                'closed' => false,
             ],
         ];
         yield 'closed resource' => [
             $closedResource,
             [
                 '$__type__$' => 'resource',
-                'id'         => $closedResourceId,
-                'type'       => 'Unknown',
-                'closed'     => true,
+                'id' => $closedResourceId,
+                'type' => 'Unknown',
+                'closed' => true,
             ],
         ];
         yield 'empty array' => [
@@ -1305,45 +1306,45 @@ final class VarDumperTest extends TestCase
         ];
         yield 'array of 3 elements, custom keys' => [
             [
-                2     => 'one',
+                2 => 'one',
                 'two' => 'two',
-                0     => 'three',
+                0 => 'three',
             ],
             [
-                2     => 'one',
+                2 => 'one',
                 'two' => 'two',
-                0     => 'three',
+                0 => 'three',
             ],
         ];
         yield 'closure in array' => [
             // @formatter:off
-            [fn() => new DateTimeZone('')],
+            [fn () => new DateTimeZone('')],
             // @formatter:on
-            ["fn() => new \DateTimeZone('')"],
+            ["fn () => new \DateTimeZone('')"],
         ];
         yield 'original class name' => [
             // @formatter:off
-            static fn(VarDumper $date) => new DateTimeZone(''),
+            static fn (VarDumper $date) => new DateTimeZone(''),
             // @formatter:on
-            'static fn(\Yiisoft\\VarDumper\VarDumper $date) => new \DateTimeZone(\'\')',
+            'static fn (\Yiisoft\\VarDumper\VarDumper $date) => new \DateTimeZone(\'\')',
         ];
         yield 'class alias' => [
             // @formatter:off
-            fn(Dumper $date) => new DateTimeZone(''),
+            fn (Dumper $date) => new DateTimeZone(''),
             // @formatter:on
-            'fn(\Yiisoft\VarDumper\VarDumper $date) => new \DateTimeZone(\'\')',
+            'fn (\Yiisoft\VarDumper\VarDumper $date) => new \DateTimeZone(\'\')',
         ];
         yield 'namespace alias' => [
             // @formatter:off
-            fn(Dumper $date) => new DateTimeZone(''),
+            fn (Dumper $date) => new DateTimeZone(''),
             // @formatter:on
-            'fn(\Yiisoft\VarDumper\VarDumper $date) => new \DateTimeZone(\'\')',
+            'fn (\Yiisoft\VarDumper\VarDumper $date) => new \DateTimeZone(\'\')',
         ];
         yield 'closure with null-collision operator' => [
             // @formatter:off
-            fn() => $_ENV['var'] ?? null,
+            fn () => $_ENV['var'] ?? null,
             // @formatter:on
-            'fn() => $_ENV[\'var\'] ?? null',
+            'fn () => $_ENV[\'var\'] ?? null',
         ];
         yield 'utf8 supported' => [
             '🤣',
@@ -1352,18 +1353,18 @@ final class VarDumperTest extends TestCase
         yield 'closure in property supported' => [
             $objectWithClosureInProperty,
             [
-                '$__id__$'    => $objectWithClosureInPropertyId,
+                '$__id__$' => $objectWithClosureInPropertyId,
                 '$__class__$' => stdClass::class,
-                'a'           => 'fn() => 1',
+                'a' => 'fn () => 1',
             ],
         ];
         yield 'private properties supported' => [
             $objectWithPrivateProperties,
             [
-                '$__id__$'    => "$objectWithPrivatePropertiesId",
+                '$__id__$' => "$objectWithPrivatePropertiesId",
                 '$__class__$' => "$objectWithPrivatePropertiesClass",
-                'age'         => 0,
-                'names'       => [
+                'age' => 0,
+                'names' => [
                     'first',
                     'last',
                 ],
@@ -1372,18 +1373,18 @@ final class VarDumperTest extends TestCase
         yield 'nested properties limit' => [
             $nestedObject,
             [
-                '$__id__$'    => "$nestedObjectId",
+                '$__id__$' => "$nestedObjectId",
                 '$__class__$' => stdClass::class,
-                'nested'      => [
-                    '$__id__$'    => "$nestedObjectId",
+                'nested' => [
+                    '$__id__$' => "$nestedObjectId",
                     '$__class__$' => stdClass::class,
-                    'nested'      => [
-                        '$__id__$'    => "$nestedObjectId",
+                    'nested' => [
+                        '$__id__$' => "$nestedObjectId",
                         '$__class__$' => stdClass::class,
-                        'nested'      => [
-                            '$__id__$'                   => "$nestedObjectId",
-                            '$__class__$'                => stdClass::class,
-                            '$__type__$'                 => 'object',
+                        'nested' => [
+                            '$__id__$' => "$nestedObjectId",
+                            '$__class__$' => stdClass::class,
+                            '$__type__$' => 'object',
                             '$__depth_limit_exceeded__$' => true,
                         ],
                     ],
@@ -1404,7 +1405,7 @@ final class VarDumperTest extends TestCase
                 [
                     [
                         [
-                            '$__type__$'                 => 'array',
+                            '$__type__$' => 'array',
                             '$__depth_limit_exceeded__$' => true,
                         ],
                     ],
@@ -1419,11 +1420,11 @@ final class VarDumperTest extends TestCase
         yield 'DateTime object' => [
             $dateTime,
             [
-                '$__id__$'      => $dateTimeObjectId,
-                '$__class__$'   => DateTime::class,
-                'date'          => $dateTimeInterpolation,
+                '$__id__$' => $dateTimeObjectId,
+                '$__class__$' => DateTime::class,
+                'date' => $dateTimeInterpolation,
                 'timezone_type' => 3,
-                'timezone'      => 'UTC',
+                'timezone' => 'UTC',
             ],
         ];
     }
