@@ -30,7 +30,7 @@ final class StreamHandlerTest extends TestCase
         $socket = socket_create(AF_UNIX, SOCK_DGRAM, 0);
         socket_bind($socket, $path);
 
-        $handler = $this->createStreamHandler('udg://'.$path);
+        $handler = $this->createStreamHandler('udg://' . $path);
 
         $handler->handle('test', 1);
 
@@ -72,7 +72,7 @@ final class StreamHandlerTest extends TestCase
         $stream = fopen('php://memory', 'wb+');
         $handler = $this->createStreamHandler($stream);
 
-        $handler = $handler->withEncoder(fn (mixed $variable): string => (string) strlen($variable));
+        $handler = $handler->withEncoder(fn(mixed $variable): string => (string) strlen($variable));
 
         $handler->handle('test', 1);
 
@@ -91,7 +91,7 @@ final class StreamHandlerTest extends TestCase
         $socket = socket_create(AF_UNIX, SOCK_DGRAM, 0);
         socket_bind($socket, $path);
 
-        $handler = $this->createStreamHandler('udg://'.$path);
+        $handler = $this->createStreamHandler('udg://' . $path);
         $handler->handle('test', 1);
 
         socket_close($socket);
@@ -157,7 +157,7 @@ final class StreamHandlerTest extends TestCase
         $stream = fopen('php://memory', 'wb+');
         $handler = $this->createStreamHandler($stream);
 
-        $handler = $handler->withEncoder(fn (mixed $variable): int => strlen($variable));
+        $handler = $handler->withEncoder(fn(mixed $variable): int => strlen($variable));
 
         $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('Encoder must return a string, "int" returned.');
@@ -195,7 +195,7 @@ final class StreamHandlerTest extends TestCase
     public function testImmutability(): void
     {
         $handler1 = $this->createStreamHandler('php://memory');
-        $handler2 = $handler1->withEncoder(fn (mixed $variable): string => (string) strlen($variable));
+        $handler2 = $handler1->withEncoder(fn(mixed $variable): string => (string) strlen($variable));
 
         $this->assertInstanceOf(StreamHandler::class, $handler2);
         $this->assertNotSame($handler1, $handler2);

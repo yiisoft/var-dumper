@@ -68,9 +68,7 @@ final class VarDumper
     /**
      * @param mixed $variable Variable to dump.
      */
-    private function __construct(private mixed $variable)
-    {
-    }
+    private function __construct(private mixed $variable) {}
 
     public static function setDefaultHandler(HandlerInterface $handler): void
     {
@@ -244,7 +242,7 @@ final class VarDumper
 
                 foreach ($keys as $name) {
                     if ($format) {
-                        $output .= "\n".$spaces.$this->offset;
+                        $output .= "\n" . $spaces . $this->offset;
                     }
                     $output .= $this->exportVariable($name);
                     $output .= ' => ';
@@ -252,8 +250,8 @@ final class VarDumper
                 }
 
                 return $format
-                    ? $output."\n".$spaces.']'
-                    : $output.']';
+                    ? $output . "\n" . $spaces . ']'
+                    : $output . ']';
             case 'object':
                 if ($var instanceof Closure) {
                     return $this->exportClosure($var);
@@ -263,21 +261,21 @@ final class VarDumper
                 }
 
                 if ($depth <= $level) {
-                    return $this->getObjectDescription($var).' (...)';
+                    return $this->getObjectDescription($var) . ' (...)';
                 }
 
                 $spaces = str_repeat($this->offset, $level);
-                $output = $this->getObjectDescription($var)."\n".$spaces.'(';
+                $output = $this->getObjectDescription($var) . "\n" . $spaces . '(';
                 $objectProperties = $this->getObjectProperties($var);
 
                 /** @psalm-var mixed $value */
                 foreach ($objectProperties as $name => $value) {
                     $propertyName = strtr(trim((string) $name), "\0", '::');
-                    $output .= "\n".$spaces.$this->offset.'['.$propertyName.'] => ';
+                    $output .= "\n" . $spaces . $this->offset . '[' . $propertyName . '] => ';
                     $output .= $this->dumpInternal($value, $format, $depth, $level + 1);
                 }
 
-                return $output."\n".$spaces.')';
+                return $output . "\n" . $spaces . ')';
             default:
                 return $this->exportVariable($var);
         }
@@ -309,7 +307,7 @@ final class VarDumper
 
                 foreach ($keys as $key) {
                     if ($format) {
-                        $output .= "\n".$spaces.$this->offset;
+                        $output .= "\n" . $spaces . $this->offset;
                     }
                     if ($outputKeys) {
                         $output .= $this->exportVariable($key);
@@ -322,8 +320,8 @@ final class VarDumper
                 }
 
                 return $format
-                    ? $output."\n".$spaces.']'
-                    : $output.']';
+                    ? $output . "\n" . $spaces . ']'
+                    : $output . ']';
             case 'object':
                 if ($variable instanceof Closure) {
                     return $this->exportClosure($variable, $level);
@@ -388,7 +386,7 @@ final class VarDumper
                 }
 
                 /** @psalm-suppress MissingClosureReturnType */
-                return array_map(fn ($value) => $this->exportPrimitives($value, $depth, $level + 1), $var);
+                return array_map(fn($value) => $this->exportPrimitives($value, $depth, $level + 1), $var);
             case 'object':
                 if ($var instanceof Closure) {
                     return $this->exportClosure($var);
@@ -477,26 +475,26 @@ final class VarDumper
         $spaces = str_repeat($this->offset, $level);
         $objectProperties = $this->getObjectProperties($variable);
         $class = $variable::class;
-        $use = $this->useVarInClosures === [] ? '' : ' use ('.implode(', ', $this->useVarInClosures).')';
-        $lines = ['(static function ()'.$use.' {'];
+        $use = $this->useVarInClosures === [] ? '' : ' use (' . implode(', ', $this->useVarInClosures) . ')';
+        $lines = ['(static function ()' . $use . ' {'];
         if ($reflectionObject->getConstructor() === null) {
             $lines = [
                 ...$lines,
-                $this->offset.'$object = new '.$class.'();',
-                $this->offset.'(function ()'.$use.' {',
+                $this->offset . '$object = new ' . $class . '();',
+                $this->offset . '(function ()' . $use . ' {',
             ];
         } else {
             $lines = [
                 ...$lines,
-                $this->offset.'$class = new \ReflectionClass(\''.$class.'\');',
-                $this->offset.'$object = $class->newInstanceWithoutConstructor();',
-                $this->offset.'(function ()'.$use.' {',
+                $this->offset . '$class = new \ReflectionClass(\'' . $class . '\');',
+                $this->offset . '$object = $class->newInstanceWithoutConstructor();',
+                $this->offset . '(function ()' . $use . ' {',
             ];
         }
         $endLines = [
-            $this->offset.'})->bindTo($object, \''.$class.'\')();',
+            $this->offset . '})->bindTo($object, \'' . $class . '\')();',
             '',
-            $this->offset.'return $object;',
+            $this->offset . 'return $object;',
             '})()',
         ];
 
@@ -506,11 +504,11 @@ final class VarDumper
          */
         foreach ($objectProperties as $name => $value) {
             $propertyName = $this->getPropertyName($name);
-            $lines[] = $this->offset.$this->offset.'$this->'.$propertyName.' = '
-                .$this->exportInternal($value, $format, $level + 2).';';
+            $lines[] = $this->offset . $this->offset . '$this->' . $propertyName . ' = '
+                . $this->exportInternal($value, $format, $level + 2) . ';';
         }
 
-        return implode("\n".($format ? $spaces : ''), array_merge($lines, $endLines));
+        return implode("\n" . ($format ? $spaces : ''), array_merge($lines, $endLines));
     }
 
     /**
@@ -541,7 +539,7 @@ final class VarDumper
 
     private function getObjectDescription(object $object): string
     {
-        return $object::class.'#'.$this->getObjectId($object);
+        return $object::class . '#' . $this->getObjectId($object);
     }
 
     private function getObjectId(object $object): string

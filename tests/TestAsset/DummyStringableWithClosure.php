@@ -13,11 +13,11 @@ final class DummyStringableWithClosure implements Stringable
 
     public function __construct()
     {
-        $this->closure = static fn (): string => self::class;
+        $this->closure = static fn(): string => self::class;
     }
 
     public function __toString(): string
     {
-        return 'Closure:'.($this->closure)();
+        return 'Closure:' . ($this->closure)();
     }
 }

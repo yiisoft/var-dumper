@@ -15,7 +15,7 @@ final class DummyIteratorAggregateWithClosure implements IteratorAggregate
 
     public function __construct()
     {
-        $this->closure = static fn (): string => __CLASS__;
+        $this->closure = static fn(): string => __CLASS__;
     }
 
     public function getIterator(): Traversable

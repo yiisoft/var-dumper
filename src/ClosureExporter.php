@@ -67,7 +67,7 @@ final class ClosureExporter
 
         $start--;
         $uses = $this->useStatementParser->fromFile($fileName);
-        $tokens = token_get_all('<?php '.implode('', array_slice($fileContent, $start, $end - $start)));
+        $tokens = token_get_all('<?php ' . implode('', array_slice($fileContent, $start, $end - $start)));
         array_shift($tokens);
 
         $bufferUse = '';
@@ -105,7 +105,7 @@ final class ClosureExporter
                 }
                 if (!empty($bufferUse)) {
                     if ($bufferUse !== $readableToken && !str_contains($readableToken, $bufferUse)) {
-                        $readableToken = $bufferUse.$readableToken;
+                        $readableToken = $bufferUse . $readableToken;
                     }
                     $bufferUse = '';
                 }
@@ -154,7 +154,7 @@ final class ClosureExporter
 
         $spaces = $level <= 1 ? '' : str_repeat(' ', ($level - 1) * 4);
 
-        return implode("\n".$spaces, [$fistLine, ...$code]);
+        return implode("\n" . $spaces, [$fistLine, ...$code]);
     }
 
     /**
@@ -192,10 +192,10 @@ final class ClosureExporter
         do {
             $lastPart = $this->getUseLastPart($use);
             $use = mb_substr($use, 0, -mb_strlen("\\{$lastPart}"));
-            $result = ($uses[$lastPart] ?? $lastPart).'\\'.$result;
+            $result = ($uses[$lastPart] ?? $lastPart) . '\\' . $result;
         } while (!empty($lastPart) && !isset($uses[$lastPart]));
 
-        return '\\'.trim($result, '\\');
+        return '\\' . trim($result, '\\');
     }
 
     /**
