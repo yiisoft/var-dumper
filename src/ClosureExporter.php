@@ -22,9 +22,14 @@ use function mb_strlen;
 use function mb_substr;
 use function token_get_all;
 use function trim;
+use function count;
+
+use const T_FN;
+use const T_FUNCTION;
+use const T_STATIC;
 
 /**
- * ClosureExporter exports PHP {@see \Closure} as a string containing PHP code.
+ * ClosureExporter exports PHP {@see Closure} as a string containing PHP code.
  *
  * The string is a valid PHP expression that can be evaluated by PHP parser
  * and the evaluation result will give back the closure instance.
