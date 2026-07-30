@@ -9,8 +9,8 @@ use Yiisoft\CodeStyle\Rector\SetList;
 
 return RectorConfig::configure()
     ->withPaths([
-        __DIR__.'/src',
-        __DIR__.'/tests',
+        __DIR__ . '/src',
+        __DIR__ . '/tests',
     ])
     ->withPhpSets(php80: true)
     ->withSets([
@@ -18,9 +18,9 @@ return RectorConfig::configure()
     ])
     ->withSkip([
         StringClassNameToClassConstantRector::class => [
-            __DIR__.'/tests/UseStatementParserTest.php',
+            __DIR__ . '/tests/UseStatementParserTest.php',
         ],
         ClassConstantToSelfClassRector::class => [
-            __DIR__.'/tests/TestAsset/DummyIteratorAggregateWithClosure.php',
+            __DIR__ . '/tests/TestAsset/DummyIteratorAggregateWithClosure.php',
         ],
     ]);
