@@ -807,8 +807,6 @@ final class VarDumperTest extends TestCase
 
     /**
      * @dataProvider asJsonDataProvider
-     *
-     * @psalm-suppress MixedAssignment
      */
     public function testAsJson($variable, string $result): void
     {
@@ -1135,8 +1133,6 @@ final class VarDumperTest extends TestCase
 
     /**
      * @dataProvider asPrimitivesDataProvider
-     *
-     * @psalm-suppress MixedAssignment
      */
     public function testAsPrimitives(mixed $variable, mixed $result): void
     {

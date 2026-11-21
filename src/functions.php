@@ -11,8 +11,6 @@ if (!\function_exists('d')) {
      * @param mixed ...$variables Variables to be dumped.
      *
      * @see VarDumper::dump()
-     *
-     * @psalm-suppress MixedAssignment
      */
     function d(mixed ...$variables): void
     {
@@ -32,8 +30,6 @@ if (!\function_exists('dd')) {
      * @param mixed ...$variables Variables to be dumped.
      *
      * @see VarDumper::dump()
-     *
-     * @psalm-suppress MixedAssignment
      */
     function dd(mixed ...$variables): void
     {
@@ -50,8 +46,6 @@ if (!\function_exists('dump')) {
      * @param mixed ...$variables Variables to be dumped.
      *
      * @see d()
-     *
-     * @psalm-suppress MixedAssignment
      */
     function dump(mixed ...$variables): void
     {
