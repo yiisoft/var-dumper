@@ -505,9 +505,7 @@ final class VarDumper
      */
     private function exportClosure(Closure $closure, int $level = 0): string
     {
-        if (self::$closureExporter === null) {
-            self::$closureExporter = new ClosureExporter();
-        }
+        self::$closureExporter ??= new ClosureExporter();
 
         return self::$closureExporter->export($closure, $level);
     }
