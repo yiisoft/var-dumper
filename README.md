@@ -18,7 +18,7 @@ may highlight syntax and export closures.
 
 ## Requirements
 
-- PHP 8.0 - 8.5.
+- PHP 8.0 - 8.6.
 
 ## Installation
 
