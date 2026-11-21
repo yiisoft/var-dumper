@@ -12,7 +12,6 @@
 [![Code Coverage](https://codecov.io/gh/yiisoft/var-dumper/branch/master/graph/badge.svg)](https://codecov.io/gh/yiisoft/var-dumper)
 [![Mutation testing badge](https://img.shields.io/endpoint?style=flat&url=https%3A%2F%2Fbadge-api.stryker-mutator.io%2Fgithub.com%2Fyiisoft%2Fvar-dumper%2Fmaster)](https://dashboard.stryker-mutator.io/reports/github.com/yiisoft/var-dumper/master)
 [![static analysis](https://github.com/yiisoft/var-dumper/workflows/static%20analysis/badge.svg)](https://github.com/yiisoft/var-dumper/actions?query=workflow%3A%22static+analysis%22)
-[![type-coverage](https://shepherd.dev/github/yiisoft/var-dumper/coverage.svg)](https://shepherd.dev/github/yiisoft/var-dumper)
 
 `VarDumper` enhances functionality of `var_dump()` and `var_export()`. It is dealing with recursive references,
 may highlight syntax and export closures.

@@ -129,7 +129,6 @@ final class VarDumper
      * but is more robust when handling complex objects.
      *
      * @param int $depth Maximum depth that the dumper should go into the variable. Defaults to 10.
-     * @param bool $highlight Whether the result should be syntax-highlighted.
      *
      * @throws ReflectionException
      *
@@ -267,7 +266,6 @@ final class VarDumper
                 $output = $this->getObjectDescription($var) . "\n" . $spaces . '(';
                 $objectProperties = $this->getObjectProperties($var);
 
-                /** @psalm-var mixed $value */
                 foreach ($objectProperties as $name => $value) {
                     $propertyName = strtr(trim((string) $name), "\0", '::');
                     $output .= "\n" . $spaces . $this->offset . '[' . $propertyName . '] => ';
@@ -353,10 +351,11 @@ final class VarDumper
     }
 
     /**
+     * @param mixed $var Variable to be exported.
+     *
      * @throws ReflectionException
      *
      * @return mixed
-     * @psalm-param mixed $var
      */
     private function exportPrimitives(mixed $var, int $depth, int $level): mixed
     {
@@ -381,7 +380,6 @@ final class VarDumper
                     ];
                 }
 
-                /** @psalm-suppress MissingClosureReturnType */
                 return array_map(fn($value) => $this->exportPrimitives($value, $depth, $level + 1), $var);
             case 'object':
                 if ($var instanceof Closure) {
@@ -405,13 +403,8 @@ final class VarDumper
                     self::OBJECT_ID_PROPERTY => $objectId,
                     self::OBJECT_CLASS_PROPERTY => $objectClass,
                 ];
-                /**
-                 * @psalm-var mixed $value
-                 * @psalm-var string $name
-                 */
                 foreach ($objectProperties as $name => $value) {
                     $propertyName = $this->getPropertyName($name);
-                    /** @psalm-suppress MixedAssignment */
                     $output[$propertyName] = $this->exportPrimitives($value, $depth, $level + 1);
                 }
                 return $output;
@@ -457,7 +450,6 @@ final class VarDumper
             return $this->exportInternal(iterator_to_array($variable), $format, $level);
         }
 
-        /** @psalm-suppress RedundantCondition */
         if ('__PHP_Incomplete_Class' !== $variable::class && method_exists($variable, '__toString')) {
             return $this->exportVariable($variable->__toString());
         }
@@ -493,10 +485,6 @@ final class VarDumper
             '})()',
         ];
 
-        /**
-         * @psalm-var mixed $value
-         * @psalm-var string $name
-         */
         foreach ($objectProperties as $name => $value) {
             $propertyName = $this->getPropertyName($name);
             $lines[] = $this->offset . $this->offset . '$this->' . $propertyName . ' = '
@@ -542,10 +530,13 @@ final class VarDumper
         return (string) spl_object_id($object);
     }
 
+    /**
+     * @return mixed[] The object properties.
+     */
     private function getObjectProperties(object $var): array
     {
         if (!$var instanceof __PHP_Incomplete_Class && method_exists($var, '__debugInfo')) {
-            /** @var array $var */
+            /** @var mixed[] $var */
             $var = $var->__debugInfo();
         }
 

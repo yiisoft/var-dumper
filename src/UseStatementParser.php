@@ -76,7 +76,7 @@ final class UseStatementParser
     /**
      * Checks whether the token is part of the use statement data.
      *
-     * @param array|string $token PHP token.
+     * @param array<int, int|string>|string $token PHP token.
      *
      * @return bool Whether the token is part of the use statement data.
      */
