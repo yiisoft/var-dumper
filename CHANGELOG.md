@@ -1,5 +1,9 @@
 # Yii VarDumper Change Log
 
+## 1.7.3 under development
+
+- no changes in this release.
+
 ## 1.7.2 November 21, 2026
 
 - Chg #134: Replace Psalm with PHPStan (@vjik)
